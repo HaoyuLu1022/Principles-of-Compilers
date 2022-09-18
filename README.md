@@ -14,6 +14,29 @@
 
 概括地讲，就是编写一个合适的词法规则文件cf.l，交给Flex编译出lex.yy.c，再交给gcc编译得到可执行文件scanner，使用scanner对.cmm进行词法分析
 
+### Quick Start
+
+依赖包安装
+
+```shell
+sudo apt-get install flex
+```
+
+编译词法规则文件，形成可执行文件
+
+```shell
+cd 1-cffx
+flex cf.l
+gcc lex.yy.c -lfl -o scanner
+```
+
+词法分析测试
+
+```shell
+./scanner test.cmm
+./scanner test2.cmm
+```
+
 **9.9 Update**: 基本实现了实验要求的各种类型的简单判断，尚未完成的工作包括：
 
 1.   正则匹配的鲁棒性测试与改善
