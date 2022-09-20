@@ -14,15 +14,17 @@ AND &&
 DIV "/"
 NOTE "//".*
 BRACKET "("|")"|"{"|"}"
-SEMT ;
+SEMT ";"
 ID ({LETTER}|_)({LETTER}|_|{DIGIT})*
-WHITESPACE [[:space:]]+
+WHITESPACE (" "+)
+TAB \t
+NEWLINE \n
 %{
 int chars = 1;
 %}
 %%
-\n {chars = 1; ++yylineno;}
-({INT}|{INTT}) {printf("INT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{NEWLINE} {chars = 1;}
+({INT}|{INTT}) {printf("INT data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
 {PLUS} {printf("PLUS at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
 {ASSIGNOP} {printf("ASSIGNOP at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
 {RELOP} {printf("RELOP at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
@@ -37,7 +39,8 @@ int chars = 1;
 {FLOAT} {printf("FLOAT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
 {ID} {printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
 {WHITESPACE} {chars += strlen(yytext);}
-. {printf("ERROR Type A at line %d, char %d: Myterious character: '%s'\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{TAB} {chars += 4;}
+. {printf("ERROR Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext); chars += strlen(yytext);}
 %%
 int main(int argc, char* argv[]) {
     if (argc > 1) {
