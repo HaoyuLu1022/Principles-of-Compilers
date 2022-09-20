@@ -12,15 +12,15 @@ TYPE void|int|float|double|char
 KEYWORD if|else|while|do|for|return
 AND &&
 DIV "/"
-NOTE "//note"
+NOTE "//".*
 BRACKET "("|")"|"{"|"}"
 SEMT ;
 ID ({LETTER}|_)({LETTER}|_|{DIGIT})*
 WHITESPACE [[:space:]]+
-%%
 %{
 int chars = 1;
 %}
+%%
 \n {chars = 1; ++yylineno;}
 ({INT}|{INTT}) {printf("INT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
 {PLUS} {printf("PLUS at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
