@@ -7,7 +7,7 @@ STAR \*
 ASSIGNOP = 
 RELOP ==|<|>|>=|<=|!=
 INTT ({PLUS}|{MINUS})?{INT}
-FLOAT {INT}(.{INTT})
+FLOAT {INT}(\.{INTT})
 LETTER [a-zA-Z]
 TYPE void|int|float|double|char
 IF if
