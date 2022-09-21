@@ -1,14 +1,14 @@
 %option yylineno
 DIGIT [0-9]
 INT [0-9]{DIGIT}*
-INTT ("+"|"-")?{INT}
-FLOAT {INT}(.{INTT})
-LETTER [a-zA-Z]
 PLUS \+
 MINUS -
 STAR \*
 ASSIGNOP = 
-RELOP "=="|"<"|">"|">="|"<="|"!="
+RELOP ==|<|>|>=|<=|!=
+INTT ({PLUS}|{MINUS})?{INT}
+FLOAT {INT}(.{INTT})
+LETTER [a-zA-Z]
 TYPE void|int|float|double|char
 IF if
 ELSE else
@@ -17,7 +17,7 @@ RETURN return
 STRUCT struct
 AND &&
 OR "||"
-DOT "\."
+DOT \.
 NOT !
 DIV "/"
 NOTE "//".*
@@ -27,12 +27,12 @@ LB "["
 RB "]"
 LC "{"
 RC "}"
-SEMI ";"
+SEMI ;
 ID ({LETTER}|_)({LETTER}|_|{DIGIT})*
 WHITESPACE (" "+)
 TAB \t
 NEWLINE \n
-COMMA ","
+COMMA ,
 %{
 int chars = 1;
 %}
