@@ -5,62 +5,39 @@ INTT ("+"|"-")?{INT}
 FLOAT {INT}(.{INTT})
 LETTER [a-zA-Z]
 PLUS \+
-MINUS -
-STAR \*
+MULTI \*
 ASSIGNOP = 
-RELOP "=="|"<"|">"|">="|"<="|"!="
+RELOP "=="|"<"|">"|">="|"<="
 TYPE void|int|float|double|char
-IF if
-ELSE else
-WHILE while
-RETURN return
-STRUCT struct
+KEYWORD if|else|while|do|for|return
 AND &&
-OR "||"
-DOT "\."
-NOT !
 DIV "/"
 NOTE "//".*
-LP "("
-RP ")"
-LB "["
-RB "]"
-LC "{"
-RC "}"
-SEMI ";"
+BRACKET "("|")"|"{"|"}"
+SEMT ;
 ID ({LETTER}|_)({LETTER}|_|{DIGIT})*
-WHITESPACE (" "+)
-TAB \t
-NEWLINE \n
-COMMA ","
+WHITESPACE [[:space:]]+
 %{
-int chars = 1;
+#define T_WORD 1
+int chars = 1, tmp = 1;
 %}
 %%
-{NEWLINE} {chars = 1;}
-{COMMA} {printf("COMMA at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{DOT} {printf("DOT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{NOT} {printf("NOT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-({INT}|{INTT}) {printf("INT data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{PLUS} {printf("PLUS at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{ASSIGNOP} {printf("ASSIGNOP at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{RELOP} {printf("RELOP at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{TYPE} {printf("TYPE at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-({IF}|{ELSE}|{WHILE}|{RETURN}) {printf("KEYWORD at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{STRUCT} {printf("STRUCT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{AND} {printf("AND at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{OR} {printf("OR at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{STAR} {printf("START at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{MINUS} {printf("MINUS at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{DIV} {printf("DIV at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{NOTE} {printf("NOTE at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-({LP}|{RP}|{LB}|{RB}|{LC}|{RC}) {printf("BRACKET at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{SEMI} {printf("SEMI at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{FLOAT} {printf("FLOAT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{ID} {printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;} 
-{WHITESPACE} {chars += yyleng;}
-{TAB} {chars += 4;}
-. {printf("ERROR Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
+({INT}|{INTT}) {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("INT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{PLUS} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("PLUS at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{ASSIGNOP} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("ASSIGNOP at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{RELOP} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("RELOP at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{TYPE} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("TYPE at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{KEYWORD} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("KEYWORD at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{AND} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("AND at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{MULTI} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("START at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{DIV} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("DIV at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{NOTE} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("NOTE at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{BRACKET} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("BRACKET at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{SEMT} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("SEMT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{FLOAT} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("FLOAT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{ID} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext); chars += strlen(yytext);}
+{WHITESPACE} {if(tmp != yylineno) {chars = 0; tmp = yylineno;} chars += strlen(yytext);}
+. {if(tmp != yylineno) {chars = 0; tmp = yylineno;} printf("ERROR Type A at line %d, char %d: Myterious character: '%s'\n", yylineno, chars, yytext); chars += strlen(yytext);}
 %%
 int main(int argc, char* argv[]) {
     if (argc > 1) {
