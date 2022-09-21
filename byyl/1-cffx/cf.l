@@ -6,9 +6,16 @@ MINUS -
 STAR \*
 ASSIGNOP = 
 RELOP ==|<|>|>=|<=|!=
-INTT ({PLUS}|{MINUS})?{INT}
-FLOAT {INT}(\.{INTT})
 LETTER [a-zA-Z]
+ERRORDIGITSTR {DIGIT}*{LETTER}[0-9a-zA-Z]*
+INTT ({PLUS}|{MINUS})?{INT}
+INT8 ({PLUS}|{MINUS})?0[0-7]+
+ERRORINT8 ({PLUS}|{MINUS})?0([89a-wyzA-WYZ][0-9a-zA-Z]*|[0-7]+[89a-zA-Z][0-9a-zA-Z]*)
+INT16 ({PLUS}|{MINUS})?0(x|X)[0-9a-fA-F]+
+ERRORINT16 ({PLUS}|{MINUS})?0(x|X)[0-9a-fA-F]*[g-zG-Z][0-9a-zA-Z]*
+FLOAT ({PLUS}|{MINUS})?({DIGIT}+\.{DIGIT}*|{DIGIT}*\.{DIGIT}+)
+FLOATT ({DIGIT}+|{FLOAT})e({MINUS}|{PLUS})?{DIGIT}+
+ERRORFLOAT ({DIGIT}+|{FLOAT})e({FLOAT}|{ERRORDIGITSTR})?
 TYPE void|int|float|double|char
 IF if
 ELSE else
@@ -21,6 +28,7 @@ DOT \.
 NOT !
 DIV "/"
 NOTE "//".*
+NOTEE "/*"(.|\n)*"*/"
 LP "("
 RP ")"
 LB "["
@@ -41,6 +49,12 @@ int chars = 1;
 {COMMA} {printf("COMMA at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {DOT} {printf("DOT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {NOT} {printf("NOT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
+({FLOAT}|{FLOATT}) {printf("FLOAT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
+{ERRORFLOAT} {printf("Error Type A at line %d, char %d: Illgal float number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
+{INT8} {printf("INT8 data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
+{ERRORINT8} {printf("Error Type A at line %d, char %d: Illgal octal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
+{INT16} {printf("INT16 data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
+{ERRORINT16} {printf("Error Type A at line %d, char %d: Illgal hexadecimal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
 ({INT}|{INTT}) {printf("INT data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {PLUS} {printf("PLUS at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {ASSIGNOP} {printf("ASSIGNOP at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
@@ -53,10 +67,9 @@ int chars = 1;
 {STAR} {printf("START at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {MINUS} {printf("MINUS at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {DIV} {printf("DIV at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{NOTE} {printf("NOTE at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
+({NOTE}|{NOTEE}) {printf("NOTE at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 ({LP}|{RP}|{LB}|{RB}|{LC}|{RC}) {printf("BRACKET at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {SEMI} {printf("SEMI at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{FLOAT} {printf("FLOAT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {ID} {printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;} 
 {WHITESPACE} {chars += yyleng;}
 {TAB} {chars += 4;}
