@@ -370,8 +370,8 @@ static void yynoreturn yy_fatal_error ( const char* msg  );
 	(yy_hold_char) = *yy_cp; \
 	*yy_cp = '\0'; \
 	(yy_c_buf_p) = yy_cp;
-#define YY_NUM_RULES 30
-#define YY_END_OF_BUFFER 31
+#define YY_NUM_RULES 31
+#define YY_END_OF_BUFFER 32
 /* This struct is not used in this scanner,
    but its presence is necessary. */
 struct yy_trans_info
@@ -381,19 +381,19 @@ struct yy_trans_info
 	};
 static const flex_int16_t yy_accept[120] =
     {   0,
-        0,    0,   31,   29,   28,    1,   27,    4,   29,   24,
-       20,   12,    2,   21,    3,   22,   11,   11,   25,   14,
-       13,   14,   26,   26,   26,   26,   26,   26,   26,   26,
-       26,   26,   29,   27,   14,   18,    0,   11,   11,    5,
+        0,    0,   32,   30,   29,    1,   28,    4,   30,   25,
+       20,   12,    2,   21,    3,   22,   11,   11,   26,   14,
+       13,   14,   27,   27,   27,   27,   27,   27,   27,   27,
+       27,   27,   30,   28,   14,   18,    0,   11,   11,    5,
         0,   23,    5,    7,    8,    8,    6,    0,   11,    6,
-       26,   26,   26,   26,   26,   16,   26,   26,   26,   26,
-       26,   19,    7,    8,   11,    0,    0,   23,    5,    8,
+       27,   27,   27,   27,   27,   16,   27,   27,   27,   27,
+       27,   19,    7,    8,   11,    0,    0,   23,    5,    8,
         8,    6,    8,    8,    6,    0,    0,    5,    6,    9,
-       10,    5,    6,   26,   26,   26,   26,   15,   26,   26,
-       26,   26,    8,    8,   23,    8,    8,    6,    5,    6,
+       10,    5,    6,   27,   27,   27,   27,   15,   27,   27,
+       27,   27,    8,    8,   24,    8,    8,    6,    5,    6,
 
-        5,    6,    6,    6,   10,    6,   26,   26,   26,   26,
-       26,    8,    6,    6,   26,   26,   26,   17,    0
+        5,    6,    6,    6,   10,    6,   27,   27,   27,   27,
+       27,    8,    6,    6,   27,   27,   27,   17,    0
     } ;
 
 static const YY_CHAR yy_ec[256] =
@@ -568,10 +568,10 @@ static const flex_int16_t yy_chk[389] =
     } ;
 
 /* Table of booleans, true if rule could match eol. */
-static const flex_int32_t yy_rule_can_match_eol[31] =
+static const flex_int32_t yy_rule_can_match_eol[32] =
     {   0,
 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 
-    0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,     };
+    0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0,     };
 
 static yy_state_type yy_last_accepting_state;
 static char *yy_last_accepting_cpos;
@@ -989,47 +989,52 @@ YY_RULE_SETUP
 {printf("DIV at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 23:
-/* rule 23 can match eol */
 YY_RULE_SETUP
 #line 70 "cf.l"
 {printf("NOTE at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 24:
+/* rule 24 can match eol */
 YY_RULE_SETUP
 #line 71 "cf.l"
-{printf("BRACKET at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
+{printf("NOTE at line %d, char %d: %s\n", yylineno, chars, yytext); int idx = yyleng - 1; for(; (idx >= 0) && (yytext[idx] != '\n');) idx--; if(idx>=0) chars = 1;  chars += (yyleng - idx - 1); }
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
 #line 72 "cf.l"
-{printf("SEMI at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
+{printf("BRACKET at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
 #line 73 "cf.l"
-{printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;} 
+{printf("SEMI at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
 #line 74 "cf.l"
-{chars += yyleng;}
+{printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;} 
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
 #line 75 "cf.l"
-{chars += 4;}
+{chars += yyleng;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
 #line 76 "cf.l"
-{printf("ERROR Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
+{chars += 4;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
 #line 77 "cf.l"
+{printf("ERROR Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
+	YY_BREAK
+case 31:
+YY_RULE_SETUP
+#line 78 "cf.l"
 ECHO;
 	YY_BREAK
-#line 1033 "lex.yy.c"
+#line 1038 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2046,7 +2051,7 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 77 "cf.l"
+#line 78 "cf.l"
 
 int main(int argc, char* argv[]) {
     if (argc > 1) {

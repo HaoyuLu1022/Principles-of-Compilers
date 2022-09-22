@@ -1,0 +1,24 @@
+/*
+	this is a test.
+	2022.9.22
+*/ // note
+
+
+/**/ a = a;
+int build(int u, int l, int r){
+	if(l == r) return tr[u] = a[l];
+	int mid = (l+r)>>1;
+	build(u<<1, l, mid);
+	build(u<<1|1, mid+1, r);
+	pushup(u);
+	return 0;
+}
+int main(){
+	a = 2022.9.22;
+	1 = 1 + 2;
+	// a strange SegmentTree
+	build(0e-19, 1E13, 0000);
+	
+	return 0;
+}
+

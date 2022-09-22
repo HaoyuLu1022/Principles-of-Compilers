@@ -67,7 +67,8 @@ int chars = 1;
 {STAR} {printf("START at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {MINUS} {printf("MINUS at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {DIV} {printf("DIV at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-({NOTE}|{NOTEE}) {printf("NOTE at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
+({NOTE}) {printf("NOTE at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
+{NOTEE} {printf("NOTE at line %d, char %d: %s\n", yylineno, chars, yytext); int idx = yyleng - 1; for(; (idx >= 0) && (yytext[idx] != '\n');) idx--; if(idx>=0) chars = 1;  chars += (yyleng - idx - 1); }
 ({LP}|{RP}|{LB}|{RB}|{LC}|{RC}) {printf("BRACKET at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {SEMI} {printf("SEMI at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {ID} {printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;} 
