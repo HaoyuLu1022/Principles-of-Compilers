@@ -4,7 +4,7 @@
 */ // note
 
 
-/**/ a = a;
+/*   */ a = a;
 int build(int u, int l, int r){
 	if(l == r) return tr[u] = a[l];
 	int mid = (l+r)>>1;
@@ -15,7 +15,7 @@ int build(int u, int l, int r){
 }
 int main(){
 	a = 2022.9.22;
-	1 = 1 + 2;
+	1=1+2;
 	// a strange SegmentTree
 	build(0e-19, 1E13, 0000);
 	

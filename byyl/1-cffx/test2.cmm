@@ -3,8 +3,5 @@
 // note1
 /* this
 is a long long comment
-*/ // short comment
-h = 5 / 2 // note2
-/* this
-is another long long comment
 */
+h = 5 / 2 // note2

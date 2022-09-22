@@ -1,8 +1,6 @@
 int main(){
-	float f = 00E00;
-	0.25;
+	float f = 2.5;
 	int n_num = 30;
-	int oct = 1+12;
 	if(n > 0.15){
 		printf("");
 	}else{
@@ -10,7 +8,6 @@ int main(){
 		< > ==
 		# % &&
 		/   //note
-		. || ,
 	}
 	return 0;
 }
