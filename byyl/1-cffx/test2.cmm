@@ -7,4 +7,4 @@ is a long long comment
 h = 5 / 2 // note2
 /* this
 is another long long comment
-*/
+*/ /**/
