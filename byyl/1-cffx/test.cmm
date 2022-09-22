@@ -1,5 +1,6 @@
 int main(){
-	float f = 2e-5;
+	float f = 00E00;
+	0.25;
 	int n_num = 30;
 	if(n > 0.15){
 		printf("");
