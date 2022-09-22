@@ -1,6 +1,6 @@
 %option yylineno
 DIGIT [0-9]
-INT [0-9]{DIGIT}*
+INT 0|[1-9]{DIGIT}*
 PLUS \+
 MINUS -
 STAR \*

@@ -2,6 +2,7 @@ int main(){
 	float f = 00E00;
 	0.25;
 	int n_num = 30;
+	int oct = 00;
 	if(n > 0.15){
 		printf("");
 	}else{
