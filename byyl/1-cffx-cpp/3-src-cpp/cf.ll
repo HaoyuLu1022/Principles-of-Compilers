@@ -1,7 +1,5 @@
 %option noyywrap c++ yylineno
 %{
-    #include <iostream>
-    using namespace std;
     int chars = 1;
 %}
 DIGIT [0-9]
@@ -86,15 +84,13 @@ COMMA ,
 %%
 // This include is required if main() is an another source file.
 //#include <FlexLexer.h>
+#include <fstream>
+using namespace std;
 int main(int argc, char* argv[]) {
     if(argc > 1) {
-        // filebuf in;
-        // if(!in.open("test.cmm", ios::in)) {
-        //     printf("Fail to open file!\n");
-        //     return 1;
-        // }
-        // istream iss(&in);
-        FlexLexer* lexer = new yyFlexLexer;
+        string filename = argv[1];
+        ifstream ifs(filename);
+        FlexLexer* lexer = new yyFlexLexer(&ifs);
         while(lexer->yylex() != 0);
     }
     return 0;

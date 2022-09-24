@@ -544,11 +544,9 @@ static const flex_int32_t yy_rule_can_match_eol[32] =
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "cf.ll"
 #line 3 "cf.ll"
-    #include <iostream>
-    using namespace std;
     int chars = 1;
-#line 551 "lex.yy.cc"
-#line 552 "lex.yy.cc"
+#line 549 "lex.yy.cc"
+#line 550 "lex.yy.cc"
 
 #define INITIAL 0
 
@@ -680,9 +678,9 @@ YY_DECL
 		}
 
 	{
-#line 49 "cf.ll"
+#line 47 "cf.ll"
 
-#line 686 "lex.yy.cc"
+#line 684 "lex.yy.cc"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -752,123 +750,123 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 50 "cf.ll"
+#line 48 "cf.ll"
 {chars = 1;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 51 "cf.ll"
+#line 49 "cf.ll"
 {printf("COMMA at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 52 "cf.ll"
+#line 50 "cf.ll"
 {printf("DOT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 53 "cf.ll"
+#line 51 "cf.ll"
 {printf("NOT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 54 "cf.ll"
+#line 52 "cf.ll"
 {printf("FLOAT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 55 "cf.ll"
+#line 53 "cf.ll"
 {printf("Error Type A at line %d, char %d: Illegal float number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 56 "cf.ll"
+#line 54 "cf.ll"
 {printf("INT8 data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 57 "cf.ll"
+#line 55 "cf.ll"
 {printf("Error Type A at line %d, char %d: Illegal octal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 58 "cf.ll"
+#line 56 "cf.ll"
 {printf("INT16 data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 59 "cf.ll"
+#line 57 "cf.ll"
 {printf("Error Type A at line %d, char %d: Illegal hexadecimal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 60 "cf.ll"
+#line 58 "cf.ll"
 {printf("INT data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 61 "cf.ll"
+#line 59 "cf.ll"
 {printf("PLUS at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 62 "cf.ll"
+#line 60 "cf.ll"
 {printf("ASSIGNOP at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 63 "cf.ll"
+#line 61 "cf.ll"
 {printf("RELOP at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 64 "cf.ll"
+#line 62 "cf.ll"
 {printf("TYPE at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 65 "cf.ll"
+#line 63 "cf.ll"
 {printf("KEYWORD at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 66 "cf.ll"
+#line 64 "cf.ll"
 {printf("STRUCT at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 67 "cf.ll"
+#line 65 "cf.ll"
 {printf("AND at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 68 "cf.ll"
+#line 66 "cf.ll"
 {printf("OR at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 69 "cf.ll"
+#line 67 "cf.ll"
 {printf("START at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 70 "cf.ll"
+#line 68 "cf.ll"
 {printf("MINUS at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 71 "cf.ll"
+#line 69 "cf.ll"
 {printf("DIV at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 72 "cf.ll"
+#line 70 "cf.ll"
 {printf("NOTE at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;} 
 	YY_BREAK
 case 24:
 /* rule 24 can match eol */
 YY_RULE_SETUP
-#line 73 "cf.ll"
+#line 71 "cf.ll"
 {printf("NOTE at line %d, char %d: %s\n", yylineno, chars, yytext); 
     int idx = yyleng - 1; 
     for(; (idx >= 0) && (yytext[idx] != '\n');) 
@@ -879,40 +877,40 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 80 "cf.ll"
+#line 78 "cf.ll"
 {printf("BRACKET at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 81 "cf.ll"
+#line 79 "cf.ll"
 {printf("SEMI at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 82 "cf.ll"
+#line 80 "cf.ll"
 {printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;} 
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 83 "cf.ll"
+#line 81 "cf.ll"
 {chars += yyleng;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 84 "cf.ll"
+#line 82 "cf.ll"
 {chars += 4;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 85 "cf.ll"
+#line 83 "cf.ll"
 {printf("ERROR Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 86 "cf.ll"
+#line 84 "cf.ll"
 ECHO;
 	YY_BREAK
-#line 916 "lex.yy.cc"
+#line 914 "lex.yy.cc"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -1884,19 +1882,17 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 86 "cf.ll"
+#line 84 "cf.ll"
 
 // This include is required if main() is an another source file.
 //#include <FlexLexer.h>
+#include <fstream>
+using namespace std;
 int main(int argc, char* argv[]) {
     if(argc > 1) {
-        filebuf in;
-        if(!in.open("test.cmm", ios::in)) {
-            printf("Fail to open file!\n");
-            return 1;
-        }
-        istream iss(&in);
-        FlexLexer* lexer = new yyFlexLexer(&iss);
+        string filename = argv[1];
+        ifstream ifs(filename);
+        FlexLexer* lexer = new yyFlexLexer(&ifs);
         while(lexer->yylex() != 0);
     }
     return 0;
