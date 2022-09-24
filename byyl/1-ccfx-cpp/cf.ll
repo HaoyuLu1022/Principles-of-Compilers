@@ -1,4 +1,9 @@
-%option yylineno
+%option noyywrap c++ yylineno
+%{
+    #include <iostream>
+    using namespace std;
+    int chars = 1;
+%}
 DIGIT [0-9]
 INT 0|[1-9]{DIGIT}*
 PLUS \+
@@ -41,9 +46,6 @@ WHITESPACE (" "+)
 TAB \t
 NEWLINE \n
 COMMA ,
-%{
-int chars = 1;
-%}
 %%
 {NEWLINE} {chars = 1;}
 {COMMA} {printf("COMMA at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
@@ -82,13 +84,18 @@ int chars = 1;
 {TAB} {chars += 4;}
 . {printf("ERROR Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
 %%
+// This include is required if main() is an another source file.
+//#include <FlexLexer.h>
 int main(int argc, char* argv[]) {
-    if (argc > 1) {
-        if(!(yyin = fopen(argv[1], "r"))) {
-                perror(argv[1]);
-            return 1;
-        }
-        while(yylex() != 0);
+    if(argc > 1) {
+        // filebuf in;
+        // if(!in.open("test.cmm", ios::in)) {
+        //     printf("Fail to open file!\n");
+        //     return 1;
+        // }
+        // istream iss(&in);
+        FlexLexer* lexer = new yyFlexLexer;
+        while(lexer->yylex() != 0);
     }
     return 0;
 }
