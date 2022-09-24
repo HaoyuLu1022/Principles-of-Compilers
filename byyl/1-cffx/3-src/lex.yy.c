@@ -906,7 +906,7 @@ YY_RULE_SETUP
 case 6:
 YY_RULE_SETUP
 #line 53 "cf.l"
-{printf("Error Type A at line %d, char %d: Illgal float number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
+{printf("Error Type A at line %d, char %d: Illegal float number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
@@ -916,7 +916,7 @@ YY_RULE_SETUP
 case 8:
 YY_RULE_SETUP
 #line 55 "cf.l"
-{printf("Error Type A at line %d, char %d: Illgal octal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
+{printf("Error Type A at line %d, char %d: Illegal octal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
@@ -926,7 +926,7 @@ YY_RULE_SETUP
 case 10:
 YY_RULE_SETUP
 #line 57 "cf.l"
-{printf("Error Type A at line %d, char %d: Illgal hexadecimal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
+{printf("Error Type A at line %d, char %d: Illegal hexadecimal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
