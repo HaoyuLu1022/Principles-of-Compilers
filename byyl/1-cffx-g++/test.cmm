@@ -1,5 +1,6 @@
 int main(){
 	float f = 1.234+5.678+910+0547+0xffff;
+	float a = f+b-1;
 	0.25;
 	int n_num = 30;
 	int oct = 1+12;

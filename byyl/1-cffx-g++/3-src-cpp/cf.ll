@@ -198,7 +198,24 @@ COMMA ,
     printf("SEMI at line %d, char %d: %s\n", yylineno, chars, yytext);
     chars += yyleng;}
 {ID} {
-    printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext);
+    if(st.empty()) {
+        printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext);
+        st.push(yytext);
+    }
+    else {
+        if(yytext[0] == '+' || yytext[0] == '-') {
+            st.pop();
+            yytext[0] == '+' ? printf("PLUS") : printf("MINUS");
+            st.push(yytext);
+            printf(" at line %d, char %d: %c\n", yylineno, chars, yytext[0]);
+            printf("ID at line %d, char %d: %s\n", yylineno, chars+1, yytext+1);
+        }
+        else {
+            while(!st.empty()) st.pop();
+			st.push(yytext);
+			printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext);
+        }
+    }
     chars += yyleng;} 
 {WHITESPACE} {chars += yyleng;}
 {TAB} {chars += 4;}

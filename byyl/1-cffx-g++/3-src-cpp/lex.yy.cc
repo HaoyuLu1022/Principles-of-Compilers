@@ -630,7 +630,7 @@ static const flex_int16_t yy_rule_linenum[31] =
     {   0,
        50,   51,   56,   59,   62,   82,   85,  105,  108,  128,
       131,  151,  154,  157,  160,  163,  166,  169,  172,  175,
-      178,  181,  184,  187,  194,  197,  200,  203,  204,  205
+      178,  181,  184,  187,  194,  197,  200,  220,  221,  222
     } ;
 
 /* The intent behind this definition is that it'll catch
@@ -1189,32 +1189,49 @@ case 27:
 YY_RULE_SETUP
 #line 200 "cf.ll"
 {
-    printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext);
+    if(st.empty()) {
+        printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext);
+        st.push(yytext);
+    }
+    else {
+        if(yytext[0] == '+' || yytext[0] == '-') {
+            st.pop();
+            yytext[0] == '+' ? printf("PLUS") : printf("MINUS");
+            st.push(yytext);
+            printf(" at line %d, char %d: %c\n", yylineno, chars, yytext[0]);
+            printf("ID at line %d, char %d: %s\n", yylineno, chars+1, yytext+1);
+        }
+        else {
+            while(!st.empty()) st.pop();
+			st.push(yytext);
+			printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext);
+        }
+    }
     chars += yyleng;} 
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 203 "cf.ll"
+#line 220 "cf.ll"
 {chars += yyleng;}
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 204 "cf.ll"
+#line 221 "cf.ll"
 {chars += 4;}
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 205 "cf.ll"
+#line 222 "cf.ll"
 {
     printf("ERROR Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext);
     chars += yyleng;}
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 208 "cf.ll"
+#line 225 "cf.ll"
 ECHO;
 	YY_BREAK
-#line 1218 "lex.yy.cc"
+#line 1235 "lex.yy.cc"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2340,7 +2357,7 @@ void yyfree (void * ptr )
 
 /* %ok-for-header */
 
-#line 208 "cf.ll"
+#line 225 "cf.ll"
 
 // This include is required if main() is an another source file.
 //#include <FlexLexer.h>
