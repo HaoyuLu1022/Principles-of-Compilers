@@ -8,12 +8,11 @@ ASSIGNOP =
 RELOP ==|<|>|>=|<=|!=
 LETTER [a-zA-Z]
 ERRORDIGITSTR {DIGIT}*{LETTER}[0-9a-zA-Z]*
-INTT ({PLUS}|{MINUS})?{INT}
-INT8 ({PLUS}|{MINUS})?0[0-7]+
-ERRORINT8 ({PLUS}|{MINUS})?0([89a-wyzA-WYZ][0-9a-zA-Z]*|[0-7]+[89a-zA-Z][0-9a-zA-Z]*)
-INT16 ({PLUS}|{MINUS})?0(x|X)[0-9a-fA-F]+
-ERRORINT16 ({PLUS}|{MINUS})?0(x|X)[0-9a-fA-F]*[g-zG-Z][0-9a-zA-Z]*
-FLOAT ({PLUS}|{MINUS})?({DIGIT}+\.{DIGIT}*|{DIGIT}*\.{DIGIT}+)
+INT8 0[0-7]+
+ERRORINT8 0([89a-wyzA-WYZ][0-9a-zA-Z]*|[0-7]+[89a-zA-Z][0-9a-zA-Z]*)
+INT16 0(x|X)[0-9a-fA-F]+
+ERRORINT16 0(x|X)[0-9a-fA-F]*[g-zG-Z][0-9a-zA-Z]*
+FLOAT ({DIGIT}+\.{DIGIT}*|{DIGIT}*\.{DIGIT}+)
 FLOATT ({DIGIT}+|{FLOAT})(e|E)({MINUS}|{PLUS})?{DIGIT}+
 ERRORFLOAT ({DIGIT}+|{FLOAT})(e|E)({FLOAT}|{ERRORDIGITSTR})?
 TYPE void|int|float|double|char
@@ -55,7 +54,7 @@ int chars = 1;
 {ERRORINT8} {printf("Error Type A at line %d, char %d: Illegal octal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
 {INT16} {printf("INT16 data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {ERRORINT16} {printf("Error Type A at line %d, char %d: Illegal hexadecimal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
-({INT}|{INTT}) {printf("INT data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
+{INT} {printf("INT data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {PLUS} {printf("PLUS at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {ASSIGNOP} {printf("ASSIGNOP at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 {RELOP} {printf("RELOP at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
