@@ -153,7 +153,8 @@ COMMA ,
     chars += yyleng;}
 {ASSIGNOP} {
     printf("ASSIGNOP at line %d, char %d: %s\n", yylineno, chars, yytext);
-    chars += yyleng;}
+    chars += yyleng;
+    while(!st.empty()) st.pop();}
 {RELOP} {
     printf("RELOP at line %d, char %d: %s\n", yylineno, chars, yytext);
     chars += yyleng;}
@@ -199,7 +200,9 @@ COMMA ,
     chars += yyleng;}
 {ID} {
     printf("ID at line %d, char %d: %s\n", yylineno, chars, yytext);
-    chars += yyleng;} 
+    chars += yyleng;
+    if(!st.empty()) st.pop();
+	st.push(yytext);} 
 {WHITESPACE} {chars += yyleng;}
 {TAB} {chars += 4;}
 . {
