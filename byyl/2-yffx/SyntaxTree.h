@@ -1,23 +1,26 @@
-#pragma once
-
+#include <string.h>
+#include <stdio.h>
 typedef int NODE_TYPE;
-
-#define NONTERMINAL 0
+#define NON_TERMINAL 0
 #define INT_TYPE 1
 #define FLOAT_TYPE 2
-#define 
+#define STRING_TYPE 3
 
-typedef union 
-{
-    char *_id;
-    int *_int;
-    float *_float;
-}type;
+struct node {
+    struct node *child;
+    struct node *bro;
+    int lines;
+    char *name;
+    NODE_TYPE type;
+    union {
+        char *id;
+        int intValue;
+        float floatValue;
+    };
+};
 
-typedef struct node {
-    type data;
-    long long line;
-    struct node *l, *r;
-}node;
-
-node* Insert(struct node *nd, char *data, int line, )
+struct node *head;
+struct node *iniNode(char *name, int lines, NODE_TYPE t);
+struct node *insNode(struct node *n, char *name, int lines, NODE_TYPE t);
+void printNode(struct node *n, FILE *f);
+void printTree(struct node *head, int depth, FILE *f);
