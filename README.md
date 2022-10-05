@@ -37,76 +37,45 @@ gcc lex.yy.c -lfl -o scanner
 ./scanner test2.cmm
 ```
 
-#### 9.9 Update
+## 实验2 语法分析
 
-基本实现了实验要求的各种类型的简单判断，尚未完成的工作包括：
+实验说明：[实验指导2 语法分析 · 语雀 (yuque.com)](https://www.yuque.com/huolihang/byyl22/lnu277#85d436d7)
 
-1.   正则匹配的鲁棒性测试与改善
-2.   指示出匹配到的语素在一行中的第几个字符(at line xxx, char xxx)
-3.   报告撰写
+### Quick Start
 
-#### 9.20 Update:
-
-满足了所有基本要求，即
-
-1.  输出C--文法规定的基本词法分析结果（27种token）；
-2.  输出未定义的标识符；
-3.  识别单行注释。
-
-##### 基本任务测试结果
-
-输入：test.cmm
+依赖包安装
 
 ```shell
-TYPE at line 1, char 1: int
-ID at line 1, char 5: main
-BRACKET at line 1, char 9: (
-BRACKET at line 1, char 10: )
-BRACKET at line 1, char 11: {
-TYPE at line 2, char 5: float
-ID at line 2, char 11: f
-ASSIGNOP at line 2, char 13: =
-FLOAT at line 2, char 15: 2.5
-SEMI at line 2, char 18: ;
-TYPE at line 3, char 5: int
-ID at line 3, char 9: n_num
-ASSIGNOP at line 3, char 15: =
-INT data at line 3, char 17: 30
-SEMI at line 3, char 19: ;
-KEYWORD at line 4, char 5: if
-BRACKET at line 4, char 7: (
-ID at line 4, char 8: n
-RELOP at line 4, char 10: >
-FLOAT at line 4, char 12: 0.15
-BRACKET at line 4, char 16: )
-BRACKET at line 4, char 17: {
-ID at line 5, char 9: printf
-BRACKET at line 5, char 15: (
-ERROR Type A at line 5, char 16: Mysterious character: '"'
-ERROR Type A at line 5, char 17: Mysterious character: '"'
-BRACKET at line 5, char 18: )
-SEMI at line 5, char 19: ;
-BRACKET at line 6, char 5: }
-KEYWORD at line 6, char 6: else
-BRACKET at line 6, char 10: {
-ID at line 7, char 9: _f2
-ASSIGNOP at line 7, char 13: =
-ID at line 7, char 15: _f
-START at line 7, char 18: *
-FLOAT at line 7, char 20: 0.15
-SEMI at line 7, char 24: ;
-RELOP at line 8, char 9: <
-RELOP at line 8, char 11: >
-RELOP at line 8, char 13: ==
-ERROR Type A at line 9, char 9: Mysterious character: '#'
-ERROR Type A at line 9, char 11: Mysterious character: '%'
-AND at line 9, char 13: &&
-DIV at line 10, char 9: /
-NOTE at line 10, char 13: //note
-BRACKET at line 11, char 5: }
-KEYWORD at line 12, char 5: return
-INT data at line 12, char 12: 0
-SEMI at line 12, char 13: ;
-BRACKET at line 13, char 1: }
+sudo apt-get install bison
+sudo apt-get install libbison-dev %% 如果gcc编译-ly报错，可以尝试这个
 ```
 
+逻辑上的工作顺序应该是flex先按词法识别token，再由bison构建语法树
+
+```sh
+flex yf.l
+bison -d syntax.y
+gcc syntax.tab.c SyntaxTree.c -lfl -ly -o parser
+```
+
+需要注意的是
+
+1.   flex对应的.l文件不需要加入头文件"SyntaxTree.h"，因为它并不负责、也不需要语法树的构建，加了还会导致头文件的重复引用
+2.   bison对应的.y文件在定义部分需要引入头文件"SyntaxTree.h"，因为在规则部分，对于符合正确产生式的语句，我们需要构建语法树；在用户函数部分的main函数中，我们需要引入"lex.yy.c"文件，以将flex识别到的token同语法结合
+3.   需要将yyerror()函数重载以使其失效（详见"syntax.y"代码），再构造myerror()函数以实现自定义报错输出
+
+>   虽然没有仔细对比，但是实际运行时，调换flex和bison的执行顺序应该是等效的。推测是因为它们只是为对应代码创建静态链接，动态链接的加载还是交给gcc来做的
+>
+>   有时间可以再测试一下
+
+测试样例
+
+```sh
+./parser test1.cmm
+./parser test2.cmm
+./parser test3.cmm
+```
+
+### 10.5更新
+
+基本要求已满足，附加要求中语法树构建还有一点问题
