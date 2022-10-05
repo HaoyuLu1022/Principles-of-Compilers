@@ -1,5 +1,4 @@
 #include <malloc.h>
-#include <stdio.h>
 #include "SyntaxTree.h"
 
 struct node *iniNode(char *name, int lines, NODE_TYPE t) {
@@ -8,8 +7,18 @@ struct node *iniNode(char *name, int lines, NODE_TYPE t) {
     newNode->child = NULL;
     newNode->lines = lines;
     newNode->type = t;
-    newNode->name = strdup(name);
-    newNode->intValue = 1;
+    newNode->name = name;
+    // if((!strcmp(newNode->name, "ID"))||(!strcmp(newNode->name, "TYPE"))) {
+    //     char *tmp;
+    //     tmp = (char *)malloc(sizeof(char *)*10);
+    //     strcpy(tmp, yytext);
+    //     newNode->type = tmp;
+    // }
+    if(!strcmp(newNode->name, "INT") || newNode->type == INT_TYPE)
+        newNode->intValue = atoi(yytext);
+    else if(!strcmp(newNode->name, "FLOAT")|| newNode->type == FLOAT_TYPE)
+        newNode->type = atof(yytext);
+    else newNode->intValue = 1;
     return newNode;
 }
 

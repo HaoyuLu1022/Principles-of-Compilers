@@ -913,7 +913,7 @@ YY_RULE_SETUP
 {
 	struct node *newnode = iniNode("FLOAT", 0, FLOAT_TYPE);
 	yylval = newnode;
-	newnode->id = strdup(yytext);
+	// newnode->id = strdup(yytext);
 	return FLOAT;
 }
 	YY_BREAK
@@ -948,7 +948,7 @@ YY_RULE_SETUP
 {
 	struct node *newnode = iniNode("INT", 0, INT_TYPE);
 	yylval = newnode;
-	newnode->id = strdup(yytext);
+	// newnode->id = strdup(yytext);
 	return INT;
 }
 	YY_BREAK

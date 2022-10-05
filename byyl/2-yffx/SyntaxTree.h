@@ -1,10 +1,14 @@
 #include <string.h>
 #include <stdio.h>
+#include <stdlib.h>
+
 typedef int NODE_TYPE;
 #define NON_TERMINAL 0
 #define INT_TYPE 1
 #define FLOAT_TYPE 2
 #define STRING_TYPE 3
+extern char *yytext;
+extern int yylineno;
 
 struct node {
     struct node *child;

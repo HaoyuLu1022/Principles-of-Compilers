@@ -74,7 +74,7 @@ COMMA ,
 {FLOAT} {
 	struct node *newnode = iniNode("FLOAT", 0, FLOAT_TYPE);
 	yylval = newnode;
-	newnode->id = strdup(yytext);
+	// newnode->id = strdup(yytext);
 	return FLOAT;
 }
 {ERRORFLOAT} {printf("Error Type A at line %d, char %d: Illegal float number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
@@ -85,7 +85,7 @@ COMMA ,
 {INT} {
 	struct node *newnode = iniNode("INT", 0, INT_TYPE);
 	yylval = newnode;
-	newnode->id = strdup(yytext);
+	// newnode->id = strdup(yytext);
 	return INT;
 }
 {PLUS} {
