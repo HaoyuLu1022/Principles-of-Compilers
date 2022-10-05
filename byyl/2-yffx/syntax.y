@@ -31,11 +31,11 @@
 %right ASSIGNOP
 %left OR
 %left AND
-%nonassoc RELOP
+%left RELOP
 %left PLUS MINUS
 %left STAR DIV
 %right NAGATE NOT
-%right DOT LP LB RP RB
+%left DOT LP LB RP RB COMMA
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
@@ -186,7 +186,8 @@ StmtList : Stmt StmtList {
     }
     ;
     
-Stmt : Exp SEMI {
+Stmt : 
+    Exp SEMI {
         $$ = insNode($1, "Stmt", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
     }
@@ -220,8 +221,13 @@ Stmt : Exp SEMI {
         $2->bro = $3;
         $3->bro = $4;
         $4->bro = $5;
-    }
-	| Exp error{
+    } /*
+	| error Stmt {
+        char msg[100];
+		sprintf(msg, "Syntax error."); // Missing IF in front.
+		myerror(msg);
+    } */
+    | Exp error {
 		char msg[100];
 		sprintf(msg, "error: Missing \";\"");
 		myerror(msg);
@@ -357,9 +363,9 @@ Exp : Exp ASSIGNOP Exp {
 	| FLOAT {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
 	}
-	| Exp ASSIGNOP error {
+	| Exp ASSIGNOP error{ 
 		char msg[100];
-        sprintf(msg, "assignop error.");
+        sprintf(msg, "Syntax error."); // ASSIGNOP not in front of Exp
         // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
 		// errors++;
 		myerror(msg);
@@ -392,6 +398,13 @@ Exp : Exp ASSIGNOP Exp {
 		// errors++;
 		myerror(msg);
 	}
+    | ELSE Exp SEMI {
+        char msg[100];
+        sprintf(msg, "Syntax error.");
+        // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
+		// errors++;
+		myerror(msg);
+    }
     ;
 
 Args : Exp COMMA Args {
@@ -424,6 +437,7 @@ int main(int argc, char** argv) {
 		return 1;
 	}
 	if(!errors) {
+        printf("None!!!\n");
 		f1 = fopen("output.txt", "w");
 		printTree(head, 0, f1);
 	}
