@@ -10,6 +10,7 @@
 	int yylex();
 	extern int yylineno;
 	int errors = 0;
+    int yydebug = 1;
 %}
 
 %token INT
@@ -90,6 +91,13 @@ Specifier : TYPE {
     }
     | StructSpecifier {
         $$ = insNode($1, "Specifier", @1.first_line, NON_TERMINAL);
+    }
+    | ELSE Exp SEMI {
+        char msg[100];
+        sprintf(msg, "Syntax error.");
+        // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
+		// errors++;
+		myerror(msg);
     }
     ;
 
@@ -227,6 +235,7 @@ Stmt :
 		sprintf(msg, "Syntax error."); // Missing IF in front.
 		myerror(msg);
     } */
+    
     | Exp error {
 		char msg[100];
 		sprintf(msg, "error: Missing \";\"");
@@ -398,13 +407,7 @@ Exp : Exp ASSIGNOP Exp {
 		// errors++;
 		myerror(msg);
 	}
-    | ELSE Exp SEMI {
-        char msg[100];
-        sprintf(msg, "Syntax error.");
-        // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
-		// errors++;
-		myerror(msg);
-    }
+    
     ;
 
 Args : Exp COMMA Args {
