@@ -71,11 +71,17 @@ gcc syntax.tab.c SyntaxTree.c -lfl -ly -o parser
 测试样例
 
 ```sh
+%% 基本要求
 ./parser test1.cmm
 ./parser test2.cmm
+%% 附加要求
 ./parser test3.cmm
+./parser test4.cmm
 ```
 
 ### 10.5更新
 
-基本要求已满足，附加要求中语法树构建还有一点问题
+-   基本要求未满足：第一处ELSE可以识别，后面无法正确识别
+    -   目前还在用debug模式调
+-   附加要求中语法树构建还有一点问题
+    -   样例输出的Empty是什么东西
