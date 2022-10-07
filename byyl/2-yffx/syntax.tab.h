@@ -38,7 +38,7 @@
 # define YY_YY_SYNTAX_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 1
+# define YYDEBUG 0
 #endif
 #if YYDEBUG
 extern int yydebug;
@@ -52,7 +52,7 @@ extern int yydebug;
     INT = 258,
     FLOAT = 259,
     TYPE = 260,
-    LF = 261,
+    NEWLINE = 261,
     ID = 262,
     SEMI = 263,
     COMMA = 264,
