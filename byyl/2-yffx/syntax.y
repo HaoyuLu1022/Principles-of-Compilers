@@ -130,11 +130,11 @@ VarDec : ID {
         $2->bro = $3;
         $3->bro = $4;
     }
-	// | VarDec LB error RB{
-	// 	char msg[100];
-	// 	sprintf(msg, "int.");
-	// 	myerror(msg);
-	// }
+	| VarDec LB error RB{
+		char msg[100];
+		sprintf(msg, "int.");
+		myerror(msg);
+	}
     ;
 
 FunDec : ID LP VarList RP {
@@ -148,11 +148,11 @@ FunDec : ID LP VarList RP {
         $1->bro = $2;
         $2->bro = $3;
     }
-	// | ID LP error RP {
-	// 	char msg[100];
-	// 	sprintf(msg, "VarList.");
-	// 	myerror(msg);
-	// }
+	| ID LP error RP {
+		char msg[100];
+		sprintf(msg, "VarList.");
+		myerror(msg);
+	}
     ;
 
 VarList : ParamDec COMMA VarList {
@@ -229,18 +229,11 @@ Stmt :
 		sprintf(msg, "Syntax error."); // Missing IF in front.
 		myerror(msg);
     } */
-    // | ELSE Exp SEMI {
-    //     char msg[100];
-    //     sprintf(msg, "Syntax error.");
-    //     // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
-	// 	// errors++;
-	// 	myerror(msg);
-    // }
-    // | Exp error {
-	// 	char msg[100];
-	// 	sprintf(msg, "error: Missing \";\"");
-	// 	myerror(msg);
-	// }
+    | Exp error {
+		char msg[100];
+		sprintf(msg, "error: Missing \";\"");
+		myerror(msg);
+	}
     ;
 
 DefList : Def DefList {
@@ -258,18 +251,20 @@ Def : Specifier DecList SEMI {
         $2->bro = $3;
     }
     | error DecList SEMI {
-        
+    	char msg[100];
+		sprintf(msg, "Syntax error.");
+		myerror(msg);
     }
-	// | Specifier error SEMI {
-	// 	char msg[100];
-	// 	sprintf(msg, "Syntax error.");
-	// 	myerror(msg);
-	// }
-	// | Specifier DecList error{
-	// 	char msg[100];
-	// 	sprintf(msg, "error: Missing \";\"");
-	// 	myerror(msg);
-	// }
+	| Specifier error SEMI {
+		char msg[100];
+		sprintf(msg, "Syntax error.");
+		myerror(msg);
+	}
+	| Specifier DecList error{
+		char msg[100];
+		sprintf(msg, "error: Missing \";\"");
+		myerror(msg);
+	}
 	;
 
 DecList : Dec {
@@ -375,41 +370,41 @@ Exp : Exp ASSIGNOP Exp {
 	| FLOAT {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
 	}
-	// | Exp ASSIGNOP error{ 
-	// 	char msg[100];
-    //     sprintf(msg, "Syntax error."); // ASSIGNOP not in front of Exp
-    //     // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
-	// 	// errors++;
-	// 	myerror(msg);
-	// }
-	// | LP error RP {
-	// 	char msg[100];
-    //     sprintf(msg, "Syntax error.");
-    //     // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
-	// 	// errors++;
-	// 	myerror(msg);
-	// }
-	// | ID LP error RP {
-	// 	char msg[100];
-    //     sprintf(msg, "Syntax error.");
-    //     // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
-	// 	// errors++;
-	// 	myerror(msg);
-	// }
-	// | Exp LB error RB{
-	// 	char msg[100];
-    //     sprintf(msg, "Syntax error.");
-    //     // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
-	// 	// errors++;
-	// 	myerror(msg);
-	// }
-	// | Exp LB Exp error RB{
-	// 	char msg[100];
-    //     sprintf(msg, "Missing \"]\".");
-    //     // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
-	// 	// errors++;
-	// 	myerror(msg);
-	// }
+	| Exp ASSIGNOP error{ 
+		char msg[100];
+        sprintf(msg, "Syntax error."); // ASSIGNOP not in front of Exp
+        // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
+		// errors++;
+		myerror(msg);
+	}
+	| LP error RP {
+		char msg[100];
+        sprintf(msg, "Syntax error.");
+        // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
+		// errors++;
+		myerror(msg);
+	}
+	| ID LP error RP {
+		char msg[100];
+        sprintf(msg, "Syntax error.");
+        // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
+		// errors++;
+		myerror(msg);
+	}
+	| Exp LB error RB{
+		char msg[100];
+        sprintf(msg, "Syntax error.");
+        // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
+		// errors++;
+		myerror(msg);
+	}
+	| Exp LB Exp error RB{
+		char msg[100];
+        sprintf(msg, "Missing \"]\".");
+        // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
+		// errors++;
+		myerror(msg);
+	}
     
     ;
 
@@ -452,8 +447,8 @@ int main(int argc, char** argv) {
 
 
 void yyerror(char *msg) {
-    errors++;
-    fprintf(stderr, "Error type B at Line %d: %s bacause %s\n", yylineno, msg, yytext);
+    // errors++;
+    // fprintf(stderr, "Error type B at Line %d: %s because %s\n", yylineno, msg, yytext);
 }
 
 void myerror(char *msg) {
