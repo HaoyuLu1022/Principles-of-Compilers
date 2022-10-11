@@ -1,17 +1,8 @@
-float f, m[6];
-
-struct ms{
-	int kk;
-} ms;
-
 int main(){
-	int q[10];
-	i = 3;
-	ms.kk = i && fun(); 
-}
-
-int fun(int a, float f[2]){
-	if(i - 2 == 1){
-  	q[1] = i + ms.kk;
+	int i = 3;
+	%666
+	if(i - 2 == 1){  // note
+		i = i + 8
 	}
+	float p[i = 2.52;
 }
