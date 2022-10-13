@@ -97,7 +97,8 @@ Specifier : TYPE {
     
     ;
 
-StructSpecifier : STRUCT OptTag LC DefList RC {
+StructSpecifier : STRUCT OptTag LC Mid RC {
+// StructSpecifier : STRUCT OptTag LC DefList RC {
         $$ = insNode($1, "StructSpecifier", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
@@ -157,40 +158,48 @@ ParamDec : Specifier VarDec {
     }
     ;
 
-CompSt : LC DefList StmtList RC {
-//CompSt : LC StmtList RC {
+// CompSt : LC DefList StmtList RC {
+// //CompSt : LC StmtList RC {
+//         $$ = insNode($1, "CompSt", @1.first_line, NON_TERMINAL);
+//         $1->bro = $2;
+//         $2->bro = $3;
+//         $3->bro = $4;
+//     }
+//     ;
+CompSt : LC Mid RC {
         $$ = insNode($1, "CompSt", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
-        $3->bro = $4;
     }
     ;
-    /*
-Mid : DefList Mid {
-	
+    
+Mid : Def Mid {
+        $$ = insNode($1, "Mid", @1.first_line, NON_TERMINAL);
+        $1->bro = $2;
 	}
-	| StmtList Mid{
-	
+	| Stmt Mid{
+        $$ = insNode($1, "Mid", @1.first_line, NON_TERMINAL);
+        $1->bro = $2;
 	}
 	| {
-	
+        $$ = insNode(NULL, "Mid", yylineno, NON_TERMINAL);
 	}
-	;*/
+	;
 
-StmtList : Stmt StmtList {
-        $$ = insNode($1, "StmtList", @1.first_line, NON_TERMINAL);
-        $1->bro = $2;
-    }/*
-    | DefList StmtList {
+// StmtList : Stmt StmtList {
+//         $$ = insNode($1, "StmtList", @1.first_line, NON_TERMINAL);
+//         $1->bro = $2;
+//     }/*
+//     | DefList StmtList {
     
-    }
-    | StmtList DefList {
+//     }
+//     | StmtList DefList {
     
-    }*/
-    | {
-        $$ = insNode(NULL, "FunDec", yylineno, NON_TERMINAL);
-    }
-    ;
+//     }*/
+//     | {
+//         $$ = insNode(NULL, "FunDec", yylineno, NON_TERMINAL);
+//     }
+//     ;
     
 Stmt : 
     Exp SEMI {
@@ -199,7 +208,7 @@ Stmt :
     }
     | Exp error {
 		char msg[100];
-		sprintf(msg, "error: Missing \";\"tag2");
+		sprintf(msg, "error: Missing \";\"");
 		myerror(msg);
 	}
     | CompSt {
@@ -246,14 +255,14 @@ Stmt :
     } */
     ;
 
-DefList : Def DefList {
-        $$ = insNode($1, "DefList", @1.first_line, NON_TERMINAL);
-        $1->bro = $2;
-    }
-    | {
-        $$ = insNode(NULL, "DefList", yylineno, NON_TERMINAL);
-    }
-    ;
+// DefList : Def DefList {
+//         $$ = insNode($1, "DefList", @1.first_line, NON_TERMINAL);
+//         $1->bro = $2;
+//     }
+//     | {
+//         $$ = insNode(NULL, "DefList", yylineno, NON_TERMINAL);
+//     }
+//     ;
 
 Def : Specifier DecList SEMI {
         $$ = insNode($1, "Def", @1.first_line, NON_TERMINAL);
@@ -262,12 +271,12 @@ Def : Specifier DecList SEMI {
     }
 	| Specifier DecList error{
 		char msg[100];
-		sprintf(msg, "error: Missing \";\"another flag");	//necessary
+		sprintf(msg, "error: Missing \";\"");	//necessary
 		myerror(msg);
 	}
     | error DecList SEMI {
     	char msg[100];
-		sprintf(msg, "Syntax error.tag1_1");
+		sprintf(msg, "Syntax error.");
 		myerror(msg);
     }
 	| Specifier error SEMI {
@@ -334,7 +343,7 @@ Exp : Exp ASSIGNOP Exp {
     }
 	| Exp ASSIGNOP error{ 
 		char msg[100];
-        sprintf(msg, "Syntax error.tag1_2"); // ASSIGNOP not in front of Exp
+        sprintf(msg, "Syntax error."); // ASSIGNOP not in front of Exp
         // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
 		// errors++;
 		myerror(msg);

@@ -1257,7 +1257,7 @@ YY_RULE_SETUP
 #line 287 "yf.l"
 {
 	errors++;
-	printf("ERROR Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext);
+	printf("Error Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext);
 	chars += yyleng;
 	}
 	YY_BREAK

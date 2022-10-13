@@ -286,7 +286,7 @@ COMMA ,
 {TAB} {chars += 4;}
 . {
 	errors++;
-	printf("ERROR Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext);
+	printf("Error Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext);
 	chars += yyleng;
 	}
 
