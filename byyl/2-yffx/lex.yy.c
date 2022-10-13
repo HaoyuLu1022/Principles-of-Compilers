@@ -579,13 +579,14 @@ char *yytext;
 	extern int errors;
 	int chars = 1;
 	int cols = 1;
-
+	int last_row = 1;
+	int this_row = 1;
 	#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
         yylloc.first_column = cols; \
         yylloc.last_column = cols + yyleng - 1; \
         cols += yyleng;
-#line 588 "lex.yy.c"
 #line 589 "lex.yy.c"
+#line 590 "lex.yy.c"
 
 #define INITIAL 0
 
@@ -802,9 +803,9 @@ YY_DECL
 		}
 
 	{
-#line 54 "yf.l"
+#line 55 "yf.l"
 
-#line 808 "lex.yy.c"
+#line 809 "lex.yy.c"
 
 	while ( /*CONSTCOND*/1 )		/* loops until end-of-file is reached */
 		{
@@ -874,13 +875,15 @@ do_action:	/* This label is used only to access EOF actions. */
 case 1:
 /* rule 1 can match eol */
 YY_RULE_SETUP
-#line 55 "yf.l"
+#line 56 "yf.l"
 {chars = 1;}
 	YY_BREAK
 case 2:
 YY_RULE_SETUP
-#line 56 "yf.l"
+#line 57 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("COMMA", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -889,8 +892,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 3:
 YY_RULE_SETUP
-#line 62 "yf.l"
+#line 65 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("DOT", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -899,8 +904,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 4:
 YY_RULE_SETUP
-#line 68 "yf.l"
+#line 73 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("NOT", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -909,8 +916,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 5:
 YY_RULE_SETUP
-#line 74 "yf.l"
+#line 81 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("FLOAT", 0, FLOAT_TYPE);
 	yylval = newnode;
 	// newnode->id = strdup(yytext);
@@ -919,33 +928,35 @@ YY_RULE_SETUP
 	YY_BREAK
 case 6:
 YY_RULE_SETUP
-#line 80 "yf.l"
+#line 89 "yf.l"
 {printf("Error Type A at line %d, char %d: Illegal float number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 7:
 YY_RULE_SETUP
-#line 81 "yf.l"
+#line 90 "yf.l"
 {printf("INT8 data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 8:
 YY_RULE_SETUP
-#line 82 "yf.l"
+#line 91 "yf.l"
 {printf("Error Type A at line %d, char %d: Illegal octal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 9:
 YY_RULE_SETUP
-#line 83 "yf.l"
+#line 92 "yf.l"
 {printf("INT16 data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 10:
 YY_RULE_SETUP
-#line 84 "yf.l"
+#line 93 "yf.l"
 {printf("Error Type A at line %d, char %d: Illegal hexadecimal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
 	YY_BREAK
 case 11:
 YY_RULE_SETUP
-#line 85 "yf.l"
+#line 94 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("INT", 0, INT_TYPE);
 	yylval = newnode;
 	// newnode->id = strdup(yytext);
@@ -954,8 +965,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 12:
 YY_RULE_SETUP
-#line 91 "yf.l"
+#line 102 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("PLUS", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -964,8 +977,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 13:
 YY_RULE_SETUP
-#line 97 "yf.l"
+#line 110 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("ASSIGNOP", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -974,8 +989,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 14:
 YY_RULE_SETUP
-#line 103 "yf.l"
+#line 118 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("RELOP", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -984,8 +1001,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 15:
 YY_RULE_SETUP
-#line 109 "yf.l"
+#line 126 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("TYPE", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -994,8 +1013,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 16:
 YY_RULE_SETUP
-#line 115 "yf.l"
+#line 134 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("RETURN", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1004,8 +1025,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 17:
 YY_RULE_SETUP
-#line 121 "yf.l"
+#line 142 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("IF", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1014,8 +1037,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 18:
 YY_RULE_SETUP
-#line 127 "yf.l"
+#line 150 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("ELSE", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1024,8 +1049,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 133 "yf.l"
+#line 158 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("WHILE", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1034,8 +1061,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 139 "yf.l"
+#line 166 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("STRUCT", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1044,8 +1073,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 145 "yf.l"
+#line 174 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("AND", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1054,8 +1085,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 151 "yf.l"
+#line 182 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("OR", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1064,8 +1097,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 157 "yf.l"
+#line 190 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("STAR", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1074,8 +1109,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 163 "yf.l"
+#line 198 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("MINUS", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1084,8 +1121,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 25:
 YY_RULE_SETUP
-#line 169 "yf.l"
+#line 206 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("DIV", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1094,7 +1133,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 175 "yf.l"
+#line 214 "yf.l"
 {
 	// pass
 } 
@@ -1102,15 +1141,17 @@ YY_RULE_SETUP
 case 27:
 /* rule 27 can match eol */
 YY_RULE_SETUP
-#line 178 "yf.l"
+#line 217 "yf.l"
 {
 	// pass
 } 
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 182 "yf.l"
+#line 221 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("LP", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1119,8 +1160,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 188 "yf.l"
+#line 229 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("RP", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1129,8 +1172,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 194 "yf.l"
+#line 237 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("LB", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1139,8 +1184,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 200 "yf.l"
+#line 245 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("RB", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1149,8 +1196,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 206 "yf.l"
+#line 253 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("LC", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1159,8 +1208,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 212 "yf.l"
+#line 261 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("RC", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1169,8 +1220,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 218 "yf.l"
+#line 269 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("SEMI", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1179,8 +1232,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 224 "yf.l"
+#line 277 "yf.l"
 {
+	last_row = this_row;
+	this_row = yylineno;
 	struct node *newnode = iniNode("ID", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
@@ -1189,17 +1244,17 @@ YY_RULE_SETUP
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 230 "yf.l"
+#line 285 "yf.l"
 {chars += 1;}
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 231 "yf.l"
+#line 286 "yf.l"
 {chars += 4;}
 	YY_BREAK
 case 38:
 YY_RULE_SETUP
-#line 232 "yf.l"
+#line 287 "yf.l"
 {
 	errors++;
 	printf("ERROR Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext);
@@ -1208,10 +1263,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 39:
 YY_RULE_SETUP
-#line 238 "yf.l"
+#line 293 "yf.l"
 ECHO;
 	YY_BREAK
-#line 1215 "lex.yy.c"
+#line 1270 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2228,4 +2283,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 238 "yf.l"
+#line 293 "yf.l"

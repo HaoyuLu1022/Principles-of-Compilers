@@ -9,6 +9,7 @@
 	void myerror(char*);
 	int yylex();
 	extern int yylineno;
+	extern int last_row;
 	int errors = 0;
     int yydebug = 1;
 %}
@@ -29,14 +30,15 @@
 %token ELSE
 %token WHILE
 
+%left COMMA
 %right ASSIGNOP
-%left OR
-%left AND
+%left AND OR
 %left RELOP
 %left PLUS MINUS
 %left STAR DIV
 %right NAGATE NOT
-%left DOT LP LB RP RB COMMA
+%left LOWER_THAN_RB
+%left DOT LP LB RP RB
 %nonassoc LOWER_THAN_ELSE
 %nonassoc ELSE
 
@@ -121,22 +123,6 @@ Tag : ID {
     }
     ;
 
-VarDec : ID {
-        $$ = insNode($1, "VarDec", @1.first_line, NON_TERMINAL);
-    }
-    | VarDec LB INT RB {
-        $$ = insNode($1, "VarDec", @1.first_line, NON_TERMINAL);
-        $1->bro = $2;
-        $2->bro = $3;
-        $3->bro = $4;
-    }
-	| VarDec LB error RB{
-		char msg[100];
-		sprintf(msg, "int.");
-		myerror(msg);
-	}
-    ;
-
 FunDec : ID LP VarList RP {
         $$ = insNode($1, "FunDec", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
@@ -172,17 +158,35 @@ ParamDec : Specifier VarDec {
     ;
 
 CompSt : LC DefList StmtList RC {
+//CompSt : LC StmtList RC {
         $$ = insNode($1, "CompSt", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
-        $3->bro = $4;
+        //$3->bro = $4;
     }
     ;
+    /*
+Mid : DefList Mid {
+	
+	}
+	| StmtList Mid{
+	
+	}
+	| {
+	
+	}
+	;*/
 
 StmtList : Stmt StmtList {
         $$ = insNode($1, "StmtList", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
+    }/*
+    | DefList StmtList {
+    
     }
+    | StmtList DefList {
+    
+    }*/
     | {
         $$ = insNode(NULL, "FunDec", yylineno, NON_TERMINAL);
     }
@@ -193,6 +197,11 @@ Stmt :
         $$ = insNode($1, "Stmt", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
     }
+    | Exp error {
+		char msg[100];
+		sprintf(msg, "error: Missing \";\"tag2");
+		myerror(msg);
+	}
     | CompSt {
         $$ = insNode($1, "Stmt", @1.first_line, NON_TERMINAL);
     }
@@ -223,17 +232,18 @@ Stmt :
         $2->bro = $3;
         $3->bro = $4;
         $4->bro = $5;
-    } /*
+    }
+    /*
+    | DefList {
+    
+    } */
+    
+    /*
 	| error Stmt {
         char msg[100];
 		sprintf(msg, "Syntax error."); // Missing IF in front.
 		myerror(msg);
     } */
-    | Exp error {
-		char msg[100];
-		sprintf(msg, "error: Missing \";\"");
-		myerror(msg);
-	}
     ;
 
 DefList : Def DefList {
@@ -250,21 +260,24 @@ Def : Specifier DecList SEMI {
         $1->bro = $2;
         $2->bro = $3;
     }
+	| Specifier DecList error{
+		char msg[100];
+		sprintf(msg, "error: Missing \";\"another flag");	//necessary
+		myerror(msg);
+	}
     | error DecList SEMI {
     	char msg[100];
-		sprintf(msg, "Syntax error.");
+		sprintf(msg, "Syntax error.tag1_1");
 		myerror(msg);
     }
 	| Specifier error SEMI {
 		char msg[100];
 		sprintf(msg, "Syntax error.");
 		myerror(msg);
-	}
-	| Specifier DecList error{
-		char msg[100];
-		sprintf(msg, "error: Missing \";\"");
-		myerror(msg);
-	}
+	}/*
+	| {
+	
+	}*/
 	;
 
 DecList : Dec {
@@ -284,13 +297,37 @@ Dec : VarDec {
         $$ = insNode($1, "Dec", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
-    };
+    }
+    ;
+
+VarDec : ID {
+        $$ = insNode($1, "VarDec", @1.first_line, NON_TERMINAL);
+    }
+    | VarDec LB INT RB {
+        $$ = insNode($1, "VarDec", @1.first_line, NON_TERMINAL);
+        $1->bro = $2;
+        $2->bro = $3;
+        $3->bro = $4;
+    }
+	| VarDec LB error RB{
+		char msg[100];
+		sprintf(msg, "int.");
+		myerror(msg);
+	}
+    ;
 
 Exp : Exp ASSIGNOP Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
     }
+	| Exp ASSIGNOP error{ 
+		char msg[100];
+        sprintf(msg, "Syntax error.tag1_2"); // ASSIGNOP not in front of Exp
+        // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
+		// errors++;
+		myerror(msg);
+	}
     | Exp AND Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
@@ -356,6 +393,13 @@ Exp : Exp ASSIGNOP Exp {
         $2->bro = $3;
         $3->bro = $4;
     }
+	| Exp LB Exp error{
+		char msg[100];
+        sprintf(msg, "Missing \"]\".");
+        // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
+		// errors++;
+		myerror(msg);
+	}
 	| Exp DOT ID {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
 		$1->bro = $2;
@@ -369,13 +413,6 @@ Exp : Exp ASSIGNOP Exp {
 	}
 	| FLOAT {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
-	}
-	| Exp ASSIGNOP error{ 
-		char msg[100];
-        sprintf(msg, "Syntax error."); // ASSIGNOP not in front of Exp
-        // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
-		// errors++;
-		myerror(msg);
 	}
 	| LP error RP {
 		char msg[100];
@@ -398,14 +435,6 @@ Exp : Exp ASSIGNOP Exp {
 		// errors++;
 		myerror(msg);
 	}
-	| Exp LB Exp error RB{
-		char msg[100];
-        sprintf(msg, "Missing \"]\".");
-        // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
-		// errors++;
-		myerror(msg);
-	}
-    
     ;
 
 Args : Exp COMMA Args {
@@ -452,6 +481,6 @@ void yyerror(char *msg) {
 }
 
 void myerror(char *msg) {
-    fprintf(stderr, "Error type B at Line %d: %s\n", yylineno, msg); // B
+    fprintf(stderr, "Error type B at Line %d: %s\n", last_row, msg); // B
 	errors++;
 }
