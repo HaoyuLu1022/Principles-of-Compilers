@@ -162,7 +162,7 @@ CompSt : LC DefList StmtList RC {
         $$ = insNode($1, "CompSt", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
-        //$3->bro = $4;
+        $3->bro = $4;
     }
     ;
     /*
