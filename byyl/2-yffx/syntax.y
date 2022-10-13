@@ -309,7 +309,18 @@ VarDec : ID {
         $2->bro = $3;
         $3->bro = $4;
     }
-	| VarDec LB error RB{
+    | VarDec LB ID RB {
+        $$ = insNode($1, "VarDec", @1.first_line, NON_TERMINAL);
+        $1->bro = $2;
+        $2->bro = $3;
+        $3->bro = $4;
+    }
+    | VarDec LB ID error {
+        char msg[100];
+        sprintf(msg, "Missing \"]\".");
+		myerror(msg);
+    }
+	| VarDec LB FLOAT RB{
 		char msg[100];
 		sprintf(msg, "int.");
 		myerror(msg);
@@ -393,13 +404,13 @@ Exp : Exp ASSIGNOP Exp {
         $2->bro = $3;
         $3->bro = $4;
     }
-	| Exp LB Exp error{
-		char msg[100];
-        sprintf(msg, "Missing \"]\".");
-        // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
-		// errors++;
-		myerror(msg);
-	}
+	// | Exp LB Exp error{
+	// 	char msg[100];
+    //     sprintf(msg, "Missing \"]\".");
+    //     // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);
+	// 	// errors++;
+	// 	myerror(msg);
+	// }
 	| Exp DOT ID {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
 		$1->bro = $2;
