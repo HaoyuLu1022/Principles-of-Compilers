@@ -78,7 +78,8 @@ extern int yydebug;
     ELSE = 284,
     WHILE = 285,
     NAGATE = 286,
-    LOWER_THAN_ELSE = 287
+    LOWER_THAN_RB = 287,
+    LOWER_THAN_ELSE = 288
   };
 #endif
 
