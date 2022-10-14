@@ -97,6 +97,7 @@ Specifier : TYPE {
     
     ;
 
+// StructSpecifier : STRUCT OptTag LC Stmt RC {
 StructSpecifier : STRUCT OptTag LC Mid RC {
 // StructSpecifier : STRUCT OptTag LC DefList RC {
         $$ = insNode($1, "StructSpecifier", @1.first_line, NON_TERMINAL);
@@ -166,12 +167,16 @@ ParamDec : Specifier VarDec {
 //         $3->bro = $4;
 //     }
 //     ;
+
+
+//CompSt : LC Stmt RC {
 CompSt : LC Mid RC {
         $$ = insNode($1, "CompSt", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
     }
     ;
+    
     
 Mid : Def Mid {
         $$ = insNode($1, "Mid", @1.first_line, NON_TERMINAL);
@@ -200,6 +205,32 @@ Mid : Def Mid {
 //         $$ = insNode(NULL, "FunDec", yylineno, NON_TERMINAL);
 //     }
 //     ;
+
+Def : Specifier DecList SEMI {
+        $$ = insNode($1, "Def", @1.first_line, NON_TERMINAL);
+        $1->bro = $2;
+        $2->bro = $3;
+    }
+	| Specifier DecList error{
+		char msg[100];
+		sprintf(msg, "error: Missing \";\"");	//necessary
+		myerror(msg);
+	}
+    | error DecList SEMI {
+    	char msg[100];
+		sprintf(msg, "Syntax error.");
+		myerror(msg);
+    }
+	| Specifier error SEMI {
+		char msg[100];
+		sprintf(msg, "Syntax error.");
+		myerror(msg);
+	}/*
+	| {
+	
+	}*/
+	;
+
     
 Stmt : 
     Exp SEMI {
@@ -210,7 +241,13 @@ Stmt :
 		char msg[100];
 		sprintf(msg, "error: Missing \";\"");
 		myerror(msg);
+	}/*
+	Stmt Stmt {
+	
 	}
+	Def {
+	
+	}*/
     | CompSt {
         $$ = insNode($1, "Stmt", @1.first_line, NON_TERMINAL);
     }
@@ -241,7 +278,10 @@ Stmt :
         $2->bro = $3;
         $3->bro = $4;
         $4->bro = $5;
-    }
+    }/*
+    | {
+    
+    }*/
     /*
     | DefList {
     
@@ -263,31 +303,6 @@ Stmt :
 //         $$ = insNode(NULL, "DefList", yylineno, NON_TERMINAL);
 //     }
 //     ;
-
-Def : Specifier DecList SEMI {
-        $$ = insNode($1, "Def", @1.first_line, NON_TERMINAL);
-        $1->bro = $2;
-        $2->bro = $3;
-    }
-	| Specifier DecList error{
-		char msg[100];
-		sprintf(msg, "error: Missing \";\"");	//necessary
-		myerror(msg);
-	}
-    | error DecList SEMI {
-    	char msg[100];
-		sprintf(msg, "Syntax error.");
-		myerror(msg);
-    }
-	| Specifier error SEMI {
-		char msg[100];
-		sprintf(msg, "Syntax error.");
-		myerror(msg);
-	}/*
-	| {
-	
-	}*/
-	;
 
 DecList : Dec {
         $$ = insNode($1, "DecList", @1.first_line, NON_TERMINAL);
