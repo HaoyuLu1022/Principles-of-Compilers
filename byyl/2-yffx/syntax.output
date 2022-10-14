@@ -47,18 +47,18 @@ Grammar
    24    | Stmt Mid
    25    | %empty
 
-   26 Stmt: Exp SEMI
-   27     | Exp error
-   28     | CompSt
-   29     | RETURN Exp SEMI
-   30     | IF LP Exp RP Stmt
-   31     | IF LP Exp RP Stmt ELSE Stmt
-   32     | WHILE LP Exp RP Stmt
+   26 Def: Specifier DecList SEMI
+   27    | Specifier DecList error
+   28    | error DecList SEMI
+   29    | Specifier error SEMI
 
-   33 Def: Specifier DecList SEMI
-   34    | Specifier DecList error
-   35    | error DecList SEMI
-   36    | Specifier error SEMI
+   30 Stmt: Exp SEMI
+   31     | Exp error
+   32     | CompSt
+   33     | RETURN Exp SEMI
+   34     | IF LP Exp RP Stmt
+   35     | IF LP Exp RP Stmt ELSE Stmt
+   36     | WHILE LP Exp RP Stmt
 
    37 DecList: Dec
    38        | Dec COMMA DecList
@@ -102,13 +102,13 @@ Grammar
 Terminals, with rules where they appear
 
     $end (0) 0
-    error (256) 18 27 34 35 36 44 47 65 66 67
+    error (256) 18 27 28 29 31 44 47 65 66 67
     INT (258) 42 63
     FLOAT (259) 45 64
     TYPE (260) 9
     NEWLINE (261)
     ID (262) 13 15 16 17 18 41 43 44 58 59 61 62 66
-    SEMI (263) 4 5 26 29 33 35 36
+    SEMI (263) 4 5 26 28 29 30 33
     COMMA (264) 8 19 38 68
     DOT (265) 61
     ASSIGNOP (266) 40 46 47
@@ -120,17 +120,17 @@ Terminals, with rules where they appear
     AND (272) 48
     OR (273) 49
     NOT (274) 57
-    LP (275) 16 17 18 30 31 32 55 58 59 65 66
-    RP (276) 16 17 18 30 31 32 55 58 59 65 66
+    LP (275) 16 17 18 34 35 36 55 58 59 65 66
+    RP (276) 16 17 18 34 35 36 55 58 59 65 66
     LB (277) 42 43 44 45 60 67
     RB (278) 42 43 45 60 67
     LC (279) 11 22
     RC (280) 11 22
     STRUCT (281) 11 12
-    RETURN (282) 29
-    IF (283) 30 31
-    ELSE (284) 31
-    WHILE (285) 32
+    RETURN (282) 33
+    IF (283) 34 35
+    ELSE (284) 35
+    WHILE (285) 36
     NAGATE (286)
     LOWER_THAN_RB (287)
     LOWER_THAN_ELSE (288)
@@ -154,7 +154,7 @@ Nonterminals, with rules where they appear
         on right: 4 8
     Specifier (39)
         on left: 9 10
-        on right: 4 5 6 21 33 34 36
+        on right: 4 5 6 21 26 27 29
     StructSpecifier (40)
         on left: 11 12
         on right: 10
@@ -175,19 +175,19 @@ Nonterminals, with rules where they appear
         on right: 19 20
     CompSt (46)
         on left: 22
-        on right: 6 28
+        on right: 6 32
     Mid (47)
         on left: 23 24 25
         on right: 11 22 23 24
-    Stmt (48)
-        on left: 26 27 28 29 30 31 32
-        on right: 24 30 31 32
-    Def (49)
-        on left: 33 34 35 36
+    Def (48)
+        on left: 26 27 28 29
         on right: 23
+    Stmt (49)
+        on left: 30 31 32 33 34 35 36
+        on right: 24 34 35 36
     DecList (50)
         on left: 37 38
-        on right: 33 34 35 38
+        on right: 26 27 28 38
     Dec (51)
         on left: 39 40
         on right: 37 38
@@ -196,7 +196,7 @@ Nonterminals, with rules where they appear
         on right: 7 8 21 39 40 42 43 44 45
     Exp (53)
         on left: 46 47 48 49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64 65 66 67
-        on right: 26 27 29 30 31 32 40 46 47 48 49 50 51 52 53 54 55 56 57 60 61 67 68 69
+        on right: 30 31 33 34 35 36 40 46 47 48 49 50 51 52 53 54 55 56 57 60 61 67 68 69
     Args (54)
         on left: 68 69
         on right: 58 68
@@ -399,8 +399,8 @@ State 18
     StructSpecifier  go to state 7
     CompSt           go to state 36
     Mid              go to state 37
-    Stmt             go to state 38
-    Def              go to state 39
+    Def              go to state 38
+    Stmt             go to state 39
     Exp              go to state 40
 
 
@@ -452,8 +452,8 @@ State 21
     StructSpecifier  go to state 7
     CompSt           go to state 36
     Mid              go to state 46
-    Stmt             go to state 38
-    Def              go to state 39
+    Def              go to state 38
+    Stmt             go to state 39
     Exp              go to state 40
 
 
@@ -488,7 +488,7 @@ State 24
 
 State 25
 
-   35 Def: error . DecList SEMI
+   28 Def: error . DecList SEMI
 
     ID  shift, and go to state 47
 
@@ -569,7 +569,7 @@ State 31
 
 State 32
 
-   29 Stmt: RETURN . Exp SEMI
+   33 Stmt: RETURN . Exp SEMI
 
     INT    shift, and go to state 26
     FLOAT  shift, and go to state 27
@@ -583,24 +583,24 @@ State 32
 
 State 33
 
-   30 Stmt: IF . LP Exp RP Stmt
-   31     | IF . LP Exp RP Stmt ELSE Stmt
+   34 Stmt: IF . LP Exp RP Stmt
+   35     | IF . LP Exp RP Stmt ELSE Stmt
 
     LP  shift, and go to state 61
 
 
 State 34
 
-   32 Stmt: WHILE . LP Exp RP Stmt
+   36 Stmt: WHILE . LP Exp RP Stmt
 
     LP  shift, and go to state 62
 
 
 State 35
 
-   33 Def: Specifier . DecList SEMI
-   34    | Specifier . DecList error
-   36    | Specifier . error SEMI
+   26 Def: Specifier . DecList SEMI
+   27    | Specifier . DecList error
+   29    | Specifier . error SEMI
 
     error  shift, and go to state 63
     ID     shift, and go to state 47
@@ -612,9 +612,9 @@ State 35
 
 State 36
 
-   28 Stmt: CompSt .
+   32 Stmt: CompSt .
 
-    $default  reduce using rule 28 (Stmt)
+    $default  reduce using rule 32 (Stmt)
 
 
 State 37
@@ -625,35 +625,6 @@ State 37
 
 
 State 38
-
-   24 Mid: Stmt . Mid
-
-    error   shift, and go to state 25
-    INT     shift, and go to state 26
-    FLOAT   shift, and go to state 27
-    TYPE    shift, and go to state 1
-    ID      shift, and go to state 28
-    MINUS   shift, and go to state 29
-    NOT     shift, and go to state 30
-    LP      shift, and go to state 31
-    LC      shift, and go to state 21
-    STRUCT  shift, and go to state 2
-    RETURN  shift, and go to state 32
-    IF      shift, and go to state 33
-    WHILE   shift, and go to state 34
-
-    RC  reduce using rule 25 (Mid)
-
-    Specifier        go to state 35
-    StructSpecifier  go to state 7
-    CompSt           go to state 36
-    Mid              go to state 66
-    Stmt             go to state 38
-    Def              go to state 39
-    Exp              go to state 40
-
-
-State 39
 
    23 Mid: Def . Mid
 
@@ -676,16 +647,45 @@ State 39
     Specifier        go to state 35
     StructSpecifier  go to state 7
     CompSt           go to state 36
+    Mid              go to state 66
+    Def              go to state 38
+    Stmt             go to state 39
+    Exp              go to state 40
+
+
+State 39
+
+   24 Mid: Stmt . Mid
+
+    error   shift, and go to state 25
+    INT     shift, and go to state 26
+    FLOAT   shift, and go to state 27
+    TYPE    shift, and go to state 1
+    ID      shift, and go to state 28
+    MINUS   shift, and go to state 29
+    NOT     shift, and go to state 30
+    LP      shift, and go to state 31
+    LC      shift, and go to state 21
+    STRUCT  shift, and go to state 2
+    RETURN  shift, and go to state 32
+    IF      shift, and go to state 33
+    WHILE   shift, and go to state 34
+
+    RC  reduce using rule 25 (Mid)
+
+    Specifier        go to state 35
+    StructSpecifier  go to state 7
+    CompSt           go to state 36
     Mid              go to state 67
-    Stmt             go to state 38
-    Def              go to state 39
+    Def              go to state 38
+    Stmt             go to state 39
     Exp              go to state 40
 
 
 State 40
 
-   26 Stmt: Exp . SEMI
-   27     | Exp . error
+   30 Stmt: Exp . SEMI
+   31     | Exp . error
    46 Exp: Exp . ASSIGNOP Exp
    47    | Exp . ASSIGNOP error
    48    | Exp . AND Exp
@@ -799,7 +799,7 @@ State 51
 
 State 52
 
-   35 Def: error DecList . SEMI
+   28 Def: error DecList . SEMI
 
     SEMI  shift, and go to state 89
 
@@ -932,7 +932,7 @@ State 59
 
 State 60
 
-   29 Stmt: RETURN Exp . SEMI
+   33 Stmt: RETURN Exp . SEMI
    46 Exp: Exp . ASSIGNOP Exp
    47    | Exp . ASSIGNOP error
    48    | Exp . AND Exp
@@ -961,8 +961,8 @@ State 60
 
 State 61
 
-   30 Stmt: IF LP . Exp RP Stmt
-   31     | IF LP . Exp RP Stmt ELSE Stmt
+   34 Stmt: IF LP . Exp RP Stmt
+   35     | IF LP . Exp RP Stmt ELSE Stmt
 
     INT    shift, and go to state 26
     FLOAT  shift, and go to state 27
@@ -976,7 +976,7 @@ State 61
 
 State 62
 
-   32 Stmt: WHILE LP . Exp RP Stmt
+   36 Stmt: WHILE LP . Exp RP Stmt
 
     INT    shift, and go to state 26
     FLOAT  shift, and go to state 27
@@ -990,15 +990,15 @@ State 62
 
 State 63
 
-   36 Def: Specifier error . SEMI
+   29 Def: Specifier error . SEMI
 
     SEMI  shift, and go to state 101
 
 
 State 64
 
-   33 Def: Specifier DecList . SEMI
-   34    | Specifier DecList . error
+   26 Def: Specifier DecList . SEMI
+   27    | Specifier DecList . error
 
     error  shift, and go to state 102
     SEMI   shift, and go to state 103
@@ -1013,30 +1013,30 @@ State 65
 
 State 66
 
-   24 Mid: Stmt Mid .
-
-    $default  reduce using rule 24 (Mid)
-
-
-State 67
-
    23 Mid: Def Mid .
 
     $default  reduce using rule 23 (Mid)
 
 
+State 67
+
+   24 Mid: Stmt Mid .
+
+    $default  reduce using rule 24 (Mid)
+
+
 State 68
 
-   27 Stmt: Exp error .
+   31 Stmt: Exp error .
 
-    $default  reduce using rule 27 (Stmt)
+    $default  reduce using rule 31 (Stmt)
 
 
 State 69
 
-   26 Stmt: Exp SEMI .
+   30 Stmt: Exp SEMI .
 
-    $default  reduce using rule 26 (Stmt)
+    $default  reduce using rule 30 (Stmt)
 
 
 State 70
@@ -1253,9 +1253,9 @@ State 88
 
 State 89
 
-   35 Def: error DecList SEMI .
+   28 Def: error DecList SEMI .
 
-    $default  reduce using rule 35 (Def)
+    $default  reduce using rule 28 (Def)
 
 
 State 90
@@ -1352,15 +1352,15 @@ State 97
 
 State 98
 
-   29 Stmt: RETURN Exp SEMI .
+   33 Stmt: RETURN Exp SEMI .
 
-    $default  reduce using rule 29 (Stmt)
+    $default  reduce using rule 33 (Stmt)
 
 
 State 99
 
-   30 Stmt: IF LP Exp . RP Stmt
-   31     | IF LP Exp . RP Stmt ELSE Stmt
+   34 Stmt: IF LP Exp . RP Stmt
+   35     | IF LP Exp . RP Stmt ELSE Stmt
    46 Exp: Exp . ASSIGNOP Exp
    47    | Exp . ASSIGNOP error
    48    | Exp . AND Exp
@@ -1389,7 +1389,7 @@ State 99
 
 State 100
 
-   32 Stmt: WHILE LP Exp . RP Stmt
+   36 Stmt: WHILE LP Exp . RP Stmt
    46 Exp: Exp . ASSIGNOP Exp
    47    | Exp . ASSIGNOP error
    48    | Exp . AND Exp
@@ -1418,23 +1418,23 @@ State 100
 
 State 101
 
-   36 Def: Specifier error SEMI .
+   29 Def: Specifier error SEMI .
 
-    $default  reduce using rule 36 (Def)
+    $default  reduce using rule 29 (Def)
 
 
 State 102
 
-   34 Def: Specifier DecList error .
+   27 Def: Specifier DecList error .
 
-    $default  reduce using rule 34 (Def)
+    $default  reduce using rule 27 (Def)
 
 
 State 103
 
-   33 Def: Specifier DecList SEMI .
+   26 Def: Specifier DecList SEMI .
 
-    $default  reduce using rule 33 (Def)
+    $default  reduce using rule 26 (Def)
 
 
 State 104
@@ -1764,8 +1764,8 @@ State 121
 
 State 122
 
-   30 Stmt: IF LP Exp RP . Stmt
-   31     | IF LP Exp RP . Stmt ELSE Stmt
+   34 Stmt: IF LP Exp RP . Stmt
+   35     | IF LP Exp RP . Stmt ELSE Stmt
 
     INT     shift, and go to state 26
     FLOAT   shift, and go to state 27
@@ -1785,7 +1785,7 @@ State 122
 
 State 123
 
-   32 Stmt: WHILE LP Exp RP . Stmt
+   36 Stmt: WHILE LP Exp RP . Stmt
 
     INT     shift, and go to state 26
     FLOAT   shift, and go to state 27
@@ -1826,24 +1826,24 @@ State 126
 
 State 127
 
-   30 Stmt: IF LP Exp RP Stmt .
-   31     | IF LP Exp RP Stmt . ELSE Stmt
+   34 Stmt: IF LP Exp RP Stmt .
+   35     | IF LP Exp RP Stmt . ELSE Stmt
 
     ELSE  shift, and go to state 129
 
-    $default  reduce using rule 30 (Stmt)
+    $default  reduce using rule 34 (Stmt)
 
 
 State 128
 
-   32 Stmt: WHILE LP Exp RP Stmt .
+   36 Stmt: WHILE LP Exp RP Stmt .
 
-    $default  reduce using rule 32 (Stmt)
+    $default  reduce using rule 36 (Stmt)
 
 
 State 129
 
-   31 Stmt: IF LP Exp RP Stmt ELSE . Stmt
+   35 Stmt: IF LP Exp RP Stmt ELSE . Stmt
 
     INT     shift, and go to state 26
     FLOAT   shift, and go to state 27
@@ -1863,6 +1863,6 @@ State 129
 
 State 130
 
-   31 Stmt: IF LP Exp RP Stmt ELSE Stmt .
+   35 Stmt: IF LP Exp RP Stmt ELSE Stmt .
 
-    $default  reduce using rule 31 (Stmt)
+    $default  reduce using rule 35 (Stmt)

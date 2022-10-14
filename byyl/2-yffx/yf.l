@@ -86,12 +86,37 @@ COMMA ,
 	// newnode->id = strdup(yytext);
 	return FLOAT;
 }
-{ERRORFLOAT} {printf("Error Type A at line %d, char %d: Illegal float number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
-{INT8} {printf("INT8 data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{ERRORINT8} {printf("Error Type A at line %d, char %d: Illegal octal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
-{INT16} {printf("INT16 data at line %d, char %d: %s\n", yylineno, chars, yytext); chars += yyleng;}
-{ERRORINT16} {printf("Error Type A at line %d, char %d: Illegal hexadecimal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;}
-{INT} {
+{ERRORFLOAT} {
+	errors ++ ;
+	last_row = this_row;
+	this_row = yylineno;
+	printf("Error Type A at line %d, char %d: Illegal float number: '%s'\n", yylineno, chars, yytext); chars += yyleng; 
+	struct node *newnode = iniNode("FLOAT", 0, FLOAT_TYPE);
+	yylval = newnode;
+	// newnode->id = strdup(yytext);
+	return FLOAT;
+}
+{ERRORINT8} {
+	errors ++ ;
+	last_row = this_row;
+	this_row = yylineno;
+	printf("Error Type A at line %d, char %d: Illegal octal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;
+	struct node *newnode = iniNode("INT", 0, INT_TYPE);
+	yylval = newnode;
+	// newnode->id = strdup(yytext);
+	return INT;
+}
+{ERRORINT16} {
+	errors ++ ;
+	last_row = this_row;
+	this_row = yylineno;
+	printf("Error Type A at line %d, char %d: Illegal hexadecimal number: '%s'\n", yylineno, chars, yytext); chars += yyleng;
+	struct node *newnode = iniNode("INT", 0, INT_TYPE);
+	yylval = newnode;
+	// newnode->id = strdup(yytext);
+	return INT;
+}
+({INT}|{INT8}|{INT16}) {
 	last_row = this_row;
 	this_row = yylineno;
 	struct node *newnode = iniNode("INT", 0, INT_TYPE);
