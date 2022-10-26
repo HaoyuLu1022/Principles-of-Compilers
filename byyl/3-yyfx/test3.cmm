@@ -1,0 +1,10 @@
+int i;
+int j;
+int i;
+
+int find(){
+	return 0;
+}
+int main(){
+
+}
