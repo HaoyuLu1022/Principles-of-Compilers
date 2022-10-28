@@ -14,12 +14,18 @@
 typedef unsigned int Type;
 typedef struct mytype {
     int def;  // 是否被定义
-    char* name;   // 变量名
-    int type;  // 类型
-    char* belong;  // 从属结构
+    char* name;   // 变量名，主键
+    // int scope;   // 作用域，这个应该不需要了，用模拟栈的方法搞了
+    int isvariable;  // 是否为VARIABLE
+    char* type;  // 类型
+    int isstruct;  // 是否为STRUCT
+    int isfunc;  // 是否为FUNCTION
+    int isarr;  // 是否为ARRAY，lhy真够吧，天下策划一个傻逼样
     int dimension;   // 数组维度
-    int scope;   // 作用域
-}MyType;
+    char* return_type;  // func返回类型
+    struct rb_root struct_varilist;
+    // struct rb_root* funcvarlist;  // func参数列表，只能放结构体和变量
+}MyType, *Mylink;
 
 struct my_node {
     struct rb_node rb_node;    // 红黑树节点
@@ -28,19 +34,40 @@ struct my_node {
     MyType info;
 };
 
-void print_mynode(MyType info){
-    //  int def;  // 是否被定义
-    // char* name;   // 变量名
-    // char* type;  // 类型
-    // char* belong;  // 从属结构
-    // int dimension;   // 数组维度
-    // int scope;   // 作用域
+typedef struct table_stack {
+    struct rb_root my_root;  // 当前作用域
+    int top;   // 作用域编号，原本是头指针，现在debug用
+    struct table_stack *last;  // link上一个作用域
+}VariTables, *VariLink;
+
+void my_print(struct rb_root *root);
+
+void print_mynode(MyType info){   // 这个本来没必要写的，但是怕铸币看不明白
+    /*
+    int def;  // 是否被定义.
+    char* name;   // 变量名，主键.
+    int scope;   // 作用域
+    int isvariable;  // 是否为VARIABLE.
+    int type;  // 类型.
+    int isstruct;  // 是否为STRUCT.
+    int isfunc;  // 是否为FUNCTION.
+    int isarr;  // 是否为ARRAY，lhy真够吧，天下策划一个傻逼样
+    int dimension;   // 数组维度
+    char* return_type;  // func返回类型
+    struct rb_root* funcvarlist;  // func参数列表，只能放结构体和变量
+    */
     printf("def : %d\n", info.def);
     printf("name : %s\n", info.name);
-    printf("type : %d\n", info.type);
-    printf("belong : %s\n", info.belong);
-    printf("dimension : %d\n", info.dimension);
-    printf("scope : %d\n", info.scope);
+    if(info.isvariable || info.isarr)
+        printf("type : %s\n", info.type);
+    if(info.isarr)
+        printf("dimension : %d\n", info.dimension);
+    if(info.isfunc)
+        printf("return_type : %s", info.return_type);
+    if(info.isstruct){
+        printf("struct : struct maybe...\n");
+        my_print(&info.struct_varilist);
+    }
 }
 
 // char *itoa(long i, char* s, int dummy_radix) {
@@ -67,12 +94,6 @@ unsigned int RSHash(char* str, unsigned int len)
 unsigned int GetVariKey(MyType a){
     char s[500];
     strcpy(s, a.name);
-    // strcat(s, a.belong);
-    // strcat(s, a.type);
-    // char t[500];
-    // // itoa(a.scope, t, 10);
-    // sprintf(t, "%d", a.scope);
-    // strcat(s, t);
     return RSHash(s, strlen(s));
 }
 
@@ -180,6 +201,55 @@ void my_print(struct rb_root *root)
     if (root!=NULL && root->rb_node!=NULL)
         print_rbtree(root->rb_node, rb_entry(root->rb_node, struct my_node, rb_node)->info,  0);
 }
+
+Mylink search(VariLink vt, MyType x){
+    
+    VariLink vl = vt;
+    
+    struct my_node *res = my_search(&vl->my_root, x);
+
+    while(vl->last != NULL && res == NULL){
+        printf("%d\n", vl->top);
+        vl = vl->last;
+        res = my_search(&vl->my_root, x);
+    }
+    if(res == NULL) return NULL;
+    else return &res->info;
+}
+
+VariLink init(VariLink vl){
+    vl = (VariLink)malloc(sizeof(VariLink));
+    vl->top = 0;
+    vl->last = NULL;
+    return vl;
+}
+
+VariLink push_scope(VariLink vl) {
+    VariLink varilink = (VariLink)malloc(sizeof(VariLink));
+    varilink->last = vl;
+    return varilink;
+}
+
+VariLink pop_scope(VariLink vl) {
+    VariLink varilink = vl->last;
+    free(vl);
+    return varilink;
+}
+
+VariLink insert(VariLink vl, MyType x) {
+    my_insert(&vl->my_root, x);
+    return vl;
+}
+
+void print(VariLink vl) {
+    int num = 1;
+    while(vl->last != NULL){
+        printf("Scope %d : \n", num++);
+        my_print(&vl->my_root);
+        vl = vl->last;
+    }
+}
+
 /*
 void main()
 {
