@@ -79,9 +79,23 @@ gcc syntax.tab.c SyntaxTree.c -lfl -ly -o parser
 ./parser test4.cmm
 ```
 
-### 10.5更新
+## 实验3 语义分析
 
--   基本要求未满足：第一处ELSE可以识别，后面无法正确识别
-    -   目前还在用debug模式调
--   附加要求中语法树构建还有一点问题
-    -   样例输出的Empty是什么东西
+实验说明：[实验指导3 语义分析 (yuque.com)](https://www.yuque.com/huolihang/byyl22/vq9hen#e44cad04)
+
+### Quick Start
+
+基本同上
+
+因为考虑采用红黑树RB Tree装各个作用域的符号表，然后维护一个符号表栈以区分作用域；然后我嫌手写很麻烦，想直接用C++的vector和map，所以这次也有gcc和g++编译的两个版本
+
+但是 〒▽〒
+
+但是 /(ㄒoㄒ)/~~
+
+但是 (┬┬﹏┬┬)
+
+一周了都没改好( ′ 3`) sigh~还不如手写RBT来得方便
+
+所以大家参考然然辛勤耕耘的RBT文档，添加19种语义错误叭<(￣︶￣)↗[GO!]
+
