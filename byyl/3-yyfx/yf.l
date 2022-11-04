@@ -1,6 +1,8 @@
 %{
 	#include "syntax.tab.h"
+	#include "RBTtest.c"
 	extern int errors;
+	extern int flgStruct;
 	int chars = 1;
 	int cols = 1;
 	int last_row = 1;
@@ -194,6 +196,7 @@ COMMA ,
 	struct node *newnode = iniNode("STRUCT", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
+	flgStruct = 1;
 	return STRUCT;
 }
 {AND} {

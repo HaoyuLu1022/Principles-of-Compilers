@@ -15,6 +15,7 @@ typedef unsigned int Type;
 typedef struct mytype {
     int def;  // 是否被定义
     char* name;   // 变量名，主键
+    // char* tag; // new: 结构体后面可以加个“别名”
     // int scope;   // 作用域，这个应该不需要了，用模拟栈的方法搞了
     int isvariable;  // 是否为VARIABLE
     char* type;  // 类型

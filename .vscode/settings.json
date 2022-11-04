@@ -4,6 +4,7 @@
         "*.ll": "c",
         "*.y": "c",
         "xlocale": "c",
-        "system_error": "c"
+        "system_error": "c",
+        "*.cmm": "cpp"
     }
 }
