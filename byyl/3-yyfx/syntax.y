@@ -6,6 +6,16 @@
 
 	#define YYSTYPE struct node*
 
+    #define UNDEFINED_VARIABLE 1
+    #define UNDEFINED_FUNCTION 2
+    #define REDEFINED_VARIABLE 3
+    #define REDEFINED_FUNCTION 4
+    #define TYPE_MISMATCH_ASSIGNMENT 5
+    #define NEED_VARIABLE 6
+    #define TYPE_MISMATCH_OPERAND 7
+    #define TYPE_MISMATCH_RETURN 8
+
+
 	void yyerror(char*);
 	void myerror(char*);
 	int yylex();
@@ -15,6 +25,7 @@
     int yydebug = 1;
     struct rb_root mytree = RB_ROOT;
     MyType tmp;
+    VariLink this_scope;
 %}
 
 %token INT
@@ -64,21 +75,29 @@ ExtDef : Specifier ExtDecList SEMI {
         $$ = insNode($1, "ExtDef", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
-        // printf("%s\n", $2->child->child->id);
+        printf("%s\n", $2->child->child->id);
         // printf("%s\n", $2->name);
+        tmp.isvariable = 1;
         tmp.name = (char*)malloc(sizeof($2->child->child->id));
-        strcpy(tmp.name, $2->child->child->id);
-        if(my_search(&mytree, tmp)){
+        strcpy(tmp.name, $2->child->child->id); // 不要怀疑这个就是变量名        
+        if(search(this_scope, tmp)){
             char msg[100];
             sprintf(msg, "Redeined variable : %s, line: %d", tmp.name, last_row);
             myerror(msg);
         }
         else{
+            printf("insert %s\n", tmp.name);
             tmp.def = 1;
-            tmp.type = $2->child->child->type;
-            my_insert(&mytree, tmp);
+            tmp.type = (char*)malloc(sizeof($1->child->id));
+            strcpy(tmp.type, $1->child->id);
+            tmp.isvariable = 1;
+            this_scope = insert(this_scope, tmp);
+
+            free(tmp.type);
+            tmp.def = 0;
+            tmp.isvariable = 0;
         }
-        // my_insert(&mytree, tmp);
+        free(tmp.name);
     }
     | Specifier SEMI {
         $$ = insNode($1, "ExtDef", @1.first_line, NON_TERMINAL);
@@ -228,6 +247,29 @@ Def : Specifier DecList SEMI {
         $$ = insNode($1, "Def", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+
+        // printf("%s\n", $2->child->child->child->name);
+        tmp.name = (char*)malloc(sizeof($2->child->child->child->id));
+        strcpy(tmp.name, $2->child->child->child->id);
+        // printf("%s")
+        if(search(this_scope, tmp)) {
+            char msg[100];
+            sprintf(msg, "Error %d at line %d : Redefined variable \'%s\'", REDEFINED_VARIABLE, last_row, tmp.name);
+            myerror(msg);
+        }
+        else {
+            printf("insert %s\n", tmp.name);
+            tmp.def = 1;
+            tmp.type = (char*)malloc(sizeof($1->child->id));
+            strcpy(tmp.type, $1->child->id);
+            tmp.isvariable = 1;
+            this_scope = insert(this_scope, tmp);
+
+            free(tmp.type);
+            tmp.def = 0;
+            tmp.isvariable = 0;
+        }
+        free(tmp.name);
     }
 	| Specifier DecList error{
 		char msg[100];
@@ -434,11 +476,37 @@ Exp : Exp ASSIGNOP Exp {
         $1->bro = $2;
         $2->bro = $3;
         $3->bro = $4;
+
+        tmp.name = (char*)malloc(sizeof($1->id));
+        strcpy(tmp.name, $1->id);
+        if(search(this_scope, tmp)) { 
+            tmp.def = 1;
+            // tmp.type = $1->type;
+            my_insert(&mytree, tmp);
+        }
+        else { // 变量未定义
+            char msg[100];
+            sprintf(msg, "Error %d at line %d : Undefined variable \'%s\'", UNDEFINED_VARIABLE, last_row, tmp.name);
+            myerror(msg);
+        }
     }
     | ID LP RP {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+
+        tmp.name = (char*)malloc(sizeof($1->id));
+        strcpy(tmp.name, $1->id);
+        if(search(this_scope, tmp)) { 
+            tmp.def = 1;
+            // tmp.type = $1->type;
+            my_insert(&mytree, tmp);
+        }
+        else { // 变量未定义
+            char msg[100];
+            sprintf(msg, "Error %d at line %d : Undefined variable \'%s\'", UNDEFINED_VARIABLE, last_row, tmp.name);
+            myerror(msg);
+        }
     }
     | Exp LB Exp RB {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
@@ -453,13 +521,26 @@ Exp : Exp ASSIGNOP Exp {
 	// 	// errors++;
 	// 	myerror(msg);
 	// }
-	| Exp DOT ID {
+	| Exp DOT ID { // 结构体
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
 		$1->bro = $2;
 		$2->bro = $3;
 	}
 	| ID {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
+        //print(this_scope);
+        tmp.name = (char*)malloc(sizeof($1->id));
+        strcpy(tmp.name, $1->id);
+        if(search(this_scope, tmp)) { 
+            tmp.def = 1;
+            // tmp.type = $1->type;
+            my_insert(&mytree, tmp);
+        }
+        else { // 变量未定义
+            char msg[100];
+            sprintf(msg, "Error %d at line %d : Undefined variable \'%s\'", UNDEFINED_VARIABLE, last_row, tmp.name);
+            myerror(msg);
+        }
 	}
 	| INT {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
@@ -504,6 +585,8 @@ Args : Exp COMMA Args {
 #include "lex.yy.c"
 
 int main(int argc, char** argv) {
+    this_scope = init(this_scope);
+
 	if(argc <= 1) return 1;
 	FILE* f = fopen(argv[1], "r");
 	if(!f) {

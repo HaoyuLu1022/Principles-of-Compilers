@@ -7,6 +7,8 @@ typedef int NODE_TYPE;
 #define INT_TYPE 1
 #define FLOAT_TYPE 2
 #define STRING_TYPE 3
+#define STRUCT_TYPE 4
+#define FUNCTION_TYPE 5
 extern char *yytext;
 extern int yylineno;
 

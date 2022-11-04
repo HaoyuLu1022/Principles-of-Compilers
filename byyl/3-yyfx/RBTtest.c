@@ -51,7 +51,7 @@ void print_mynode(MyType info){   // 这个本来没必要写的，但是怕铸�
     int type;  // 类型.
     int isstruct;  // 是否为STRUCT.
     int isfunc;  // 是否为FUNCTION.
-    int isarr;  // 是否为ARRAY，lhy真够吧，天下策划一个傻逼样
+    int isarr;  // 是否为ARRAY //，lhy真够吧，天下策划一个傻逼样
     int dimension;   // 数组维度
     char* return_type;  // func返回类型
     struct rb_root* funcvarlist;  // func参数列表，只能放结构体和变量
