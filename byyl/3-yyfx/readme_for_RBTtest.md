@@ -15,7 +15,7 @@ typedef struct mytype {
     char* type;  // 类型
     int isstruct;  // 是否为STRUCT
     int isfunc;  // 是否为FUNCTION
-    int isarr;  // 是否为ARRAY，lhy真够吧，天下策划一个傻逼样
+    int isarr;  // 是否为ARRAY
     int dimension;   // 数组维度
     char* return_type;  // func返回类型
     struct rb_root struct_varilist;
@@ -130,6 +130,8 @@ unsigned int GetVariKey(MyType a){
 
 ## "my_"系列函数
 
+### my_search
+
 获得哈希值后只要把红黑树的**查找**、插入函数“编译原理化”即可，在此只记录使用方法：将要查询的节点信息用一个MyType保存以后即可搜索，返回同名（name）的my_node，还需要对比所有信息是否一致，例如type，可用my_node->info.type这样方法来访问，由于struct的特殊性必须使用这个函数，其余位置可使用后文中封装的更高级的search函数。
 
 ```c
@@ -154,6 +156,8 @@ struct my_node *my_search(struct rb_root *root, MyType info)
     return NULL;
 }
 ```
+
+### my_insert
 
 下文的**插入**函数与上述查询类似，**只有struct声明变量时使用**。
 
@@ -192,6 +196,8 @@ int my_insert(struct rb_root *root, MyType info)
     return 0;
 }
 ```
+
+### 其他函数
 
 **删除**操作my_delete改完发现不太方便用，因为红黑树的动态特性，不熟悉的我甚至写不出clear函数😥。
 
