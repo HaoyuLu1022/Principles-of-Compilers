@@ -577,7 +577,7 @@ char *yytext;
 	#include "syntax.tab.h"
 	#include "RBTtest.c"
 	extern int errors;
-	extern int flgStruct;
+	extern int flgStruct, flgArr;
 	int chars = 1;
 	int cols = 1;
 	int last_row = 1;
@@ -1198,24 +1198,26 @@ YY_RULE_SETUP
 	struct node *newnode = iniNode("LB", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
+	flgArr = 1;
 	return LB;
 }
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 273 "yf.l"
+#line 274 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
 	struct node *newnode = iniNode("RB", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
+	// flgArr = 0;
 	return RB;
 }
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 281 "yf.l"
+#line 283 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1227,7 +1229,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 289 "yf.l"
+#line 291 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1239,7 +1241,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 297 "yf.l"
+#line 299 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1251,7 +1253,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 305 "yf.l"
+#line 307 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1263,17 +1265,17 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 313 "yf.l"
+#line 315 "yf.l"
 {chars += 1;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 314 "yf.l"
+#line 316 "yf.l"
 {chars += 4;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 315 "yf.l"
+#line 317 "yf.l"
 {
 	errors++;
 	printf("Error Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext);
@@ -1282,10 +1284,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 321 "yf.l"
+#line 323 "yf.l"
 ECHO;
 	YY_BREAK
-#line 1289 "lex.yy.c"
+#line 1291 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2302,4 +2304,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 321 "yf.l"
+#line 323 "yf.l"

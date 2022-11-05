@@ -28,7 +28,7 @@
 	extern int last_row;
 	int errors = 0;
     int yydebug = 1;
-    int flgStruct = 0;
+    int flgStruct = 0, flgArr = 0;
     struct rb_root mytree = RB_ROOT;
     MyType tmp;
     VariLink this_scope;
@@ -339,15 +339,23 @@ Def : Specifier DecList SEMI {
         $1->bro = $2;
         $2->bro = $3;
 
-        // printf("%s\n", $2->child->child->child->name);
-        tmp.name = (char*)malloc(sizeof($2->child->child->child->id));
-        strcpy(tmp.name, $2->child->child->child->id);
-        if(search(this_scope, tmp)) {
+        // printf("variable name: %s\n", $2->child->child->child->id);
+        if(!flgArr) {
+            tmp.name = (char*)malloc(sizeof($2->child->child->child->id));
+            strcpy(tmp.name, $2->child->child->child->id);
+        }
+        else {
+            tmp.name = (char*)malloc(sizeof($2->child->child->child->child->id));
+            strcpy(tmp.name, $2->child->child->child->child->id);
+        }
+        // tmp.name = (char*)malloc(sizeof($2->child->child->child->id));
+        // strcpy(tmp.name, $2->child->child->child->id);
+        if(search(this_scope, tmp)) { // 两种可能：struct xx {...} yy; 或 int a;
             char msg[100];
-            if(!flgStruct)
+            if(!flgStruct) // 普通变量声明
                 // printf("%s\n", tmp.name);
                 sprintf(msg, "Error %d at line %d : Redefined variable \'%s\'", REDEFINED_VARIABLE, last_row, tmp.name);
-            else 
+            else // 结构体变量声明
                 sprintf(msg, "Error %d at line %d : Redefined field \'%s\'", REDEFINED_FIELD, last_row, tmp.name);
             myerror(msg);
         }
@@ -355,15 +363,24 @@ Def : Specifier DecList SEMI {
             printf("insert variable \'%s\'\n", tmp.name);
             tmp.def = 1;
             printf("%d\n", flgStruct);
-            if(flgStruct == 2) { // 是struct tag的情况
+            if(flgStruct == 2) { // 是struct tag的情况，如struct sa nn;
                 tmp.type = (char*)malloc(sizeof($1->child->child->id));
                 // printf("%s\n", $1->child->child->id); // 应该是struct
                 strcpy(tmp.type, $1->child->child->id);
             }
-            else if(flgStruct == 1) {
+            else if(flgStruct == 1) { // 一般变量，如int a;
+
                 tmp.type = (char*)malloc(sizeof($1->child->id));
                 // printf("%s\n", $1->child->name);
                 strcpy(tmp.type, $1->child->id);
+
+                // printf("%d\n", flgArr);
+
+                if(flgArr) { // 是数组
+                    tmp.isarr = 1;
+                    tmp.dimension = $2->child->child->bro->bro->intValue;
+                    flgArr = 0;
+                }
             }
             tmp.isvariable = 1;
             this_scope = insert(this_scope, tmp);
@@ -371,6 +388,8 @@ Def : Specifier DecList SEMI {
             free(tmp.type);
             tmp.def = 0;
             tmp.isvariable = 0;
+            tmp.isarr = 0;
+            tmp.dimension = 0;
         }
         free(tmp.name);
     }
@@ -388,10 +407,7 @@ Def : Specifier DecList SEMI {
 		char msg[100];
 		sprintf(msg, "Syntax error.");
 		myerror(msg);
-	}/*
-	| {
-	
-	}*/
+	}
 	;
 
     
@@ -404,13 +420,7 @@ Stmt :
 		char msg[100];
 		sprintf(msg, "error: Missing \";\"");
 		myerror(msg);
-	}/*
-	Stmt Stmt {
-	
 	}
-	Def {
-	
-	}*/
     | CompSt {
         $$ = insNode($1, "Stmt", @1.first_line, NON_TERMINAL);
     }
@@ -441,21 +451,7 @@ Stmt :
         $2->bro = $3;
         $3->bro = $4;
         $4->bro = $5;
-    }/*
-    | {
-    
-    }*/
-    /*
-    | DefList {
-    
-    } */
-    
-    /*
-	| error Stmt {
-        char msg[100];
-		sprintf(msg, "Syntax error."); // Missing IF in front.
-		myerror(msg);
-    } */
+    }
     ;
 
 // DefList : Def DefList {
@@ -542,7 +538,7 @@ Exp : Exp ASSIGNOP Exp {
         $1->bro = $2;
         $2->bro = $3;
     }
-	| Exp ASSIGNOP error{ 
+	| Exp ASSIGNOP error { 
 		char msg[100];
         sprintf(msg, "Syntax error."); // ASSIGNOP not in front of Exp
         // fprintf(stderr, "Error type B at line %d: %s\n", yylineno, msg);

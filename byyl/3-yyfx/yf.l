@@ -2,7 +2,7 @@
 	#include "syntax.tab.h"
 	#include "RBTtest.c"
 	extern int errors;
-	extern int flgStruct;
+	extern int flgStruct, flgArr;
 	int chars = 1;
 	int cols = 1;
 	int last_row = 1;
@@ -268,6 +268,7 @@ COMMA ,
 	struct node *newnode = iniNode("LB", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
+	flgArr = 1;
 	return LB;
 }
 {RB} {
@@ -276,6 +277,7 @@ COMMA ,
 	struct node *newnode = iniNode("RB", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
+	// flgArr = 0;
 	return RB;
 }
 {LC} {
