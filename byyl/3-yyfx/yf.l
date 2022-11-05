@@ -7,6 +7,7 @@
 	int cols = 1;
 	int last_row = 1;
 	int this_row = 1;
+	extern VariLink this_scope;
 	#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
         yylloc.first_column = cols; \
         yylloc.last_column = cols + yyleng - 1; \
@@ -197,6 +198,7 @@ COMMA ,
 	yylval = newnode;
 	newnode->id = strdup(yytext);
 	flgStruct = 1;
+	// printf("Set flgStruct to %d\n", flgStruct);
 	return STRUCT;
 }
 {AND} {
@@ -286,6 +288,8 @@ COMMA ,
 	struct node *newnode = iniNode("LC", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
+
+	this_scope = push_scope(this_scope);
 	return LC;
 }
 {RC} {
@@ -294,6 +298,8 @@ COMMA ,
 	struct node *newnode = iniNode("RC", 0, STRING_TYPE);
 	yylval = newnode;
 	newnode->id = strdup(yytext);
+
+	// this_scope = pop_scope(this_scope);
 	return RC;
 }
 {SEMI} {

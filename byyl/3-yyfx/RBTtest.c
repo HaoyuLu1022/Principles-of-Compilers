@@ -210,7 +210,7 @@ Mylink search(VariLink vt, MyType x){
     struct my_node *res = my_search(&vl->my_root, x);
 
     while(vl->last != NULL && res == NULL){
-        printf("%d\n", vl->top);
+        // printf("%d\n", vl->top);
         vl = vl->last;
         res = my_search(&vl->my_root, x);
     }
@@ -226,12 +226,14 @@ VariLink init(VariLink vl){
 }
 
 VariLink push_scope(VariLink vl) {
+    // printf("pushing scope!!\n");
     VariLink varilink = (VariLink)malloc(sizeof(VariLink));
     varilink->last = vl;
     return varilink;
 }
 
 VariLink pop_scope(VariLink vl) {
+    // printf("popping scope!!\n");
     VariLink varilink = vl->last;
     free(vl);
     return varilink;

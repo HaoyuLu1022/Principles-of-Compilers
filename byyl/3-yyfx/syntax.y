@@ -93,10 +93,11 @@ ExtDef : Specifier ExtDecList SEMI {
                 myerror(msg);
             }
             else {
-                printf("insert variable \'%s\'\n", tmp.name);
+                // printf("insert variable \'%s\'\n", tmp.name);
                 tmp.def = 1;
-                tmp.type = (char*)malloc(sizeof($1->child->id));
-                strcpy(tmp.type, $1->child->id);
+                // printf("%s\n", $1->child->child->id);
+                tmp.type = (char*)malloc(sizeof($1->child->child->id));
+                strcpy(tmp.type, $1->child->child->id);
                 tmp.isvariable = 1;
                 this_scope = insert(this_scope, tmp);
 
@@ -112,13 +113,10 @@ ExtDef : Specifier ExtDecList SEMI {
                 myerror(msg);
             }
             else {
-                printf("insert variable \'%s\'\n", tmp.name);
+                // printf("insert variable \'%s\'\n", tmp.name);
                 tmp.def = 1;
-                // printf("!!!\n");
                 tmp.type = (char*)malloc(sizeof($1->child->child->id));
-                // printf("%s\n", $1->child->child->id);
                 strcpy(tmp.type, $1->child->child->id);
-                // printf("!!!\n");
                 tmp.isstruct = 1;
                 this_scope = insert(this_scope, tmp);
 
@@ -128,6 +126,7 @@ ExtDef : Specifier ExtDecList SEMI {
             }
         }
         free(tmp.name);
+        // flgStruct = 0;
     }
     | Specifier SEMI {
         $$ = insNode($1, "ExtDef", @1.first_line, NON_TERMINAL);
@@ -139,26 +138,17 @@ ExtDef : Specifier ExtDecList SEMI {
         $2->bro = $3;
 
         tmp.name = (char*)malloc(sizeof($2->child->id));
-        // tmp.isfunc = 1;
         strcpy(tmp.name, $2->child->id);
-        if(search(this_scope, tmp)) { // 函数重定义
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
-            myerror(msg);
-        }
-        else {
-            printf("insert function \'%s\'\n", tmp.name);
-            tmp.def = 1;
-            tmp.return_type = (char*)malloc(sizeof($1->child->id));
-            strcpy(tmp.type, $1->child->id);
-            tmp.isfunc = 1;
-            this_scope = insert(this_scope, tmp);
+        Mylink ml = search(this_scope, tmp); // 查找前面的作用域里该函数声明对应的结点
+        ml->return_type = (char*)malloc(sizeof($1->child->id));
+        strcpy(ml->return_type, $1->child->id); // 赋给它return type
 
-            free(tmp.type);
-            tmp.def = 0;
-            tmp.isfunc = 0;
-        }
-        free(tmp.name);
+        MyType newnode = *ml;
+        this_scope = insert(this_scope, newnode); // 拷贝前面作用域中函数声明对应的结点，并插入当前作用域
+
+        /*------ To-do: 如何插入参数表 ------*/
+
+        this_scope = pop_scope(this_scope);
     }
     ;
 
@@ -203,7 +193,7 @@ StructSpecifier : STRUCT OptTag LC Mid RC {
             myerror(msg);
         }
         else {
-            printf("insert struct \'%s\'\n", tmp.name);
+            // printf("insert struct \'%s\'\n", tmp.name);
             tmp.def = 1;
             tmp.isstruct = 1;
             this_scope = insert(this_scope, tmp);
@@ -226,7 +216,7 @@ StructSpecifier : STRUCT OptTag LC Mid RC {
             myerror(msg);
         }
         else {
-            printf("insert struct \'%s\'\n", tmp.name);
+            // printf("insert struct \'%s\'\n", tmp.name);
             tmp.def = 1;
             tmp.isstruct = 1;
             this_scope = insert(this_scope, tmp);
@@ -258,11 +248,57 @@ FunDec : ID LP VarList RP {
         $1->bro = $2;
         $2->bro = $3;
         $3->bro = $4;
+
+        tmp.name = (char*)malloc(sizeof($1->id));
+        strcpy(tmp.name, $1->id);
+        if(search(this_scope, tmp)) { // 函数重定义
+            char msg[100];
+            sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
+            myerror(msg);
+        }
+        else {
+            // printf("insert function \'%s\'\n", tmp.name);
+            tmp.def = 1;
+            // printf("%s\n", $1->child->id);
+            // tmp.return_type = (char*)malloc(sizeof($1->child->id));
+            // strcpy(tmp.return_type, $1->child->id);
+            tmp.isfunc = 1;
+            this_scope = insert(this_scope, tmp);
+
+            free(tmp.type);
+            tmp.def = 0;
+            tmp.isfunc = 0;
+        }
+        // printf("%s\n", tmp.name);
+        free(tmp.name);
     }
     | ID LP RP {
         $$ = insNode($1, "FunDec", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+
+        tmp.name = (char*)malloc(sizeof($1->id));
+        strcpy(tmp.name, $1->id);
+        if(search(this_scope, tmp)) { // 函数重定义
+            char msg[100];
+            sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
+            myerror(msg);
+        }
+        else {
+            // printf("insert function \'%s\'\n", tmp.name);
+            tmp.def = 1;
+            // printf("%s\n", $1->child->id);
+            // tmp.return_type = (char*)malloc(sizeof($1->child->id));
+            // strcpy(tmp.return_type, $1->child->id);
+            tmp.isfunc = 1;
+            this_scope = insert(this_scope, tmp);
+
+            free(tmp.type);
+            tmp.def = 0;
+            tmp.isfunc = 0;
+        }
+        // printf("%s\n", tmp.name);
+        free(tmp.name);
     }
 	| ID LP error RP {
 		char msg[100];
@@ -340,42 +376,37 @@ Def : Specifier DecList SEMI {
         $2->bro = $3;
 
         // printf("variable name: %s\n", $2->child->child->child->id);
-        if(!flgArr) {
+        if(!flgArr) { // 不是数组
             tmp.name = (char*)malloc(sizeof($2->child->child->child->id));
             strcpy(tmp.name, $2->child->child->child->id);
         }
-        else {
+        else { // 是数组
             tmp.name = (char*)malloc(sizeof($2->child->child->child->child->id));
             strcpy(tmp.name, $2->child->child->child->child->id);
         }
         // tmp.name = (char*)malloc(sizeof($2->child->child->child->id));
         // strcpy(tmp.name, $2->child->child->child->id);
+        // printf("insert variable \'%s\'\n", tmp.name);
         if(search(this_scope, tmp)) { // 两种可能：struct xx {...} yy; 或 int a;
             char msg[100];
             if(!flgStruct) // 普通变量声明
-                // printf("%s\n", tmp.name);
                 sprintf(msg, "Error %d at line %d : Redefined variable \'%s\'", REDEFINED_VARIABLE, last_row, tmp.name);
             else // 结构体变量声明
                 sprintf(msg, "Error %d at line %d : Redefined field \'%s\'", REDEFINED_FIELD, last_row, tmp.name);
             myerror(msg);
         }
         else {
-            printf("insert variable \'%s\'\n", tmp.name);
             tmp.def = 1;
-            printf("%d\n", flgStruct);
+            // printf("%d\n", flgStruct);
             if(flgStruct == 2) { // 是struct tag的情况，如struct sa nn;
                 tmp.type = (char*)malloc(sizeof($1->child->child->id));
                 // printf("%s\n", $1->child->child->id); // 应该是struct
                 strcpy(tmp.type, $1->child->child->id);
             }
             else if(flgStruct == 1) { // 一般变量，如int a;
-
                 tmp.type = (char*)malloc(sizeof($1->child->id));
                 // printf("%s\n", $1->child->name);
                 strcpy(tmp.type, $1->child->id);
-
-                // printf("%d\n", flgArr);
-
                 if(flgArr) { // 是数组
                     tmp.isarr = 1;
                     tmp.dimension = $2->child->child->bro->bro->intValue;
@@ -384,7 +415,7 @@ Def : Specifier DecList SEMI {
             }
             tmp.isvariable = 1;
             this_scope = insert(this_scope, tmp);
-
+            
             free(tmp.type);
             tmp.def = 0;
             tmp.isvariable = 0;
@@ -392,6 +423,7 @@ Def : Specifier DecList SEMI {
             tmp.dimension = 0;
         }
         free(tmp.name);
+        flgStruct = 0;
     }
 	| Specifier DecList error{
 		char msg[100];
@@ -645,7 +677,6 @@ Exp : Exp ASSIGNOP Exp {
 	}
 	| ID {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
-        //print(this_scope);
         tmp.name = (char*)malloc(sizeof($1->id));
         strcpy(tmp.name, $1->id);
         if(search(this_scope, tmp)) { 
