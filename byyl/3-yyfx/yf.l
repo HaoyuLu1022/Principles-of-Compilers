@@ -198,7 +198,6 @@ COMMA ,
 	yylval = newnode;
 	newnode->id = strdup(yytext);
 	flgStruct = 1;
-	// printf("Set flgStruct to %d\n", flgStruct);
 	return STRUCT;
 }
 {AND} {

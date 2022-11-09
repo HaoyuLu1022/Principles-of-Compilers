@@ -15,12 +15,18 @@
     #define NEED_VARIABLE 6
     #define TYPE_MISMATCH_OPERAND 7
     #define TYPE_MISMATCH_RETURN 8
-    
+    #define FUNCTION_MISMATCH 9
+    #define NOT_ARRAY 10
+    #define NOT_FUNCTION 11
+    #define ARRAY_ACCESS_OPERATEOR_NOT_INTEGER 12
+    #define DOT_ILLEGAL_USE 13
+    #define NOT_EXISTENT_FIELD 14
     #define REDEFINED_FIELD 15
     #define REDEFINED_STRUCT 16
     #define UNDEFINED_STRUCT 17
-
-
+    #define DECLARED_BUT_NOT_DEFINED 18
+    #define AMBIGUATING_FUNCTION_DECLARATION 19
+    
 	void yyerror(char*);
 	void myerror(char*);
 	int yylex();
@@ -126,7 +132,6 @@ ExtDef : Specifier ExtDecList SEMI {
             }
         }
         free(tmp.name);
-        // flgStruct = 0;
     }
     | Specifier SEMI {
         $$ = insNode($1, "ExtDef", @1.first_line, NON_TERMINAL);
@@ -142,13 +147,40 @@ ExtDef : Specifier ExtDecList SEMI {
         Mylink ml = search(this_scope, tmp); // 查找前面的作用域里该函数声明对应的结点
         ml->return_type = (char*)malloc(sizeof($1->child->id));
         strcpy(ml->return_type, $1->child->id); // 赋给它return type
-
+       /* //jcy 8
+		if(ml->return_type != $) {				应该有一个从CompSt传下来的return_type
+		    char msg[100];
+            sprintf(msg, "Error %d at line %d : Type mismatched for return", TYPE_MISMATCH_RETURN, last_row);
+            myerror(msg);
+		}
+		//jcy 8	*/
         MyType newnode = *ml;
         this_scope = insert(this_scope, newnode); // 拷贝前面作用域中函数声明对应的结点，并插入当前作用域
 
         /*------ To-do: 如何插入参数表 ------*/
+        
 
         this_scope = pop_scope(this_scope);
+    }
+    | Specifier FunDec SEMI {
+    	/*------ TO-do: insert Varlist  */
+    	/* if search(this_scope, fun_name)		// jcy 19
+    	
+    	conflict in Varlist or Specifier
+    	
+    	// jcy 19
+    	else */
+    	// 前面没声明过
+    	// \begin{jcy 18}
+    	
+    	/*---- To-do: insert Specifier and Varlist   */
+    	tmp.name = (char*)malloc(sizeof($2->child->id));
+        strcpy(tmp.name, $2->child->id);
+    	char msg[100];
+        sprintf(msg, "Error %d at line %d : Incomplete definition of function \'%s\'", DECLARED_BUT_NOT_DEFINED, last_row, tmp.name);
+        myerror(msg);
+        
+        // \end{jcy 18}				to be continued ... 
     }
     ;
 
@@ -176,9 +208,7 @@ Specifier : TYPE {
     
     ;
 
-// StructSpecifier : STRUCT OptTag LC Stmt RC {
 StructSpecifier : STRUCT OptTag LC Mid RC {
-// StructSpecifier : STRUCT OptTag LC DefList RC {
         $$ = insNode($1, "StructSpecifier", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
@@ -200,7 +230,6 @@ StructSpecifier : STRUCT OptTag LC Mid RC {
 
             tmp.def = 0;
             tmp.isstruct = 0;
-            // flgStruct = 1;
         }
         free(tmp.name);
     }
@@ -223,7 +252,6 @@ StructSpecifier : STRUCT OptTag LC Mid RC {
             
             tmp.def = 0;
             tmp.isstruct = 0;
-            // flgStruct = 1;
         }
         free(tmp.name);
         flgStruct = 2;
@@ -242,7 +270,15 @@ Tag : ID {
         $$ = insNode($1, "Tag", @1.first_line, NON_TERMINAL);
     }
     ;
+    
+/*
+TypeList : TYPE COMMA TypeList {	// 因为函数声明的时候可以没有形参的符号	for error 18 and 19, but to be continued...
 
+	}
+	| TYPE {
+	
+	}
+*/
 FunDec : ID LP VarList RP {
         $$ = insNode($1, "FunDec", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
@@ -397,7 +433,6 @@ Def : Specifier DecList SEMI {
         }
         else {
             tmp.def = 1;
-            // printf("%d\n", flgStruct);
             if(flgStruct == 2) { // 是struct tag的情况，如struct sa nn;
                 tmp.type = (char*)malloc(sizeof($1->child->child->id));
                 // printf("%s\n", $1->child->child->id); // 应该是struct
@@ -512,7 +547,10 @@ Dec : VarDec {
         $$ = insNode($1, "Dec", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
-    }
+        // \begin{jcy 5} record the type of Exp and assign to Dec 用于与后面Specifier进行比较
+        
+        // \end{jcy 5}
+    } 
     ;
 
 VarDec : ID {
@@ -523,7 +561,7 @@ VarDec : ID {
         $1->bro = $2;
         $2->bro = $3;
         $3->bro = $4;
-
+		// why noted ?  -- by jcy
         // tmp.name = (char*)malloc(sizeof($1->child->id));
         // strcpy(tmp.name, $1->child->id);
         // if(search(this_scope, tmp)) {
@@ -569,6 +607,10 @@ Exp : Exp ASSIGNOP Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        //	\begin{jcy 5}
+        //获取两个Exp的类型，进行一致性的判断即可，需要完成变量属性的传递（注意别的Exp产生式中这一步的维护）并完成这里类别的获取
+        
+        //	\end{jcy 5}
     }
 	| Exp ASSIGNOP error { 
 		char msg[100];
@@ -577,65 +619,125 @@ Exp : Exp ASSIGNOP Exp {
 		// errors++;
 		myerror(msg);
 	}
+	// jcy 6 priority order ? (INT or FLOAT -> Exp)    **be good for use** but conflict
+    | INT ASSIGNOP Exp {
+    	char msg[100];
+        sprintf(msg, "Error %d at line %d : The left-hand side of assignment must be a variable", NEED_VARIABLE, last_row); 
+		myerror(msg);
+    }
+    | FLOAT ASSIGNOP Exp {
+		char msg[100];
+        sprintf(msg, "Error %d at line %d : The left-hand side of assignment must be a variable", NEED_VARIABLE, last_row); 
+		myerror(msg);
+	}
+    // jcy 6
+    // \beign{jcy 7}
     | Exp AND Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        if($1->name == $3->name) $$->name = $1->name;
+        else{
+        	char msg[100];
+            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            myerror(msg);
+        }
     }
     | Exp OR Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        if($1->name == $3->name) $$->name = $1->name;
+        else{
+        	char msg[100];
+            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            myerror(msg);
+        }
     }
     | Exp RELOP Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        if($1->name == $3->name) $$->name = $1->name;
+        else{
+        	char msg[100];
+            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            myerror(msg);
+        }
     }
     | Exp PLUS Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        if($1->name == $3->name) $$->name = $1->name;
+        else{
+        	char msg[100];
+            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            myerror(msg);
+        }
     }
     | Exp MINUS Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        if($1->name == $3->name) $$->name = $1->name;
+        else{
+        	char msg[100];
+            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            myerror(msg);
+        }
     }
     | Exp STAR Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        if($1->name == $3->name) $$->name = $1->name;
+        else{
+        	char msg[100];
+            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            myerror(msg);
+        }
     }
     | Exp DIV Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        if($1->name == $3->name) $$->name = $1->name;
+        else{
+        	char msg[100];
+            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            myerror(msg);
+        }
     }
+    // \end{jcy 7}
     | LP Exp RP {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        $$->name = $2->name;
+        //加一步Exp类型的传递
     }
     | MINUS Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
+        $$->name = $2->name;
     }
     | NOT Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
+        $$->name = $2->name;
     }
     | ID LP Args RP {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
         $3->bro = $4;
-
+		// to be continued...
         tmp.name = (char*)malloc(sizeof($1->id));
         strcpy(tmp.name, $1->id);
         if(search(this_scope, tmp)) { 
             tmp.def = 1;
-            // tmp.type = $1->type;
+            // tmp.type = $1->type;	这些地方是否还需要加一个函数参数是否符合的判定，并且把函数返回类型赋给Exp	// to be continued
             // my_insert(&mytree, tmp);
             this_scope = insert(this_scope, tmp);
         }
@@ -649,12 +751,12 @@ Exp : Exp ASSIGNOP Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
-
+		// to be continued ...
         tmp.name = (char*)malloc(sizeof($1->id));
         strcpy(tmp.name, $1->id);
         if(search(this_scope, tmp)) { 
             tmp.def = 1;
-            // tmp.type = $1->type;
+            // tmp.type = $1->type;	这些地方是否还需要加一个函数参数是否符合的判定，并且把函数返回类型赋给Exp	// to be continued
             // my_insert(&mytree, tmp);
             this_scope = insert(this_scope, tmp);
         }
@@ -669,17 +771,37 @@ Exp : Exp ASSIGNOP Exp {
         $1->bro = $2;
         $2->bro = $3;
         $3->bro = $4;
+        // \begin{jcy 10}
+        //一个$1是否为数组变量的检查，一个$3是否为整数的检查（忽略段错误）
+        // 类型传递
+        // \end{jcy 10}
     }
 	| Exp DOT ID { // 结构体
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
 		$1->bro = $2;
 		$2->bro = $3;
+		//	\begin{jcy 13}
+        tmp.name = (char*)malloc(sizeof($1->id));	//不一定对，我搞不清楚往下走几层能获取到我想要的正确信息
+        strcpy(tmp.name, $1->id);
+        if(search(this_scope, tmp)) { //先获取这个名字的东西，然后看看它是不是结构体：如果不是结构体，则判为错误13；若是结构体，开始看ID是否存在：如果ID存在，将其属性赋给规约后的结果；若ID不存在，则判为错误14
+            tmp.def = 1;
+            // tmp.type = $1->type;
+            // my_insert(&mytree, tmp);
+            this_scope = insert(this_scope, tmp);
+        }
+        else { // 函数未定义
+            char msg[100];
+            sprintf(msg, "Error %d at line %d : Undefined function \'%s\'", UNDEFINED_FUNCTION, last_row, tmp.name);
+            myerror(msg);
+        }
+        //	\end{jcy 13}
 	}
 	| ID {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         tmp.name = (char*)malloc(sizeof($1->id));
         strcpy(tmp.name, $1->id);
         if(search(this_scope, tmp)) { 
+        	
             tmp.def = 1;
             // tmp.type = $1->type;
             // my_insert(&mytree, tmp);
@@ -693,9 +815,17 @@ Exp : Exp ASSIGNOP Exp {
 	}
 	| INT {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
+		//tmp.type = (char*)malloc(sizeof($1->name));
+        //strcpy(tmp.type, $1->name);
+        $$->name = "INT";
+		//printf("int value = %d\n", $1->intValue);
+		//this_scope = insert(this_scope, tmp);
+		//free(tmp.type);
 	}
 	| FLOAT {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
+		$$->name = "FLOAT";
+		//printf("float value = %f\n", $1->floatValue);			似乎不起作用
 	}
 	| LP error RP {
 		char msg[100];

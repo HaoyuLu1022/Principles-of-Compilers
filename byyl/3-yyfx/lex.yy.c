@@ -1088,13 +1088,12 @@ YY_RULE_SETUP
 	yylval = newnode;
 	newnode->id = strdup(yytext);
 	flgStruct = 1;
-	// printf("Set flgStruct to %d\n", flgStruct);
 	return STRUCT;
 }
 	YY_BREAK
 case 19:
 YY_RULE_SETUP
-#line 204 "yf.l"
+#line 203 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1106,7 +1105,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 20:
 YY_RULE_SETUP
-#line 212 "yf.l"
+#line 211 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1118,7 +1117,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 21:
 YY_RULE_SETUP
-#line 220 "yf.l"
+#line 219 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1130,7 +1129,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 22:
 YY_RULE_SETUP
-#line 228 "yf.l"
+#line 227 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1142,7 +1141,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 23:
 YY_RULE_SETUP
-#line 236 "yf.l"
+#line 235 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1154,7 +1153,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 24:
 YY_RULE_SETUP
-#line 244 "yf.l"
+#line 243 "yf.l"
 {
 	// pass
 } 
@@ -1162,14 +1161,14 @@ YY_RULE_SETUP
 case 25:
 /* rule 25 can match eol */
 YY_RULE_SETUP
-#line 247 "yf.l"
+#line 246 "yf.l"
 {
 	// pass
 } 
 	YY_BREAK
 case 26:
 YY_RULE_SETUP
-#line 251 "yf.l"
+#line 250 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1181,7 +1180,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 27:
 YY_RULE_SETUP
-#line 259 "yf.l"
+#line 258 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1193,7 +1192,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 28:
 YY_RULE_SETUP
-#line 267 "yf.l"
+#line 266 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1206,7 +1205,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 29:
 YY_RULE_SETUP
-#line 276 "yf.l"
+#line 275 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1219,7 +1218,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 30:
 YY_RULE_SETUP
-#line 285 "yf.l"
+#line 284 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1233,7 +1232,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 31:
 YY_RULE_SETUP
-#line 295 "yf.l"
+#line 294 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1247,7 +1246,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 32:
 YY_RULE_SETUP
-#line 305 "yf.l"
+#line 304 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1259,7 +1258,7 @@ YY_RULE_SETUP
 	YY_BREAK
 case 33:
 YY_RULE_SETUP
-#line 313 "yf.l"
+#line 312 "yf.l"
 {
 	last_row = this_row;
 	this_row = yylineno;
@@ -1271,17 +1270,17 @@ YY_RULE_SETUP
 	YY_BREAK
 case 34:
 YY_RULE_SETUP
-#line 321 "yf.l"
+#line 320 "yf.l"
 {chars += 1;}
 	YY_BREAK
 case 35:
 YY_RULE_SETUP
-#line 322 "yf.l"
+#line 321 "yf.l"
 {chars += 4;}
 	YY_BREAK
 case 36:
 YY_RULE_SETUP
-#line 323 "yf.l"
+#line 322 "yf.l"
 {
 	errors++;
 	printf("Error Type A at line %d, char %d: Mysterious character: '%s'\n", yylineno, chars, yytext);
@@ -1290,10 +1289,10 @@ YY_RULE_SETUP
 	YY_BREAK
 case 37:
 YY_RULE_SETUP
-#line 329 "yf.l"
+#line 328 "yf.l"
 ECHO;
 	YY_BREAK
-#line 1297 "lex.yy.c"
+#line 1296 "lex.yy.c"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 
@@ -2310,4 +2309,4 @@ void yyfree (void * ptr )
 
 #define YYTABLES_NAME "yytables"
 
-#line 329 "yf.l"
+#line 328 "yf.l"

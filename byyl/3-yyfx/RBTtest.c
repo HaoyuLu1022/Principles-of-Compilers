@@ -19,6 +19,8 @@ typedef struct mytype {
     // int scope;   // 作用域，这个应该不需要了，用模拟栈的方法搞了
     int isvariable;  // 是否为VARIABLE
     char* type;  // 类型
+    int isint;		// 是否为整数
+    int isfloat;		// 是否为浮点数
     int isstruct;  // 是否为STRUCT
     int isfunc;  // 是否为FUNCTION
     int isarr;  // 是否为ARRAY，lhy真够吧，天下策划一个傻逼样
