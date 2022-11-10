@@ -24,7 +24,7 @@ typedef struct mytype {
     int isarr;  // 是否为ARRAY，lhy真够吧，天下策划一个傻逼样
     int dimension;   // 数组维度
     char* return_type;  // func返回类型
-    struct rb_root struct_varilist;
+    struct rb_root* varilist; // 结构体和函数的属性/参数列表
     // struct rb_root* funcvarlist;  // func参数列表，只能放结构体和变量
 }MyType, *Mylink;
 
@@ -67,7 +67,7 @@ void print_mynode(MyType info){   // 这个本来没必要写的，但是怕铸�
         printf("return_type : %s", info.return_type);
     if(info.isstruct){
         printf("struct : struct maybe...\n");
-        my_print(&info.struct_varilist);
+        my_print(info.varilist);
     }
 }
 
@@ -123,7 +123,7 @@ struct my_node *my_search(struct rb_root *root, MyType info)
 }
 
 /*
- * 将key插入到红黑树中。插入成功，返回0；失败返回-1。
+ * 将key插入到红黑树中。插入成功，返回1；失败返回0。
  */
 int my_insert(struct rb_root *root, MyType info)
 {
@@ -142,19 +142,19 @@ int my_insert(struct rb_root *root, MyType info)
         else if (key > my->key)
             tmp = &((*tmp)->rb_right);
         else
-            return -1;
+            return 0;
     }
 
     // 如果新建结点失败，则返回。
     if ((mynode=malloc(sizeof(struct my_node))) == NULL)
-        return -1;
+        return 0;
     mynode->key = key;
     mynode->info = info;
     /* Add new node and rebalance tree. */
     rb_link_node(&mynode->rb_node, parent, tmp);
     rb_insert_color(&mynode->rb_node, root);
 
-    return 0;
+    return 1;
 }
 
 /*
