@@ -407,9 +407,9 @@ Def : Specifier DecList SEMI {
             }
 
             if(flgStruct == 2) { // 是struct tag的情况，如struct sa nn;
-                tmp.type = (char*)malloc(sizeof($1->child->child->id));
-                // printf("%s\n", $1->child->child->id); // 应该是struct
-                strcpy(tmp.type, $1->child->child->id);
+                tmp.type = (char*)malloc(sizeof($1->child->child->bro->child->id));
+                // printf("%s\n", $1->child->child->bro->child->id); // 应该是struct的类型名OptTag
+                strcpy(tmp.type, $1->child->child->bro->child->id);
             }
             else { // 一般变量，如int a，结构体内和一般声明均是;
                 tmp.type = (char*)malloc(sizeof($1->child->id));

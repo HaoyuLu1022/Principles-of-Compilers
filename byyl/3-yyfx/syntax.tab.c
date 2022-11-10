@@ -2001,9 +2001,9 @@ yyreduce:
             }
 
             if(flgStruct == 2) { // 是struct tag的情况，如struct sa nn;
-                tmp.type = (char*)malloc(sizeof(yyvsp[-2]->child->child->id));
-                // printf("%s\n", $1->child->child->id); // 应该是struct
-                strcpy(tmp.type, yyvsp[-2]->child->child->id);
+                tmp.type = (char*)malloc(sizeof(yyvsp[-2]->child->child->bro->child->id));
+                // printf("%s\n", $1->child->child->bro->child->id); // 应该是struct的类型名OptTag
+                strcpy(tmp.type, yyvsp[-2]->child->child->bro->child->id);
             }
             else { // 一般变量，如int a，结构体内和一般声明均是;
                 tmp.type = (char*)malloc(sizeof(yyvsp[-2]->child->id));
@@ -2015,7 +2015,7 @@ yyreduce:
                     // flgArr = 0;
                 }
             }
-            // printf("Variable %s has type %s\n", tmp.name, tmp.type);
+            printf("Variable %s has type %s\n", tmp.name, tmp.type);
             tmp.isvariable = 1;
             this_scope = insert(this_scope, tmp);
 
