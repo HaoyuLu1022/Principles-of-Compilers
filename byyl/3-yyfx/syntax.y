@@ -93,7 +93,7 @@ ExtDef : Specifier ExtDecList SEMI {
         tmp.name = (char*)malloc(sizeof($2->child->child->id));
         strcpy(tmp.name, $2->child->child->id); // 不要怀疑这个就是变量名
         if(!flgStruct) { // 不是结构体，是普通的变量声明 
-            if(search(this_scope, tmp)) {
+            if(my_search(&this_scope->my_root, tmp)) {
                 char msg[100];
                 sprintf(msg, "Error %d at line %d : Redefined variable \'%s\'", REDEFINED_VARIABLE, last_row, tmp.name);
                 myerror(msg);
@@ -113,7 +113,7 @@ ExtDef : Specifier ExtDecList SEMI {
             }
         }
         else { // 是结构体，且有变量 tmp.name
-            if(search(this_scope, tmp)) {
+            if(my_search(&this_scope->my_root, tmp)) {
                 char msg[100];
                 sprintf(msg, "Error %d at line %d : Redefined variable \'%s\'", REDEFINED_VARIABLE, last_row, tmp.name);
                 myerror(msg);
@@ -217,21 +217,59 @@ StructSpecifier : STRUCT OptTag LC Mid RC {
 
         tmp.name = (char*)malloc(sizeof($2->child->id));
         strcpy(tmp.name, $2->child->id);
+        // printf("struct name: %s\n", tmp.name);
         if(search(this_scope, tmp)) { // 结构体名字重复
             char msg[100];
             sprintf(msg, "Error %d at line %d : Duplicate name \'%s\'", REDEFINED_STRUCT, last_row, tmp.name);
             myerror(msg);
         }
         else {
-            // printf("insert struct \'%s\'\n", tmp.name);
             tmp.def = 1;
             tmp.isstruct = 1;
+            struct node* newnode = $4; // newnode保持指向Mid
+            MyType temp;
+            char* mid = "Mid";
+            do {
+                temp.def = 1;
+                temp.isvariable = 1;
+
+                temp.type = (char*)malloc(sizeof(newnode->child->child->child->id));
+                strcpy(temp.type, newnode->child->child->child->id);
+
+                struct node* newnew = newnode->child->child->bro; // newnew保持指向DecList
+                do {
+                    temp.name = (char*)malloc(sizeof(newnew->child->child->child->id));
+                    strcpy(temp.name, newnew->child->child->child->id);
+                    // printf("Struct \'%s\' has variable \'%s\' of type \'%s\'\n", tmp.name, temp.name, temp.type);
+
+                    tmp.varilist = (struct rb_root*)malloc(sizeof(struct rb_root*));
+                    int result = my_insert(tmp.varilist, temp);
+                    // printf("Whether successful: %d\n", result);
+
+                    free(temp.name);
+
+                    if(newnew->child->bro != NULL) {
+                        newnew = newnew->child->bro->bro;
+                    }
+                    else break;
+                } while(newnew != NULL);
+                free(tmp.type);
+
+                if(strcmp(newnode->child->bro->name, mid) == 0) {
+                    newnode = newnode->child->bro;
+                    // printf("name: %s\n", newnode->name);
+                }
+                else break;
+            } while(newnode != NULL);
+
             this_scope = insert(this_scope, tmp);
 
             tmp.def = 0;
             tmp.isstruct = 0;
         }
         free(tmp.name);
+        free(tmp.varilist);
+        // printf("flgStruct: %d\n", flgStruct);
     }
     | STRUCT Tag {
         $$ = insNode($1, "StructSpecifier", @1.first_line, NON_TERMINAL);
@@ -295,13 +333,40 @@ FunDec : ID LP VarList RP {
         else {
             // printf("insert function \'%s\'\n", tmp.name);
             tmp.def = 1;
-            // printf("%s\n", $1->child->id);
-            // tmp.return_type = (char*)malloc(sizeof($1->child->id));
-            // strcpy(tmp.return_type, $1->child->id);
             tmp.isfunc = 1;
+            MyType temp;
+            struct node *newnode = $3;
+            do { // 函数的参数列表
+                temp.def = 1;
+                temp.isvariable = 1;
+                // printf("Variable type: %s\n", newnode->child->child->child->id);
+                temp.type = (char*)malloc(sizeof(newnode->child->child->child->id));
+                strcpy(temp.type, newnode->child->child->child->id);
+
+                // printf("Variable name: %s\n", newnode->child->child->bro->child->id);
+                temp.name = (char*)malloc(sizeof(newnode->child->child->bro->child->id));
+                strcpy(temp.name, newnode->child->child->bro->child->id);
+                // printf("Variable %s is type %s\n", temp.name, temp.type);
+
+                tmp.varilist = (struct rb_root*)malloc(sizeof(struct rb_root*));
+                int result = my_insert(tmp.varilist, temp);
+                // printf("Whether successful: %d\n", result);
+
+                temp.def = 0;
+                temp.isvariable = 0;
+                free(temp.type);
+                free(temp.name);
+
+                if(newnode->child->bro != NULL) {
+                    newnode = newnode->child->bro->bro;
+                }
+                else break;
+            } while(newnode != NULL);
+
             this_scope = insert(this_scope, tmp);
 
             free(tmp.type);
+            free(tmp.varilist);
             tmp.def = 0;
             tmp.isfunc = 0;
         }
@@ -323,9 +388,6 @@ FunDec : ID LP VarList RP {
         else {
             // printf("insert function \'%s\'\n", tmp.name);
             tmp.def = 1;
-            // printf("%s\n", $1->child->id);
-            // tmp.return_type = (char*)malloc(sizeof($1->child->id));
-            // strcpy(tmp.return_type, $1->child->id);
             tmp.isfunc = 1;
             this_scope = insert(this_scope, tmp);
 
@@ -411,54 +473,69 @@ Def : Specifier DecList SEMI {
         $1->bro = $2;
         $2->bro = $3;
 
-        // printf("variable name: %s\n", $2->child->child->child->id);
-        if(!flgArr) { // 不是数组
-            tmp.name = (char*)malloc(sizeof($2->child->child->child->id));
-            strcpy(tmp.name, $2->child->child->child->id);
-        }
-        else { // 是数组
-            tmp.name = (char*)malloc(sizeof($2->child->child->child->child->id));
-            strcpy(tmp.name, $2->child->child->child->child->id);
-        }
-        // tmp.name = (char*)malloc(sizeof($2->child->child->child->id));
-        // strcpy(tmp.name, $2->child->child->child->id);
-        // printf("insert variable \'%s\'\n", tmp.name);
-        if(search(this_scope, tmp)) { // 两种可能：struct xx {...} yy; 或 int a;
-            char msg[100];
-            if(!flgStruct) // 普通变量声明
-                sprintf(msg, "Error %d at line %d : Redefined variable \'%s\'", REDEFINED_VARIABLE, last_row, tmp.name);
-            else // 结构体变量声明
-                sprintf(msg, "Error %d at line %d : Redefined field \'%s\'", REDEFINED_FIELD, last_row, tmp.name);
-            myerror(msg);
-        }
-        else {
+        struct node* newnode = $2;
+            
+        do {
             tmp.def = 1;
-            if(flgStruct == 2) { // 是struct tag的情况，如struct sa nn;
-                tmp.type = (char*)malloc(sizeof($1->child->child->id));
-                // printf("%s\n", $1->child->child->id); // 应该是struct
-                strcpy(tmp.type, $1->child->child->id);
+            if(!flgArr) { // 不是数组
+                tmp.name = (char*)malloc(sizeof(newnode->child->child->child->id));
+                strcpy(tmp.name, newnode->child->child->child->id);
             }
-            else if(flgStruct == 1) { // 一般变量，如int a;
+            else { // 是数组
+                tmp.name = (char*)malloc(sizeof(newnode->child->child->child->child->id));
+                // printf("array name: %s\n", newnode->child->child->child->child->id);
+                strcpy(tmp.name, newnode->child->child->child->child->id);
+            }
+
+            if(search(this_scope, tmp)) { // 两种可能：struct xx {...} yy; 或 int a;
+                char msg[100];
+                if(!flgStruct) // 普通变量声明
+                    sprintf(msg, "Error %d at line %d : Redefined variable \'%s\'", REDEFINED_VARIABLE, last_row, tmp.name);
+                else // 结构体变量声明
+                    sprintf(msg, "Error %d at line %d : Redefined field \'%s\'", REDEFINED_FIELD, last_row, tmp.name);
+                myerror(msg);
+
+                // if(newnode->child->bro != NULL) { // 看这个DecList右边有没有COMMA，不这么写感觉没办法写循环
+                //     newnode = newnode->child->bro->bro;
+                //     continue;
+                // }
+                // else break; // 这一段应该没必要
+            }
+
+            if(flgStruct == 2) { // 是struct tag的情况，如struct sa nn;
+                tmp.type = (char*)malloc(sizeof($1->child->child->bro->child->id));
+                // printf("%s\n", $1->child->child->bro->child->id); // 应该是struct的类型名OptTag
+                strcpy(tmp.type, $1->child->child->bro->child->id);
+                flgStruct = 0;
+            }
+            else { // 一般变量，如int a，结构体内和一般声明均是;
                 tmp.type = (char*)malloc(sizeof($1->child->id));
-                // printf("%s\n", $1->child->name);
+                // printf("%s\n", $1->child->id);
                 strcpy(tmp.type, $1->child->id);
                 if(flgArr) { // 是数组
                     tmp.isarr = 1;
-                    tmp.dimension = $2->child->child->bro->bro->intValue;
-                    flgArr = 0;
+                    tmp.dimension = newnode->child->child->child->bro->bro->intValue;
+                    // flgArr = 0;
                 }
             }
+            // printf("Variable %s has type %s\n", tmp.name, tmp.type);
             tmp.isvariable = 1;
             this_scope = insert(this_scope, tmp);
-            
+
             free(tmp.type);
             tmp.def = 0;
             tmp.isvariable = 0;
             tmp.isarr = 0;
             tmp.dimension = 0;
-        }
-        free(tmp.name);
-        flgStruct = 0;
+            free(tmp.name);
+                
+            if(newnode->child->bro != NULL) // 不这么写感觉没办法写循环
+                newnode = newnode->child->bro->bro; // 让newnode始终指向DecList
+            else break; // 可能为NULL，提前终止，避免报错
+        } while(newnode != NULL);
+
+        flgArr = 0;
+            
     }
 	| Specifier DecList error{
 		char msg[100];
@@ -561,29 +638,6 @@ VarDec : ID {
         $1->bro = $2;
         $2->bro = $3;
         $3->bro = $4;
-		// why noted ?  -- by jcy
-        // tmp.name = (char*)malloc(sizeof($1->child->id));
-        // strcpy(tmp.name, $1->child->id);
-        // if(search(this_scope, tmp)) {
-        //     char msg[100];
-        //     sprintf(msg, "Error %d at line %d : Redefined variable \'%s\'", REDEFINED_VARIABLE, last_row, tmp.name);
-        //     myerror(msg);
-        // }
-        // else {
-        //     printf("insert array \'%s\'\n", tmp.name);
-        //     tmp.def = 1;
-        //     // tmp.type = (char*)malloc(sizeof($1->child->id));
-        //     // strcpy(tmp.type, $1->child->id);
-        //     tmp.isarr = 1;
-        //     tmp.dimension = $1->bro->bro->intValue;
-        //     this_scope = insert(this_scope, tmp);
-
-        //     free(tmp.type);
-        //     tmp.def = 0;
-        //     tmp.isarr = 0;
-        //     tmp.dimension = 0;
-        // }
-        // free(tmp.name);
     }
     | VarDec LB ID RB {
         $$ = insNode($1, "VarDec", @1.first_line, NON_TERMINAL);
