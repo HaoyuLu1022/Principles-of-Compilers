@@ -17,6 +17,8 @@ struct node {
     struct node *bro;
     int lines;
     char *name;
+    int varDef;
+    int isAssignable;
     NODE_TYPE type;
     union {
         char *id;

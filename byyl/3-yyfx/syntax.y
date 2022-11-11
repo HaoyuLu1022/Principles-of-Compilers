@@ -35,6 +35,7 @@
 	int errors = 0;
     int yydebug = 1;
     int flgStruct = 0, flgArr = 0;
+    char* Compst_return_type = "null";
     struct rb_root mytree = RB_ROOT;
     MyType tmp;
     VariLink this_scope;
@@ -144,25 +145,31 @@ ExtDef : Specifier ExtDecList SEMI {
 
         tmp.name = (char*)malloc(sizeof($2->child->id));
         strcpy(tmp.name, $2->child->id);
-        Mylink ml = search(this_scope, tmp); // 查找前面的作用域里该函数声明对应的结点
-        ml->return_type = (char*)malloc(sizeof($1->child->id));
-        strcpy(ml->return_type, $1->child->id); // 赋给它return type
-       /* //jcy 8
-		if(ml->return_type != $) {				应该有一个从CompSt传下来的return_type
+        //Mylink ml = search(this_scope, tmp); // 查找前面的作用域里该函数声明对应的结点
+        //ml->return_type = (char*)malloc(sizeof($1->child->id));
+        //strcpy(ml->return_type, $1->child->id); // 赋给它return type
+        //jcy 8
+        tmp.return_type = (char*)malloc(sizeof($1->child->id));
+        strcpy(tmp.return_type, $1->child->id);
+        //printf("tmp.return_type: %s \n ", tmp.return_type);
+        //printf("Compst_return_type: %s \n ", Compst_return_type);
+		if(strcmp(tmp.return_type, Compst_return_type)) {
+		//if(tmp.return_type != Compst_return_type) {
 		    char msg[100];
             sprintf(msg, "Error %d at line %d : Type mismatched for return", TYPE_MISMATCH_RETURN, last_row);
             myerror(msg);
 		}
-		//jcy 8	*/
-        MyType newnode = *ml;
-        this_scope = insert(this_scope, newnode); // 拷贝前面作用域中函数声明对应的结点，并插入当前作用域
-
+		//jcy 8	
+        //MyType newnode = *ml;
+        //this_scope = insert(this_scope, newnode); // 拷贝前面作用域中函数声明对应的结点，并插入当前作用域
+		this_scope = insert(this_scope, tmp);
         /*------ To-do: 如何插入参数表 ------*/
         
 
         this_scope = pop_scope(this_scope);
     }
-    | Specifier FunDec SEMI {
+    //暂不考虑附加要求
+    //| Specifier FunDec SEMI {
     	/*------ TO-do: insert Varlist  */
     	/* if search(this_scope, fun_name)		// jcy 19
     	
@@ -174,6 +181,7 @@ ExtDef : Specifier ExtDecList SEMI {
     	// \begin{jcy 18}
     	
     	/*---- To-do: insert Specifier and Varlist   */
+    	/*
     	tmp.name = (char*)malloc(sizeof($2->child->id));
         strcpy(tmp.name, $2->child->id);
     	char msg[100];
@@ -181,7 +189,8 @@ ExtDef : Specifier ExtDecList SEMI {
         myerror(msg);
         
         // \end{jcy 18}				to be continued ... 
-    }
+    }*/
+    
     ;
 
 ExtDecList : VarDec {
@@ -512,6 +521,12 @@ Def : Specifier DecList SEMI {
                 tmp.type = (char*)malloc(sizeof($1->child->id));
                 // printf("%s\n", $1->child->id);
                 strcpy(tmp.type, $1->child->id);
+                //printf("type of %s is %s\n", tmp.name, tmp.type);
+                // \begin{jcy 5}
+                if(newnode->child->child->bro != NULL){
+                	// for int a = 0.5;
+                }
+                // \end{jcy 5}
                 if(flgArr) { // 是数组
                     tmp.isarr = 1;
                     tmp.dimension = newnode->child->child->child->bro->bro->intValue;
@@ -572,6 +587,8 @@ Stmt :
         $$ = insNode($1, "Stmt", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        Compst_return_type = (char*)malloc(sizeof($2->name));
+        strcpy(Compst_return_type, $2->name);
     }
     | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE {
         $$ = insNode($1, "Stmt", @1.first_line, NON_TERMINAL);
@@ -625,6 +642,14 @@ Dec : VarDec {
         $1->bro = $2;
         $2->bro = $3;
         // \begin{jcy 5} record the type of Exp and assign to Dec 用于与后面Specifier进行比较
+        /*tmp.def = 1;
+        tmp.name = (char*)malloc(sizeof($1->child->id));
+        strcpy(tmp.name, $1->child->id);
+        tmp.type = $$->name;
+        tmp.isvariable = 1;
+        this_scope = insert(this_scope, tmp);
+        
+        tmp.def = 0;*/
         
         // \end{jcy 5}
     } 
@@ -661,9 +686,20 @@ Exp : Exp ASSIGNOP Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        // \begin{jcy 6}
+        if($1->isAssignable == 0){
+           	char msg[100];
+        	sprintf(msg, "Error %d at line %d : The left-hand side of assignment must be a variable", NEED_VARIABLE, last_row); 
+			myerror(msg);
+        }
+        // \end{jcy 6}
         //	\begin{jcy 5}
-        //获取两个Exp的类型，进行一致性的判断即可，需要完成变量属性的传递（注意别的Exp产生式中这一步的维护）并完成这里类别的获取
-        
+        if(strcmp($1->name, $3->name)){			//主要还有一个结构体的赋值需要补
+           	char msg[100];
+        	sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+			myerror(msg);
+        }
+        else $$->name = $1->name;
         //	\end{jcy 5}
     }
 	| Exp ASSIGNOP error { 
@@ -673,6 +709,7 @@ Exp : Exp ASSIGNOP Exp {
 		// errors++;
 		myerror(msg);
 	}
+	/*
 	// jcy 6 priority order ? (INT or FLOAT -> Exp)    **be good for use** but conflict
     | INT ASSIGNOP Exp {
     	char msg[100];
@@ -685,15 +722,17 @@ Exp : Exp ASSIGNOP Exp {
 		myerror(msg);
 	}
     // jcy 6
+    */
     // \beign{jcy 7}
     | Exp AND Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        $$->isAssignable = 0;
         if($1->name == $3->name) $$->name = $1->name;
         else{
         	char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
             myerror(msg);
         }
     }
@@ -701,10 +740,11 @@ Exp : Exp ASSIGNOP Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        $$->isAssignable = 0;
         if($1->name == $3->name) $$->name = $1->name;
         else{
         	char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
             myerror(msg);
         }
     }
@@ -712,10 +752,11 @@ Exp : Exp ASSIGNOP Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        $$->isAssignable = 0;
         if($1->name == $3->name) $$->name = $1->name;
         else{
         	char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
             myerror(msg);
         }
     }
@@ -723,10 +764,13 @@ Exp : Exp ASSIGNOP Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        $$->isAssignable = 0;
         if($1->name == $3->name) $$->name = $1->name;
         else{
+        	//printf("type of $1:  %s \n", $1->name);
+        	//printf("type of $3:  %s \n", $3->name);
         	char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
             myerror(msg);
         }
     }
@@ -734,10 +778,11 @@ Exp : Exp ASSIGNOP Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        $$->isAssignable = 0;
         if($1->name == $3->name) $$->name = $1->name;
         else{
         	char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
             myerror(msg);
         }
     }
@@ -745,10 +790,11 @@ Exp : Exp ASSIGNOP Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        $$->isAssignable = 0;
         if($1->name == $3->name) $$->name = $1->name;
         else{
         	char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
             myerror(msg);
         }
     }
@@ -756,10 +802,11 @@ Exp : Exp ASSIGNOP Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        $$->isAssignable = 0;
         if($1->name == $3->name) $$->name = $1->name;
         else{
         	char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for oprands", TYPE_MISMATCH_OPERAND, last_row);
+            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
             myerror(msg);
         }
     }
@@ -769,33 +816,47 @@ Exp : Exp ASSIGNOP Exp {
         $1->bro = $2;
         $2->bro = $3;
         $$->name = $2->name;
-        //加一步Exp类型的传递
+        $$->isAssignable = $2->isAssignable;
     }
     | MINUS Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $$->name = $2->name;
+        $$->isAssignable = 0;
     }
     | NOT Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $$->name = $2->name;
+        $$->isAssignable = 0;
     }
     | ID LP Args RP {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
         $3->bro = $4;
-		// to be continued...
         tmp.name = (char*)malloc(sizeof($1->id));
         strcpy(tmp.name, $1->id);
+        $$->isAssignable = 0;
         if(search(this_scope, tmp)) { 
             tmp.def = 1;
-            // tmp.type = $1->type;	这些地方是否还需要加一个函数参数是否符合的判定，并且把函数返回类型赋给Exp	// to be continued
-            // my_insert(&mytree, tmp);
-            this_scope = insert(this_scope, tmp);
+            Mylink ml = search(this_scope, tmp);
+            if(ml->isfunc){
+            	// tmp.type = $1->type;	这些地方是否还需要加一个函数参数是否符合的判定，并且把函数返回类型赋给Exp	// to be continued
+            	// my_insert(&mytree, tmp);
+	            this_scope = insert(this_scope, tmp);
+            }
+			else{
+			//	\begin{jcy 11}
+		        char msg[100];
+            	sprintf(msg, "Error %d at line %d : \'%s\' is not a function", NOT_FUNCTION, last_row, tmp.name);
+            	myerror(msg);
+            
+            // 	\end{jcy 11}
+			}
         }
         else { // 函数未定义
+        	//$$->varDef = 0;		不用写这一句是因为函数值不能写在赋值表达式的左边
             char msg[100];
             sprintf(msg, "Error %d at line %d : Undefined function \'%s\'", UNDEFINED_FUNCTION, last_row, tmp.name);
             myerror(msg);
@@ -808,13 +869,26 @@ Exp : Exp ASSIGNOP Exp {
 		// to be continued ...
         tmp.name = (char*)malloc(sizeof($1->id));
         strcpy(tmp.name, $1->id);
+        $$->isAssignable = 0;
         if(search(this_scope, tmp)) { 
             tmp.def = 1;
-            // tmp.type = $1->type;	这些地方是否还需要加一个函数参数是否符合的判定，并且把函数返回类型赋给Exp	// to be continued
-            // my_insert(&mytree, tmp);
-            this_scope = insert(this_scope, tmp);
+            Mylink ml = search(this_scope, tmp);
+            if(ml->isfunc){
+            	// tmp.type = $1->type;	这些地方是否还需要加一个函数参数是否符合的判定，并且把函数返回类型赋给Exp	// to be continued
+            	// my_insert(&mytree, tmp);
+	            this_scope = insert(this_scope, tmp);
+            }
+			else{
+			//	\begin{jcy 11}
+		        char msg[100];
+            	sprintf(msg, "Error %d at line %d : \'%s\' is not a function", NOT_FUNCTION, last_row, tmp.name);
+            	myerror(msg);
+            
+            // 	\end{jcy 11}
+			}
         }
         else { // 函数未定义
+        	//$$->varDef = 0;		不用写这一句是因为函数值不能写在赋值表达式的左边
             char msg[100];
             sprintf(msg, "Error %d at line %d : Undefined function \'%s\'", UNDEFINED_FUNCTION, last_row, tmp.name);
             myerror(msg);
@@ -826,6 +900,38 @@ Exp : Exp ASSIGNOP Exp {
         $2->bro = $3;
         $3->bro = $4;
         // \begin{jcy 10}
+        if($1->type == STRING_TYPE){			//主要是因为直接是数值的话，它没有RBT上的name
+		    tmp.name = (char*)malloc(sizeof($1->id));
+		    strcpy(tmp.name, $1->id);
+		    Mylink ml = search(this_scope, tmp);
+		    if(search(this_scope, tmp)){
+		    	if(ml->isarr){
+		    		// \begin{jcy 12}
+		    		if($3->name != "int"){
+		    			char msg[100];
+		        		sprintf(msg, "Error %d at line %d : \'%s\' is not an integer", ARRAY_ACCESS_OPERATEOR_NOT_INTEGER, last_row, tmp.name);
+		        		myerror(msg);
+		    		}
+		    		// \end{jcy 12}
+		    	}
+		    	else{
+		    		char msg[100];
+		        	sprintf(msg, "Error %d at line %d : \'%s\' is not an array", NOT_ARRAY, last_row, tmp.name);
+		        	myerror(msg);
+		    	}
+		    }
+		    else{
+		        char msg[100];
+		        sprintf(msg, "Error %d at line %d : Undefined variable \'%s\'", UNDEFINED_VARIABLE, last_row, tmp.name);
+		        myerror(msg);
+		    }
+        
+        }
+        else{
+		    char msg[100];
+		    sprintf(msg, "Error %d at line %d : \'%s\' is not an array", NOT_ARRAY, last_row, tmp.name);
+	        myerror(msg);        
+		}
         //一个$1是否为数组变量的检查，一个$3是否为整数的检查（忽略段错误）
         // 类型传递
         // \end{jcy 10}
@@ -835,33 +941,56 @@ Exp : Exp ASSIGNOP Exp {
 		$1->bro = $2;
 		$2->bro = $3;
 		//	\begin{jcy 13}
-        tmp.name = (char*)malloc(sizeof($1->id));	//不一定对，我搞不清楚往下走几层能获取到我想要的正确信息
-        strcpy(tmp.name, $1->id);
-        if(search(this_scope, tmp)) { //先获取这个名字的东西，然后看看它是不是结构体：如果不是结构体，则判为错误13；若是结构体，开始看ID是否存在：如果ID存在，将其属性赋给规约后的结果；若ID不存在，则判为错误14
-            tmp.def = 1;
-            // tmp.type = $1->type;
-            // my_insert(&mytree, tmp);
-            this_scope = insert(this_scope, tmp);
-        }
-        else { // 函数未定义
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Undefined function \'%s\'", UNDEFINED_FUNCTION, last_row, tmp.name);
-            myerror(msg);
-        }
+		if($1->type == STRING_TYPE){
+		    tmp.name = (char*)malloc(sizeof($1->id));
+		    strcpy(tmp.name, $1->id);
+		    if(search(this_scope, tmp)) { //先获取这个名字的东西，然后看看它是不是结构体：如果不是结构体，则判为错误13；若是结构体，开始看ID是否存在：如果ID存在，将其属性赋给规约后的结果；若ID不存在，则判为错误14
+		        Mylink ml = search(this_scope, tmp);
+		        if(ml->isstruct){
+		        	// error 14 	to be continued... 
+		        	this_scope = insert(this_scope, tmp);
+		        }
+		        // tmp.type = $1->type;
+		        // my_insert(&mytree, tmp);
+		        else{
+		        	char msg[100];
+	        		sprintf(msg, "Error %d at line %d : Illegal use of \'.\'", DOT_ILLEGAL_USE, last_row);
+	        		myerror(msg);
+		        }
+		    }
+		    else { // 结构体未定义
+		    	$$->varDef = 0;
+		    	// \begin{jcy 17}
+		        char msg[100];
+		        sprintf(msg, "Error %d at line %d : Undefined struct \'%s\'", UNDEFINED_STRUCT, last_row, tmp.name);
+		        myerror(msg);
+		        // \end{jcy 17}
+		    }
+		}
+		else{
+			char msg[100];
+	        sprintf(msg, "Error %d at line %d : Illegal use of \'.\'", DOT_ILLEGAL_USE, last_row);
+	        myerror(msg);
+		}
         //	\end{jcy 13}
 	}
 	| ID {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
+		$$->type = STRING_TYPE;
         tmp.name = (char*)malloc(sizeof($1->id));
         strcpy(tmp.name, $1->id);
+        Mylink ml = search(this_scope, tmp);
+        printf("type.name:   %s  \n", tmp.name);
         if(search(this_scope, tmp)) { 
-        	
+        	$$->name = ml->type;
+        	//printf("ml->type: %s \n", )
             tmp.def = 1;
             // tmp.type = $1->type;
             // my_insert(&mytree, tmp);
             this_scope = insert(this_scope, tmp);
         }
         else { // 变量未定义
+        	$$->varDef = 0;
             char msg[100];
             sprintf(msg, "Error %d at line %d : Undefined variable \'%s\'", UNDEFINED_VARIABLE, last_row, tmp.name);
             myerror(msg);
@@ -871,14 +1000,16 @@ Exp : Exp ASSIGNOP Exp {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
 		//tmp.type = (char*)malloc(sizeof($1->name));
         //strcpy(tmp.type, $1->name);
-        $$->name = "INT";
+        $$->name = "int";
+        $$->isAssignable = 0;
 		//printf("int value = %d\n", $1->intValue);
 		//this_scope = insert(this_scope, tmp);
 		//free(tmp.type);
 	}
 	| FLOAT {
 		$$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
-		$$->name = "FLOAT";
+		$$->name = "float";
+		$$->isAssignable = 0;
 		//printf("float value = %f\n", $1->floatValue);			似乎不起作用
 	}
 	| LP error RP {
