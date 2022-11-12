@@ -5,6 +5,7 @@
         "*.y": "c",
         "xlocale": "c",
         "system_error": "c",
-        "*.cmm": "cpp"
+        "*.cmm": "cpp",
+        "syntaxtree.h": "c"
     }
 }

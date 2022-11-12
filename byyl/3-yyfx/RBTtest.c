@@ -61,7 +61,7 @@ void print_mynode(MyType info){   // 这个本来没必要写的，但是怕铸�
     */
     printf("def : %d\n", info.def);
     printf("name : %s\n", info.name);
-    printf("type : %s\n", info.type);
+    // printf("type : %s\n", info.type);
     if(info.isvariable || info.isarr)
         printf("type : %s\n", info.type);
     if(info.isarr)
@@ -69,7 +69,7 @@ void print_mynode(MyType info){   // 这个本来没必要写的，但是怕铸�
     if(info.isfunc)
         printf("return_type : %s\n", info.return_type);
     if(info.isstruct){
-        printf("struct : struct maybe...\n");
+        printf("struct : struct maybe...\nVarilist:\n");
         my_print(&info.varilist);
     }
 }
@@ -205,6 +205,7 @@ void my_print(struct rb_root *root)
 {
     if (root!=NULL && root->rb_node!=NULL)
         print_rbtree(root->rb_node, rb_entry(root->rb_node, struct my_node, rb_node)->info,  0);
+    else printf("NULL\n");
 }
 
 Mylink search(VariLink vt, MyType x){
