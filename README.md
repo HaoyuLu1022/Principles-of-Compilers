@@ -111,7 +111,7 @@ gcc syntax.tab.c SyntaxTree.c -lfl -ly -o parser
 -   [x] 6.   赋值号左侧出现右值表达式
 -   [x] 7.   操作数类型不匹配
 -   [x] 8.   Return类型不匹配
--   [ ] 9.   函数实参形参不匹配
+-   [x] 9.   函数实参形参不匹配
 -   [x] 10.   对非数组变量进行数组访问
 -   [x] 11.   对普通变量调用函数
 -   [x] 12.   数组访问符中出现非整数
@@ -124,3 +124,7 @@ gcc syntax.tab.c SyntaxTree.c -lfl -ly -o parser
 -   [ ] 19.   *函数声明冲突
 
 注：*代表附加要求
+
+-   自底向上传递属性参数的思路会破坏语法树结构，导致段错误
+-   使用ASSIGNOP的产生式有两处，Exp -> Exp ASSIGNOP Exp和VarDec -> VarDec ASSIGNOP Exp，所以要分开实现
+-   声明和定义相关的产生式处语义分析的处理非常重要

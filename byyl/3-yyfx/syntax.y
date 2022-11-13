@@ -2,6 +2,7 @@
 	#include <stdio.h>
 	#include <stdlib.h>
     #include <ctype.h>
+    #include <assert.h>
 	#include "SyntaxTree.h"
     // #include "RBTtest.c"
 
@@ -27,6 +28,9 @@
     #define UNDEFINED_STRUCT 17
     #define DECLARED_BUT_NOT_DEFINED 18
     #define AMBIGUATING_FUNCTION_DECLARATION 19
+
+    #define MIN(i, j) (((i) < (j)) ? (i) : (j))
+    #define MAX(i, j) (((i) > (j)) ? (i) : (j))
 
 
 	void yyerror(char*);
@@ -151,14 +155,6 @@ ExtDef : Specifier ExtDecList SEMI {
             // printf("Variable %s has type %s\n", tmp.name, tmp.type);
             tmp.isvariable = 1;
             this_scope = insert(this_scope, tmp);
-
-            // free(tmp.type);
-            // tmp.def = 0;
-            // tmp.isvariable = 0;
-            // tmp.isstruct = 0;
-            // tmp.isarr = 0;
-            // tmp.dimension = 0;
-            // free(tmp.name);
                 
             if(newnode->child->bro != NULL) // 不这么写感觉没办法写循环
                 newnode = newnode->child->bro->bro; // 让newnode始终指向DecList
@@ -180,11 +176,9 @@ ExtDef : Specifier ExtDecList SEMI {
         MyType tmp = MyType_default;
         // tmp.name = (char*)malloc(sizeof($2->child->id));
         strcpy(tmp.name, $2->child->id);
-
+        tmp.isfunc = 1;
         // tmp.return_type = (char*)malloc(sizeof($1->child->id));
         strcpy(tmp.return_type, $1->child->id);
-        // printf("tmp.return_type: %s \n ", tmp.return_type);
-        // printf("current return type: %s\n", Compst_return_type);
         if(strcmp(Compst_return_type, "null")) {
             if(strcmp(tmp.return_type, Compst_return_type)) {
             // if(tmp.return_type != Compst_return_type) {
@@ -193,15 +187,60 @@ ExtDef : Specifier ExtDecList SEMI {
                 myerror(msg);
             }
         }
-		
-		// jcy 8	
-        // MyType newnode = *ml;
-        // this_scope = insert(this_scope, newnode); // 拷贝前面作用域中函数声明对应的结点，并插入当前作用域
-		
-        this_scope = insert(this_scope, tmp);
-        my_insert(&this_scope->last->my_root, tmp);
 
+        if(search(this_scope, tmp)) {
+            char msg[100];
+            sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
+            myerror(msg);
+        }
+		else {
+            tmp.isfunc = 1;
+            tmp.def = 1;
+            if($2->child->bro->bro->bro) { // 说明 FunDec -> ID LP VarList RP
+                struct node* n = $2->child->bro->bro; // n始终指向VarList
+                char varifunc[12] = {"00_varifunc"};
+                do {
+                    MyType t = MyType_default;
+                    t.def = 1;
+                    t.isvariable = 1;
+                    strcpy(t.type, n->child->child->child->id);
+                    strcpy(t.name, n->child->child->bro->child->id);
+                    int result = my_insert(&tmp.varilist, t);
+
+                    t = MyType_default;
+                    strcpy(t.type, n->child->child->child->id);
+                    strcpy(t.name, varifunc);
+                    varifunc[1] += 1;
+                    if(varifunc[1] > '9'){
+                        varifunc[0] += 1;
+                        varifunc[1] = 0;
+                    }
+                    result = my_insert(&tmp.varilist, t);
+
+                    if(n->child->bro) {
+                        n = n->child->bro->bro;
+                    }
+                    else break;
+                } while(n);
+                
+            }
+            else {
+                // printf("没啥\n");
+            }
+            // my_print(&tmp.varilist);
+            this_scope = insert(this_scope, tmp);
+            my_insert(&this_scope->last->my_root, tmp);
+        }
+		// jcy 8	
+        
         this_scope = pop_scope(this_scope);
+    }
+    | Specifier FunDec SEMI {
+        $$ = insNode($1, "ExtDef", @1.first_line, NON_TERMINAL);
+        $1->bro = $2;
+        $2->bro = $3;
+
+
     }
     ;
 
@@ -361,55 +400,45 @@ FunDec : ID LP VarList RP {
         $2->bro = $3;
         $3->bro = $4;
 
-        MyType tmp = MyType_default;
-        // tmp.name = (char*)malloc(sizeof($1->id));
-        strcpy(tmp.name, $1->id);
-        if(search(this_scope, tmp)) { // 函数重定义
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
-            myerror(msg);
-        }
-        else {
-            // printf("insert function \'%s\'\n", tmp.name);
-            tmp.def = 1;
-            tmp.isfunc = 1;
-            // MyType temp;
-            struct node *newnode = $3;
-            do { // 函数的参数列表
-            MyType temp = MyType_default;
-                temp.def = 1;
-                temp.isvariable = 1;
-                // printf("Variable type: %s\n", newnode->child->child->child->id);
-                // temp.type = (char*)malloc(sizeof(newnode->child->child->child->id));
-                strcpy(temp.type, newnode->child->child->child->id);
+        // MyType tmp = MyType_default;
+        // // tmp.name = (char*)malloc(sizeof($1->id));
+        // strcpy(tmp.name, $1->id);
+        // // if(search(this_scope, tmp)) { // 函数重定义
+        // //     char msg[100];
+        // //     sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
+        // //     myerror(msg);
+        // // }
+        // // else {
+        //     // printf("insert function \'%s\'\n", tmp.name);
+        //     tmp.def = 1;
+        //     tmp.isfunc = 1;
+        //     // MyType temp;
+        //     struct node *newnode = $3;
+        //     do { // 函数的参数列表
+        //     MyType temp = MyType_default;
+        //         temp.def = 1;
+        //         temp.isvariable = 1;
+        //         // printf("Variable type: %s\n", newnode->child->child->child->id);
+        //         // temp.type = (char*)malloc(sizeof(newnode->child->child->child->id));
+        //         strcpy(temp.type, newnode->child->child->child->id);
 
-                // printf("Variable name: %s\n", newnode->child->child->bro->child->id);
-                // temp.name = (char*)malloc(sizeof(newnode->child->child->bro->child->id));
-                strcpy(temp.name, newnode->child->child->bro->child->id);
-                // printf("Variable %s is type %s\n", temp.name, temp.type);
+        //         // printf("Variable name: %s\n", newnode->child->child->bro->child->id);
+        //         // temp.name = (char*)malloc(sizeof(newnode->child->child->bro->child->id));
+        //         strcpy(temp.name, newnode->child->child->bro->child->id);
+        //         // printf("Variable %s is type %s\n", temp.name, temp.type);
 
-                // tmp.varilist = (struct rb_root*)malloc(sizeof(struct rb_root*));
-                int result = my_insert(&tmp.varilist, temp);
-                // printf("Whether successful: %d\n", result);
+        //         // tmp.varilist = (struct rb_root*)malloc(sizeof(struct rb_root*));
+        //         int result = my_insert(&tmp.varilist, temp);
+        //         // printf("Whether successful: %d\n", result);
 
-                temp.def = 0;
-                temp.isvariable = 0;
-                // free(temp.type);
-                // free(temp.name);
+        //         if(newnode->child->bro != NULL) {
+        //             newnode = newnode->child->bro->bro;
+        //         }
+        //         else break;
+        //     } while(newnode != NULL);
 
-                if(newnode->child->bro != NULL) {
-                    newnode = newnode->child->bro->bro;
-                }
-                else break;
-            } while(newnode != NULL);
-
-            this_scope = insert(this_scope, tmp);
-
-            // free(tmp.type);
-            // free(tmp.varilist);
-            tmp.def = 0;
-            tmp.isfunc = 0;
-        }
+            // this_scope = insert(this_scope, tmp);
+        // }
         // printf("%s\n", tmp.name);
         // free(tmp.name);
     }
@@ -418,26 +447,26 @@ FunDec : ID LP VarList RP {
         $1->bro = $2;
         $2->bro = $3;
 
-        MyType tmp = MyType_default;
-        // tmp.name = (char*)malloc(sizeof($1->id));
-        strcpy(tmp.name, $1->id);
-        if(search(this_scope, tmp)) { // 函数重定义
-            // printf("insert function \'%s\'\n", tmp.name);
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
-            myerror(msg);
-        }
-        else {
-            // printf("insert function \'%s\'\n", tmp.name);
-            tmp.def = 1;
-            tmp.isfunc = 1;
-            this_scope = insert(this_scope, tmp);
-            // printf("%s\n", tmp.name);
+        // MyType tmp = MyType_default;
+        // // tmp.name = (char*)malloc(sizeof($1->id));
+        // strcpy(tmp.name, $1->id);
+        // if(search(this_scope, tmp)) { // 函数重定义
+        //     // printf("insert function \'%s\'\n", tmp.name);
+        //     char msg[100];
+        //     sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
+        //     myerror(msg);
+        // }
+        // else {
+        //     // printf("insert function \'%s\'\n", tmp.name);
+        //     tmp.def = 1;
+        //     tmp.isfunc = 1;
+        //     this_scope = insert(this_scope, tmp);
+        //     // printf("%s\n", tmp.name);
 
-            // free(tmp.type);
-            tmp.def = 0;
-            tmp.isfunc = 0;
-        }
+        //     // free(tmp.type);
+        //     tmp.def = 0;
+        //     tmp.isfunc = 0;
+        // }
         // printf("%s\n", tmp.name);
         // free(tmp.name);
     }
@@ -747,13 +776,45 @@ Exp : Exp ASSIGNOP Exp {
         $1->bro = $2;
         $2->bro = $3;
 
-        if($1->child->type != STRING_TYPE) {
+        // printf("exp: %d\n", $1->child->child->type);
+        if($1->child->type != STRING_TYPE && $1->child->type != NON_TERMINAL) {
             char msg[100];
         	sprintf(msg, "Error %d at line %d : The left-hand side of assignment must be a variable", NEED_VARIABLE, last_row); 
 			myerror(msg);
         }
+        else if($1->child->type == NON_TERMINAL) { // 说明可能是数组
+            MyType t1 = MyType_default;
+            strcpy(t1.name, $1->child->child->id);
+            MyType *t2 = search(this_scope, t1);
+
+            // printf("%s\n", $3->child->name);
+            if(!strcmp($3->child->name, "ID")) { // $3->child->type == STRING_TYPE
+                MyType t3 = MyType_default;
+                // printf("%s\n", $3->child->child->id);
+                strcpy(t3.name, $3->child->child->id);
+                MyType* t4 = search(this_scope, t3);
+                if(strcmp(t2->type, t4->type)) {
+                    char msg[100];
+                    sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    myerror(msg);
+                }
+            }
+            else if(!strcmp($3->child->name, "FLOAT")) {
+                if(strcmp(t2->type, "float")) {
+                    char msg[100];
+                    sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    myerror(msg);
+                }
+            }
+            else if(!strcmp($3->child->name, "INT")) {
+                if(strcmp(t2->type, "int")) {
+                    char msg[100];
+                    sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    myerror(msg);
+                }
+            }
+        }
         else {
-            
             MyType t1 = MyType_default;
             strcpy(t1.name, $1->child->id);
             MyType *t2 = search(this_scope, t1);
@@ -1249,12 +1310,142 @@ Exp : Exp ASSIGNOP Exp {
         $$->isAssignable = 0;
         MyType* mt = search(this_scope, tmp);
         if(mt != NULL) { 
-            tmp.def = 1;
+            // tmp.def = 1;
             
             if(mt->isfunc) {
-                // tmp.type = $1->type;
-                // my_insert(&mytree, tmp);
-                this_scope = insert(this_scope, tmp);
+                // this_scope = insert(this_scope, tmp);
+                // dxr to do
+                struct node* newnode = $3;
+                // printf("%s\n", newnode->child->child->id);
+                char varifunc[12] = {"00_varifunc"};
+                char Parameter[10][10];
+                char Arguments[10][10];
+                int right = 1, vari_num = 0, para_num = 0;
+                MyType parameter = MyType_default; // 形参
+                do { // 函数的参数列表 实参
+
+                    
+                    strcpy(parameter.name, varifunc);
+                    // printf("%s\n", parameter.name);
+                    struct my_node* ttp = my_search(&(mt->varilist), parameter);
+                    // print_mynode(ttp->info);
+                    // my_print(&(mt->varilist));
+                    if(ttp != NULL) {
+                        parameter = ttp->info;
+                        // printf("%s : %s\n", mt->name, parameter.type);
+                    }  // 后面做了
+                    
+                    if(strcmp(newnode->child->child->name, "ID")){  // 不是变量
+                        // printf("%s\n", newnode->child->child->name);
+                        char argu[20];
+                        // printf("%d\n", newnode->child->child->type);
+                        if(strcmp(newnode->child->child->name, "INT") == 0){
+                            strcpy(argu, "int");
+                        }
+                        else if(strcmp(newnode->child->child->name, "FLOAT") == 0){
+                            strcpy(argu, "float");
+                        }
+                        else {
+                            printf("你说你妈呢\n");
+                            exit(0);
+                        }
+                        // printf("%s\n", argu);
+                        // Arguments[vari_num] = (char*)malloc(sizeof(argu));
+                        strcpy(Arguments[vari_num++], argu);
+                        if(ttp == NULL || strcmp(parameter.type, argu)){
+                            right = 0;
+                            // printf("%s %s %s\n", mt->name, parameter.type, argu);
+                        }
+                        if(ttp != NULL){
+                            // Parameter[para_num] = (char*)malloc(sizeof(parameter.type));
+                            strcpy(Parameter[para_num++], parameter.type);
+                        }
+                    }
+                    else{
+                        MyType argu = MyType_default;
+                        strcpy(argu.name, newnode->child->child->id);
+                        Mylink tttp = search(this_scope, argu); // 据卢爹说一定能搜到，在此就直接拿了用
+                        assert(tttp != NULL);
+                        argu = *tttp;
+                        // print_mynode(argu);
+                        // Arguments[vari_num] = (char*)malloc(sizeof(argu.type));
+                        strcpy(Arguments[vari_num++], argu.type);
+                        if(ttp==NULL || strcmp(parameter.type, argu.type)){
+                            right = 0;
+                        }
+                        if(ttp != NULL){
+                            // Parameter[para_num] = (char*)malloc(sizeof(parameter.type));
+                            strcpy(Parameter[para_num++], parameter.type);
+                        }
+                    }
+                    // parameter.def = 0;
+                    // parameter.isvariable = 1;
+                    // printf("Variable type: %s\n", newnode->child->child->name);
+                    // temp.type = (char*)malloc(sizeof(newnode->child->child->child->id));
+                    // strcpy(temp.type, newnode->child->child->id);
+
+                    // printf("Variable name: %s\n", newnode->child->bro->child->name);
+                    // // temp.name = (char*)malloc(sizeof(newnode->child->child->bro->child->id));
+                    // strcpy(temp.name, newnode->child->bro->child->id);
+                    // printf("Variable %s is type %s\n", temp.name, temp.type);
+
+                    // tmp.varilist = (struct rb_root*)malloc(sizeof(struct rb_root*));
+                    // int result = my_insert(&tmp.varilist, temp);
+                    // printf("Whether successful: %d\n", result);
+
+                    // temp.def = 0;
+                    // temp.isvariable = 0;
+                    // free(temp.type);
+                    // free(temp.name);
+                    // temp = MyType_default;
+                    // temp.isvariable = 1;
+                    // strcpy(temp.type, newnode->child->child->child->id);
+                    // strcpy(temp.name, varifunc);
+                    varifunc[1] += 1;
+                    if(varifunc[1] > '9'){
+                        varifunc[0] += 1;
+                        varifunc[1] = 0;
+                    }
+                    // result = my_insert(&tmp.varilist, temp);
+                    if(newnode->child->bro != NULL) {
+                        newnode = newnode->child->bro->bro;
+                    }
+                    else break;
+                } while(newnode != NULL);
+                strcpy(parameter.name, varifunc);
+                struct my_node* tpp = my_search(&(mt->varilist), parameter);
+                while(tpp){
+                    parameter = tpp->info;
+                    strcpy(Parameter[para_num++], parameter.type);
+                    varifunc[1] += 1;
+                    if(varifunc[1] > '9'){
+                        varifunc[0] += 1;
+                        varifunc[1] = 0;
+                    }
+                    strcpy(parameter.name, varifunc);
+                    tpp = my_search(&(mt->varilist), parameter);
+                    right = 0;
+                }
+                if(right == 0) {
+                    // char msg[1000];
+                    printf("Error %d at line %d : Function \'%s(", FUNCTION_MISMATCH, last_row, mt->name);
+                    for(int i = 0; i < vari_num; i ++){
+                        if(i != vari_num - 1)
+                            printf("%s,", Arguments[i]);
+                        else
+                            printf("%s", Arguments[i]);
+                    }
+                    printf(")\' is not applicable for arguments \'%s(", mt->name);
+                    for(int i = 0; i < para_num; i ++){
+                        if(i != para_num - 1)
+                            printf("%s,", Parameter[i]);
+                        else
+                            printf("%s", Parameter[i]);
+                    }
+                    printf(")\'");
+                    printf("\n");
+                    errors ++;
+                }
             }
             else {
                 //	\begin{jcy 11}
@@ -1281,11 +1472,50 @@ Exp : Exp ASSIGNOP Exp {
         $$->isAssignable = 0;
         MyType* mt = search(this_scope, tmp);
         if(mt != NULL) { 
-            tmp.def = 1;
+            // tmp.def = 1;
             if(mt->isfunc) {
                 // tmp.type = $1->type;
                 // my_insert(&mytree, tmp);
-                this_scope = insert(this_scope, tmp);
+                // this_scope = insert(this_scope, tmp);
+                char varifunc[12] = {"00_varifunc"};
+                char Parameter[10][10];
+                char Arguments[10][10];
+                int right = 1, vari_num = 0, para_num = 0;
+                MyType parameter = MyType_default; // 形参
+                strcpy(parameter.name, varifunc);
+                struct my_node* tpp = my_search(&(mt->varilist), parameter);
+                while(tpp){
+                    parameter = tpp->info;
+                    strcpy(Parameter[para_num++], parameter.type);
+                    varifunc[1] += 1;
+                    if(varifunc[1] > '9'){
+                        varifunc[0] += 1;
+                        varifunc[1] = 0;
+                    }
+                    strcpy(parameter.name, varifunc);
+                    tpp = my_search(&(mt->varilist), parameter);
+                    right = 0;
+                }
+                if(right == 0) {
+                    // char msg[1000];
+                    printf("Error %d at line %d : Function \'%s(", FUNCTION_MISMATCH, last_row, mt->name);
+                    for(int i = 0; i < vari_num; i ++){
+                        if(i != vari_num - 1)
+                            printf("%s,", Arguments[i]);
+                        else
+                            printf("%s", Arguments[i]);
+                    }
+                    printf(")\' is not applicable for arguments \'%s(", mt->name);
+                    for(int i = 0; i < para_num; i ++){
+                        if(i != para_num - 1)
+                            printf("%s,", Parameter[i]);
+                        else
+                            printf("%s", Parameter[i]);
+                    }
+                    printf(")\'");
+                    printf("\n");
+                    errors ++;
+                }
             }
             else {
                 //	\begin{jcy 11}
@@ -1354,10 +1584,11 @@ Exp : Exp ASSIGNOP Exp {
 		$2->bro = $3;
 
         MyType tmp = MyType_default;
-        if($1->type == STRING_TYPE) {
+        if($1->child->type == STRING_TYPE) {
 		    // tmp.name = (char*)malloc(sizeof($1->child->id));
 		    strcpy(tmp.name, $1->child->id);
             MyType* ml = search(this_scope, tmp);
+            // print(this_scope);
 		    if(ml != NULL) { //先获取这个名字的东西，然后看看它是不是结构体：如果不是结构体，则判为错误13；若是结构体，开始看ID是否存在：如果ID存在，将其属性赋给规约后的结果；若ID不存在，则判为错误14
 		        // Mylink ml = search(this_scope, tmp);
 		        if(ml->isstruct) {
@@ -1500,6 +1731,8 @@ int main(int argc, char** argv) {
 	yylineno = 1;
 	yyrestart(f);
 	yyparse();
+
+    /*----检查Error 18和19----*/
 
 	FILE *f1 = fopen("output.txt", "w");
 	if(!f1) {
