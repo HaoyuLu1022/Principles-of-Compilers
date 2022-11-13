@@ -403,33 +403,25 @@ FunDec : ID LP VarList RP {
         // MyType tmp = MyType_default;
         // // tmp.name = (char*)malloc(sizeof($1->id));
         // strcpy(tmp.name, $1->id);
-        // // if(search(this_scope, tmp)) { // 函数重定义
-        // //     char msg[100];
-        // //     sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
-        // //     myerror(msg);
-        // // }
-        // // else {
-        //     // printf("insert function \'%s\'\n", tmp.name);
+        // if(search(this_scope, tmp)) { // 函数重定义
+        //     char msg[100];
+        //     sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
+        //     myerror(msg);
+        // }
+        // else {
+            // printf("insert function \'%s\'\n", tmp.name);
         //     tmp.def = 1;
         //     tmp.isfunc = 1;
-        //     // MyType temp;
         //     struct node *newnode = $3;
         //     do { // 函数的参数列表
         //     MyType temp = MyType_default;
         //         temp.def = 1;
         //         temp.isvariable = 1;
-        //         // printf("Variable type: %s\n", newnode->child->child->child->id);
-        //         // temp.type = (char*)malloc(sizeof(newnode->child->child->child->id));
+
         //         strcpy(temp.type, newnode->child->child->child->id);
-
-        //         // printf("Variable name: %s\n", newnode->child->child->bro->child->id);
-        //         // temp.name = (char*)malloc(sizeof(newnode->child->child->bro->child->id));
         //         strcpy(temp.name, newnode->child->child->bro->child->id);
-        //         // printf("Variable %s is type %s\n", temp.name, temp.type);
 
-        //         // tmp.varilist = (struct rb_root*)malloc(sizeof(struct rb_root*));
         //         int result = my_insert(&tmp.varilist, temp);
-        //         // printf("Whether successful: %d\n", result);
 
         //         if(newnode->child->bro != NULL) {
         //             newnode = newnode->child->bro->bro;
@@ -439,36 +431,29 @@ FunDec : ID LP VarList RP {
 
             // this_scope = insert(this_scope, tmp);
         // }
-        // printf("%s\n", tmp.name);
-        // free(tmp.name);
     }
     | ID LP RP {
         $$ = insNode($1, "FunDec", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
 
-        // MyType tmp = MyType_default;
-        // // tmp.name = (char*)malloc(sizeof($1->id));
+        
         // strcpy(tmp.name, $1->id);
         // if(search(this_scope, tmp)) { // 函数重定义
-        //     // printf("insert function \'%s\'\n", tmp.name);
+        
         //     char msg[100];
-        //     sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
+        //     sprin zxxxdxxxxxxxxxxx        tf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
         //     myerror(msg);
         // }
         // else {
-        //     // printf("insert function \'%s\'\n", tmp.name);
+        
         //     tmp.def = 1;
         //     tmp.isfunc = 1;
         //     this_scope = insert(this_scope, tmp);
-        //     // printf("%s\n", tmp.name);
 
-        //     // free(tmp.type);
         //     tmp.def = 0;
         //     tmp.isfunc = 0;
         // }
-        // printf("%s\n", tmp.name);
-        // free(tmp.name);
     }
 	| ID LP error RP {
 		char msg[100];
@@ -561,7 +546,7 @@ Def : Specifier DecList SEMI {
                 strcpy(tmp.name, newnode->child->child->child->child->id);
             }
 
-            if(search(this_scope, tmp)) { // 两种可能：struct xx {...} yy; 或 int a;
+            if(my_search(&this_scope->my_root, tmp)) { // 两种可能：struct xx {...} yy; 或 int a;
                 char msg[100];
                 if(!flgStruct) // 普通变量声明
                     sprintf(msg, "Error %d at line %d : Redefined variable \'%s\'", REDEFINED_VARIABLE, last_row, tmp.name);
@@ -622,20 +607,15 @@ Def : Specifier DecList SEMI {
             tmp.isvariable = 1;
             this_scope = insert(this_scope, tmp);
 
-            // print(this_scope);
-
             // free(tmp.type);
-            tmp.def = 0;
-            tmp.isvariable = 0;
-            tmp.isarr = 0;
-            tmp.isstruct = 0;
-            tmp.dimension = 0;
             // free(tmp.name);
                 
             if(newnode->child->bro) // 不这么写感觉没办法写循环
                 newnode = newnode->child->bro->bro; // 让newnode始终指向DecList
             else break; // 可能为NULL，提前终止，避免报错
         } while(newnode);
+        
+        // print(this_scope);
 
         // flgStruct = 0;
         flgArr = 0;        
@@ -776,7 +756,7 @@ Exp : Exp ASSIGNOP Exp {
         $1->bro = $2;
         $2->bro = $3;
 
-        // printf("exp: %d\n", $1->child->child->type);
+        // printf("exp: %s\n", $1->child->name);
         if($1->child->type != STRING_TYPE && $1->child->type != NON_TERMINAL) {
             char msg[100];
         	sprintf(msg, "Error %d at line %d : The left-hand side of assignment must be a variable", NEED_VARIABLE, last_row); 
@@ -819,11 +799,11 @@ Exp : Exp ASSIGNOP Exp {
             strcpy(t1.name, $1->child->id);
             MyType *t2 = search(this_scope, t1);
 
-            // printf("%s\n", $3->child->name);
+            // printf("%s\n", $3->child->id);
             if(!strcmp($3->child->name, "ID")) { // $3->child->type == STRING_TYPE
                 MyType t3 = MyType_default;
                 // printf("%s\n", $3->child->child->id);
-                strcpy(t3.name, $3->child->child->id);
+                strcpy(t3.name, $3->child->id);
                 MyType* t4 = search(this_scope, t3);
                 if(strcmp(t2->type, t4->type)) {
                     char msg[100];
