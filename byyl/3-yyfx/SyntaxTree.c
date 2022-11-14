@@ -11,7 +11,7 @@ struct node *iniNode(char *name, int lines, NODE_TYPE t) {
     newNode->isAssignable = 1;
     if(!strcmp(newNode->name, "INT") || newNode->type == INT_TYPE)
         newNode->intValue = atoi(yytext);
-    else if(!strcmp(newNode->name, "FLOAT")|| newNode->type == FLOAT_TYPE)
+    else if(!strcmp(newNode->name, "FLOAT") || newNode->type == FLOAT_TYPE)
         newNode->type = atof(yytext);
     else newNode->intValue = 1;
     return newNode;
@@ -33,10 +33,10 @@ void printNode(struct node *n, FILE *f, int depth) {
     if(n->type == STRING_TYPE) {
         fprintf(f, "%s : %s\n", n->name, n->id);
     }
-    else if(n->type == INT_TYPE) {
+    else if(!strcmp(n->name, "INT")) { // n->type == INT_TYPE
         fprintf(f, "INT : %d\n", n->intValue);
     }
-    else if(n->type == FLOAT_TYPE) {
+    else if(!strcmp(n->name, "FLOAT")) { // n->type == FLOAT_TYPE
         fprintf(f, "FLOAT : %f\n", n->floatValue);
     }
     else {

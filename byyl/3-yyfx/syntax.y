@@ -656,10 +656,10 @@ Stmt :
         $1->bro = $2;
         $2->bro = $3;
 
-        if($2->child->type == INT_TYPE) {
+        if(!strcmp($2->child->name, "int")) { // $2->child->type == INT_TYPE
             strcpy(Compst_return_type, "int");
         }
-        else if($2->child->type == FLOAT_TYPE) {
+        else if(!strcmp($2->child->name, "float")) { // $2->child->type == FLOAT_TYPE
             strcpy(Compst_return_type, "float");
         }
         else if($2->child->type == STRING_TYPE) {
@@ -1516,11 +1516,11 @@ Exp : Exp ASSIGNOP Exp {
         $1->bro = $2;
         $2->bro = $3;
         $3->bro = $4;
-
         // \begin{jcy 10}
         MyType tmp = MyType_default;
-        if($1->type == STRING_TYPE) {			//主要是因为直接是数值的话，它没有RBT上的name
+        if($1->child->type == STRING_TYPE) {			//主要是因为直接是数值的话，它没有RBT上的name
 		    // tmp.name = (char*)malloc(sizeof($1->child->id));
+            
 		    strcpy(tmp.name, $1->child->id);
 		    MyType* ml = search(this_scope, tmp);
             

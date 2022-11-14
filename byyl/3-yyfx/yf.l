@@ -85,6 +85,7 @@ COMMA ,
 	last_row = this_row;
 	this_row = yylineno;
 	struct node *newnode = iniNode("FLOAT", 0, FLOAT_TYPE);
+	newnode->floatValue = atof(yytext);
 	yylval = newnode;
 	// newnode->id = strdup(yytext);
 	return FLOAT;

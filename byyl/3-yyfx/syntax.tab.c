@@ -2286,10 +2286,10 @@ yyreduce:
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
 
-        if(yyvsp[-1]->child->type == INT_TYPE) {
+        if(!strcmp(yyvsp[-1]->child->name, "int")) { // $2->child->type == INT_TYPE
             strcpy(Compst_return_type, "int");
         }
-        else if(yyvsp[-1]->child->type == FLOAT_TYPE) {
+        else if(!strcmp(yyvsp[-1]->child->name, "float")) { // $2->child->type == FLOAT_TYPE
             strcpy(Compst_return_type, "float");
         }
         else if(yyvsp[-1]->child->type == STRING_TYPE) {
@@ -3264,11 +3264,11 @@ yyreduce:
         yyvsp[-3]->bro = yyvsp[-2];
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
-
         // \begin{jcy 10}
         MyType tmp = MyType_default;
-        if(yyvsp[-3]->type == STRING_TYPE) {			//主要是因为直接是数值的话，它没有RBT上的name
+        if(yyvsp[-3]->child->type == STRING_TYPE) {			//主要是因为直接是数值的话，它没有RBT上的name
 		    // tmp.name = (char*)malloc(sizeof($1->child->id));
+            
 		    strcpy(tmp.name, yyvsp[-3]->child->id);
 		    MyType* ml = search(this_scope, tmp);
             
