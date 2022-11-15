@@ -126,11 +126,17 @@ ExtDef : Specifier ExtDecList SEMI {
             // printf("Scope: %d\n", this_scope->top);
             if(search(this_scope, tmp)) { // 两种可能：struct xx {...} yy; 或 int a;
                 char msg[100];
-                if(!flgStruct) // 普通变量声明
-                    sprintf(msg, "Error %d at line %d : Redefined variable \'%s\'", REDEFINED_VARIABLE, last_row, tmp.name);
-                else // 结构体变量声明
-                    sprintf(msg, "Error %d at line %d : Redefined field \'%s\'", REDEFINED_FIELD, last_row, tmp.name);
-                myerror(msg);
+                if(!flgStruct) {// 普通变量声明
+                    errors++;
+                    printf("Error %d at line %d : Redefined variable \'%s\'\n", REDEFINED_VARIABLE, last_row, tmp.name);
+                    // sprintf(msg, "Error %d at line %d : Redefined variable \'%s\'", REDEFINED_VARIABLE, last_row, tmp.name);
+                }
+                else {// 结构体变量声明
+                    errors++;
+                    printf("Error %d at line %d : Redefined field \'%s\'\n", REDEFINED_FIELD, last_row, tmp.name);
+                    // sprintf(msg, "Error %d at line %d : Redefined field \'%s\'", REDEFINED_FIELD, last_row, tmp.name);
+                }
+                // myerror(msg);
             }
 
             // printf("flgStruct: %d\n", flgStruct);
@@ -167,6 +173,8 @@ ExtDef : Specifier ExtDecList SEMI {
     | Specifier SEMI {
         $$ = insNode($1, "ExtDef", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
+
+        flgStruct = 0;
     }
     | Specifier FunDec CompSt {
         $$ = insNode($1, "ExtDef", @1.first_line, NON_TERMINAL);
@@ -182,16 +190,20 @@ ExtDef : Specifier ExtDecList SEMI {
         if(strcmp(Compst_return_type, "null")) {
             if(strcmp(tmp.return_type, Compst_return_type)) {
             // if(tmp.return_type != Compst_return_type) {
-                char msg[100];
-                sprintf(msg, "Error %d at line %d : Type mismatched for return", TYPE_MISMATCH_RETURN, last_row);
-                myerror(msg);
+                errors++;
+                printf("Error %d at line %d : Type mismatched for return\n", TYPE_MISMATCH_RETURN, last_row);
+                // char msg[100];
+                // sprintf(msg, "Error %d at line %d : Type mismatched for return", TYPE_MISMATCH_RETURN, last_row);
+                // myerror(msg);
             }
         }
 
         if(search(this_scope, tmp)) {
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
-            myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Redefined function \'%s\'\n", REDEFINED_FUNCTION, last_row, tmp.name);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
+            // myerror(msg);
         }
 		else {
             tmp.isfunc = 1;
@@ -286,9 +298,11 @@ StructSpecifier : STRUCT OptTag LC Mid RC {
         strcpy(tmp.type, $1->id);
         // printf("%s is named %s\n", tmp.type, tmp.name);
         if(search(this_scope, tmp)) { // 结构体名字重复
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Duplicate name \'%s\'", REDEFINED_STRUCT, last_row, tmp.name);
-            myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Duplicate name \'%s\'\n", REDEFINED_STRUCT, last_row, tmp.name);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Duplicate name \'%s\'", REDEFINED_STRUCT, last_row, tmp.name);
+            // myerror(msg);
         }
         else {
             tmp.def = 1;
@@ -358,9 +372,11 @@ StructSpecifier : STRUCT OptTag LC Mid RC {
         strcpy(tmp.name, $2->child->id);
         // printf("Scope: %d\n", this_scope->top);
         if(!search(this_scope, tmp)) {
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Undefined struct \'%s\'", UNDEFINED_STRUCT, last_row, tmp.name);
-            myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Undefined struct \'%s\'\n", UNDEFINED_STRUCT, last_row, tmp.name);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Undefined struct \'%s\'", UNDEFINED_STRUCT, last_row, tmp.name);
+            // myerror(msg);
         }
         else {
             // printf("insert struct \'%s\'\n", tmp.name);
@@ -548,11 +564,17 @@ Def : Specifier DecList SEMI {
 
             if(my_search(&this_scope->my_root, tmp)) { // 两种可能：struct xx {...} yy; 或 int a;
                 char msg[100];
-                if(!flgStruct) // 普通变量声明
-                    sprintf(msg, "Error %d at line %d : Redefined variable \'%s\'", REDEFINED_VARIABLE, last_row, tmp.name);
-                else // 结构体变量声明
-                    sprintf(msg, "Error %d at line %d : Redefined field \'%s\'", REDEFINED_FIELD, last_row, tmp.name);
-                myerror(msg);
+                if(!flgStruct)  {// 普通变量声明
+                    errors++;
+                    printf("Error %d at line %d : Redefined variable \'%s\'\n", REDEFINED_VARIABLE, last_row, tmp.name);
+                    // sprintf(msg, "Error %d at line %d : Redefined variable \'%s\'", REDEFINED_VARIABLE, last_row, tmp.name);
+                }
+                else {// 结构体变量声明
+                    errors++;
+                    printf("Error %d at line %d : Redefined field \'%s\'\n", REDEFINED_FIELD, last_row, tmp.name);
+                    // sprintf(msg, "Error %d at line %d : Redefined field \'%s\'", REDEFINED_FIELD, last_row, tmp.name);
+                }
+                // myerror(msg);
             }
             else {
                 if(flgStruct == 2) { // 是struct tag的情况，如struct sa nn;
@@ -580,23 +602,29 @@ Def : Specifier DecList SEMI {
                             strcpy(t1.name, newnode->child->child->bro->bro->child->id);
                             MyType* t2 = search(this_scope, t1);
                             if(strcmp(t2->type, $1->child->id)) {
-                                char msg[100];
-                                sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                                myerror(msg);
+                                errors++;
+                                printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                                // char msg[100];
+                                // sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                                // myerror(msg);
                             }
                         }
                         else if(!strcmp(newnode->child->child->bro->bro->child->name, "INT")) {
                             if(strcmp("int", $1->child->id)) {
-                                char msg[100];
-                                sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                                myerror(msg);
+                                errors++;
+                                printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                                // char msg[100];
+                                // sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                                // myerror(msg);
                             }
                         }
                         else if(!strcmp(newnode->child->child->bro->bro->child->name, "FLOAT")) {
                             if(strcmp("float", $1->child->id)) {
-                                char msg[100];
-                                sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                                myerror(msg);
+                                errors++;
+                                printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                                // char msg[100];
+                                // sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                                // myerror(msg);
                             }
                         }
                     }
@@ -758,9 +786,11 @@ Exp : Exp ASSIGNOP Exp {
 
         // printf("exp: %s\n", $1->child->name);
         if($1->child->type != STRING_TYPE && $1->child->type != NON_TERMINAL) {
-            char msg[100];
-        	sprintf(msg, "Error %d at line %d : The left-hand side of assignment must be a variable", NEED_VARIABLE, last_row); 
-			myerror(msg);
+            errors++;
+            printf("Error %d at line %d : The left-hand side of assignment must be a variable\n", NEED_VARIABLE, last_row); 
+            // char msg[100];
+        	// sprintf(msg, "Error %d at line %d : The left-hand side of assignment must be a variable", NEED_VARIABLE, last_row); 
+			// myerror(msg);
         }
         else if($1->child->type == NON_TERMINAL) { // 说明可能是数组
             MyType t1 = MyType_default;
@@ -774,23 +804,29 @@ Exp : Exp ASSIGNOP Exp {
                 strcpy(t3.name, $3->child->child->id);
                 MyType* t4 = search(this_scope, t3);
                 if(strcmp(t2->type, t4->type)) {
-                    char msg[100];
-                    sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                    myerror(msg);
+                    errors++;
+                    printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    // char msg[100];
+                    // sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    // myerror(msg);
                 }
             }
             else if(!strcmp($3->child->name, "FLOAT")) {
                 if(strcmp(t2->type, "float")) {
-                    char msg[100];
-                    sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                    myerror(msg);
+                    errors++;
+                    printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    // char msg[100];
+                    // sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    // myerror(msg);
                 }
             }
             else if(!strcmp($3->child->name, "INT")) {
                 if(strcmp(t2->type, "int")) {
-                    char msg[100];
-                    sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                    myerror(msg);
+                    errors++;
+                    printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    // char msg[100];
+                    // sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    // myerror(msg);
                 }
             }
         }
@@ -806,23 +842,29 @@ Exp : Exp ASSIGNOP Exp {
                 strcpy(t3.name, $3->child->id);
                 MyType* t4 = search(this_scope, t3);
                 if(strcmp(t2->type, t4->type)) {
-                    char msg[100];
-                    sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                    myerror(msg);
+                    errors++;
+                    printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    // char msg[100];
+                    // sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    // myerror(msg);
                 }
             }
             else if(!strcmp($3->child->name, "FLOAT")) {
                 if(strcmp(t2->type, "float")) {
-                    char msg[100];
-                    sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                    myerror(msg);
+                    errors++;
+                    printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    // char msg[100];
+                    // sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    // myerror(msg);
                 }
             }
             else if(!strcmp($3->child->name, "INT")) {
                 if(strcmp(t2->type, "int")) {
-                    char msg[100];
-                    sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                    myerror(msg);
+                    errors++;
+                    printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    // char msg[100];
+                    // sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                    // myerror(msg);
                 }
             }
         }
@@ -887,9 +929,11 @@ Exp : Exp ASSIGNOP Exp {
         // print_mynode(*t2);
         // print_mynode(*t4);
         if(strcmp(t2->type, t4->type)) {
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
-            myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Type mismatched for operands\n", TYPE_MISMATCH_OPERAND, last_row);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
+            // myerror(msg);
         }
 
         // $$->isAssignable = 0;
@@ -947,9 +991,11 @@ Exp : Exp ASSIGNOP Exp {
         // print_mynode(*t2);
         // print_mynode(*t4);
         if(strcmp(t2->type, t4->type)) {
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
-            myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Type mismatched for operands\n", TYPE_MISMATCH_OPERAND, last_row);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
+            // myerror(msg);
         }
 
         // $$->isAssignable = 0;
@@ -1006,9 +1052,11 @@ Exp : Exp ASSIGNOP Exp {
         // print_mynode(*t2);
         // print_mynode(*t4);
         if(strcmp(t2->type, t4->type)) {
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
-            myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Type mismatched for operands\n", TYPE_MISMATCH_OPERAND, last_row);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
+            // myerror(msg);
         }
 
         // $$->isAssignable = 0;
@@ -1065,9 +1113,11 @@ Exp : Exp ASSIGNOP Exp {
         // print_mynode(*t2);
         // print_mynode(*t4);
         if(strcmp(t2->type, t4->type)) {
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
-            myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Type mismatched for operands\n", TYPE_MISMATCH_OPERAND, last_row);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
+            // myerror(msg);
         }
 
         // $$->isAssignable = 0;
@@ -1125,9 +1175,11 @@ Exp : Exp ASSIGNOP Exp {
         // print_mynode(*t2);
         // print_mynode(*t4);
         if(strcmp(t2->type, t4->type)) {
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
-            myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Type mismatched for operands\n", TYPE_MISMATCH_OPERAND, last_row);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
+            // myerror(msg);
         }
 
         // $$->isAssignable = 0;
@@ -1184,9 +1236,11 @@ Exp : Exp ASSIGNOP Exp {
         // print_mynode(*t2);
         // print_mynode(*t4);
         if(strcmp(t2->type, t4->type)) {
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
-            myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Type mismatched for operands\n", TYPE_MISMATCH_OPERAND, last_row);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
+            // myerror(msg);
         }
 
         // $$->isAssignable = 0;
@@ -1243,9 +1297,11 @@ Exp : Exp ASSIGNOP Exp {
         // print_mynode(*t2);
         // print_mynode(*t4);
         if(strcmp(t2->type, t4->type)) {
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
-            myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Type mismatched for operands\n", TYPE_MISMATCH_OPERAND, last_row);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Type mismatched for operands", TYPE_MISMATCH_OPERAND, last_row);
+            // myerror(msg);
         }
 
         // $$->isAssignable = 0;
@@ -1429,16 +1485,20 @@ Exp : Exp ASSIGNOP Exp {
             }
             else {
                 //	\begin{jcy 11}
-		        char msg[100];
-            	sprintf(msg, "Error %d at line %d : \'%s\' is not a function", NOT_FUNCTION, last_row, tmp.name);
-            	myerror(msg);
+                errors++;
+                printf("Error %d at line %d : \'%s\' is not a function\n", NOT_FUNCTION, last_row, tmp.name);
+		        // char msg[100];
+            	// sprintf(msg, "Error %d at line %d : \'%s\' is not a function", NOT_FUNCTION, last_row, tmp.name);
+            	// myerror(msg);
                 // 	\end{jcy 11}
             }
         }
         else { // 函数未定义
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Undefined function \'%s\'", UNDEFINED_FUNCTION, last_row, tmp.name);
-            myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Undefined function \'%s\'\n", UNDEFINED_FUNCTION, last_row, tmp.name);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Undefined function \'%s\'", UNDEFINED_FUNCTION, last_row, tmp.name);
+            // myerror(msg);
         }
     }
     | ID LP RP {
@@ -1499,16 +1559,20 @@ Exp : Exp ASSIGNOP Exp {
             }
             else {
                 //	\begin{jcy 11}
-		        char msg[100];
-            	sprintf(msg, "Error %d at line %d : \'%s\' is not a function", NOT_FUNCTION, last_row, tmp.name);
-            	myerror(msg);
+                errors++;
+                printf("Error %d at line %d : \'%s\' is not a function\n", NOT_FUNCTION, last_row, tmp.name);
+		        // char msg[100];
+            	// sprintf(msg, "Error %d at line %d : \'%s\' is not a function", NOT_FUNCTION, last_row, tmp.name);
+            	// myerror(msg);
                 // 	\end{jcy 11}
             }
         }
         else { // 函数未定义
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Undefined function \'%s\'", UNDEFINED_FUNCTION, last_row, tmp.name);
-            myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Undefined function \'%s\'\n", UNDEFINED_FUNCTION, last_row, tmp.name);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Undefined function \'%s\'", UNDEFINED_FUNCTION, last_row, tmp.name);
+            // myerror(msg);
         }
     }
     | Exp LB Exp RB {
@@ -1529,30 +1593,39 @@ Exp : Exp ASSIGNOP Exp {
 		    		// \begin{jcy 12}
                     // printf("%s\n", $3->child->name);
 		    		if(strcmp($3->child->name, "INT")) {
-		    			char msg[100];
-                        if(!strcmp($3->child->name, "FLOAT"))
-		        		    sprintf(msg, "Error %d at line %d : \'%f\' is not an integer", ARRAY_ACCESS_OPERATEOR_NOT_INTEGER, last_row, $3->child->floatValue);
-		        		myerror(msg);
+		    			// char msg[100];
+                        if(!strcmp($3->child->name, "FLOAT")) {
+                            errors++;
+                            printf("Error %d at line %d : \'%f\' is not an integer\n", ARRAY_ACCESS_OPERATEOR_NOT_INTEGER, last_row, $3->child->floatValue);
+                        }
+		        		//     sprintf(msg, "Error %d at line %d : \'%f\' is not an integer", ARRAY_ACCESS_OPERATEOR_NOT_INTEGER, last_row, $3->child->floatValue);
+		        		// myerror(msg);
 		    		}
 		    		// \end{jcy 12}
 		    	}
 		    	else {
-		    		char msg[100];
-		        	sprintf(msg, "Error %d at line %d : \'%s\' is not an array", NOT_ARRAY, last_row, tmp.name);
-		        	myerror(msg);
+                    errors++;
+                    printf("Error %d at line %d : \'%s\' is not an array\n", NOT_ARRAY, last_row, tmp.name);
+		    		// char msg[100];
+		        	// sprintf(msg, "Error %d at line %d : \'%s\' is not an array", NOT_ARRAY, last_row, tmp.name);
+		        	// myerror(msg);
 		    	}
 		    }
 		    else {
-		        char msg[100];
-		        sprintf(msg, "Error %d at line %d : Undefined variable \'%s\'", UNDEFINED_VARIABLE, last_row, tmp.name);
-		        myerror(msg);
+                errors++;
+                printf("Error %d at line %d : Undefined variable \'%s\'\n", UNDEFINED_VARIABLE, last_row, tmp.name);
+		        // char msg[100];
+		        // sprintf(msg, "Error %d at line %d : Undefined variable \'%s\'", UNDEFINED_VARIABLE, last_row, tmp.name);
+		        // myerror(msg);
 		    }
         
         }
         else {
-		    char msg[100];
-		    sprintf(msg, "Error %d at line %d : \'%s\' is not an array", NOT_ARRAY, last_row, tmp.name);
-	        myerror(msg);        
+            errors++;
+            printf("Error %d at line %d : \'%s\' is not an array\n", NOT_ARRAY, last_row, tmp.name);
+		    // char msg[100];
+		    // sprintf(msg, "Error %d at line %d : \'%s\' is not an array", NOT_ARRAY, last_row, tmp.name);
+	        // myerror(msg);        
 		}
         //一个$1是否为数组变量的检查，一个$3是否为整数的检查（忽略段错误）
         // 类型传递
@@ -1585,18 +1658,22 @@ Exp : Exp ASSIGNOP Exp {
                         // printf("Yes!!\n");
                     }
                     else {
-                        char msg[100];
-                        sprintf(msg, "Error %d at line %d : Non-existing field \'%s\'", NOT_EXISTENT_FIELD, last_row, $3->id);
-                        myerror(msg);
+                        errors++;
+                        printf("Error %d at line %d : Non-existing field \'%s\'\n", NOT_EXISTENT_FIELD, last_row, $3->id);
+                        // char msg[100];
+                        // sprintf(msg, "Error %d at line %d : Non-existing field \'%s\'", NOT_EXISTENT_FIELD, last_row, $3->id);
+                        // myerror(msg);
                     }
 		        	// this_scope = insert(this_scope, tmp); // 不能insert，只能查
 		        }
 		        // tmp.type = $1->type;
 		        // my_insert(&mytree, tmp);
 		        else {
-		        	char msg[100];
-	        		sprintf(msg, "Error %d at line %d : Illegal use of \'.\'", DOT_ILLEGAL_USE, last_row);
-	        		myerror(msg);
+                    errors++;
+                    printf("Error %d at line %d : Illegal use of \'.\'\n", DOT_ILLEGAL_USE, last_row);
+		        	// char msg[100];
+	        		// sprintf(msg, "Error %d at line %d : Illegal use of \'.\'", DOT_ILLEGAL_USE, last_row);
+	        		// myerror(msg);
 		        }
 		    }/*
 		    else { // 结构体未定义
@@ -1609,9 +1686,11 @@ Exp : Exp ASSIGNOP Exp {
 		    }*/
 		}
 		else {
-			char msg[100];
-	        sprintf(msg, "Error %d at line %d : Illegal use of \'.\'", DOT_ILLEGAL_USE, last_row);
-	        myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Illegal use of \'.\'\n", DOT_ILLEGAL_USE, last_row);
+			// char msg[100];
+	        // sprintf(msg, "Error %d at line %d : Illegal use of \'.\'", DOT_ILLEGAL_USE, last_row);
+	        // myerror(msg);
 		}
         //	\end{jcy 13}
 	}
@@ -1630,9 +1709,11 @@ Exp : Exp ASSIGNOP Exp {
             // free(tmp.type);
         }
         else { // 变量未定义
-            char msg[100];
-            sprintf(msg, "Error %d at line %d : Undefined variable \'%s\'", UNDEFINED_VARIABLE, last_row, tmp.name);
-            myerror(msg);
+            errors++;
+            printf("Error %d at line %d : Undefined variable \'%s\'\n", UNDEFINED_VARIABLE, last_row, tmp.name);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Undefined variable \'%s\'", UNDEFINED_VARIABLE, last_row, tmp.name);
+            // myerror(msg);
         }
         // free(tmp.name);
 	}

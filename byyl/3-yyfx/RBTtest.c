@@ -15,17 +15,14 @@ typedef unsigned int Type;
 typedef struct mytype {
     int def;  // 是否被定义
     char name[20];   // 变量名，主键
-    // char* tag; // new: 结构体后面可以加个“别名”
-    // int scope;   // 作用域，这个应该不需要了，用模拟栈的方法搞了
     int isvariable;  // 是否为VARIABLE
     char type[20];  // 类型
     int isstruct;  // 是否为STRUCT
     int isfunc;  // 是否为FUNCTION
-    int isarr;  // 是否为ARRAY，lhy真够吧，天下策划一个傻逼样
+    int isarr;  // 是否为ARRAY
     int dimension;   // 数组维度
     char return_type[20];  // func返回类型
     struct rb_root varilist; // 结构体和函数的属性/参数列表
-    // struct rb_root* funcvarlist;  // func参数列表，只能放结构体和变量
 } MyType, *Mylink;
 
 MyType MyType_default = {0, "", 0, "", 0, 0, 0, 0, ""};
