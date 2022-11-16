@@ -27,7 +27,7 @@
     #define REDEFINED_STRUCT 16
     #define UNDEFINED_STRUCT 17
     #define DECLARED_BUT_NOT_DEFINED 18
-    #define AMBIGUATING_FUNCTION_DECLARATION 19
+    #define AMBIGUOUS_FUNCTION_DECLARATION 19
 
     #define MIN(i, j) (((i) < (j)) ? (i) : (j))
     #define MAX(i, j) (((i) > (j)) ? (i) : (j))
@@ -40,11 +40,13 @@
 	extern int last_row;
 	int errors = 0;
     int yydebug = 1;
-    int flgStruct = 0, flgArr = 0;
+    int flgStruct = 0, flgArr = 0, func_cnt = 0;
     char Compst_return_type[20] = "null";
+    char func_list[20][20];
     struct rb_root mytree = RB_ROOT;
     // MyType tmp; // 从全局变量改用局部变量
     VariLink this_scope;
+    // VariLink func_stack;
 
     char *strlwr(char *str) {
         char *ptr = str;
@@ -198,12 +200,19 @@ ExtDef : Specifier ExtDecList SEMI {
             }
         }
 
-        if(search(this_scope, tmp)) {
-            errors++;
-            printf("Error %d at line %d : Redefined function \'%s\'\n", REDEFINED_FUNCTION, last_row, tmp.name);
-            // char msg[100];
-            // sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
-            // myerror(msg);
+        MyType* mt = search(this_scope, tmp);
+        if(mt) {
+            if(mt->def) {
+                errors++;
+                printf("Error %d at line %d : Redefined function \'%s\'\n", REDEFINED_FUNCTION, last_row, tmp.name);
+                // char msg[100];
+                // sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
+                // myerror(msg);
+            }
+            else {
+                mt->def = 1;
+                printf("没啥\n");
+            }
         }
 		else {
             tmp.isfunc = 1;
@@ -252,7 +261,67 @@ ExtDef : Specifier ExtDecList SEMI {
         $1->bro = $2;
         $2->bro = $3;
 
+        MyType tmp = MyType_default;
+        tmp.def = 0; // 只是声明，尚未定义
+        strcpy(tmp.name, $2->child->id);
+        tmp.isfunc = 1;
+        strcpy(tmp.return_type, $1->child->id);
+        // if(strcmp(Compst_return_type, "null")) {
+        //     if(strcmp(tmp.return_type, Compst_return_type)) {
+        //     // if(tmp.return_type != Compst_return_type) {
+        //         errors++;
+        //         printf("Error %d at line %d : Type mismatched for return\n", TYPE_MISMATCH_RETURN, last_row);
+        //     }
+        // }
 
+        if(search(this_scope, tmp)) {
+            errors++;
+            printf("Error %d at line %d : Incompleted definition of function \'%s\'\n", AMBIGUOUS_FUNCTION_DECLARATION, last_row, tmp.name);
+            // char msg[100];
+            // sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
+            // myerror(msg);
+        }
+		else {
+            tmp.isfunc = 1;
+            tmp.dimension = last_row; // 借用存一下函数所在行数
+            // tmp.def = 1;
+            if($2->child->bro->bro->bro) { // 说明 FunDec -> ID LP VarList RP
+                struct node* n = $2->child->bro->bro; // n始终指向VarList
+                char varifunc[12] = {"00_varifunc"};
+                do {
+                    MyType t = MyType_default;
+                    t.def = 1;
+                    t.isvariable = 1;
+                    strcpy(t.type, n->child->child->child->id);
+                    strcpy(t.name, n->child->child->bro->child->id);
+                    int result = my_insert(&tmp.varilist, t);
+
+                    t = MyType_default;
+                    strcpy(t.type, n->child->child->child->id);
+                    strcpy(t.name, varifunc);
+                    varifunc[1] += 1;
+                    if(varifunc[1] > '9'){
+                        varifunc[0] += 1;
+                        varifunc[1] = 0;
+                    }
+                    result = my_insert(&tmp.varilist, t);
+
+                    if(n->child->bro) {
+                        n = n->child->bro->bro;
+                    }
+                    else break;
+                } while(n);
+                
+            }
+            else {
+                // printf("没啥\n");
+            }
+            this_scope = insert(this_scope, tmp);
+            // my_insert(&this_scope->last->my_root, tmp);
+            // printf("%s\n", tmp.name);
+            strcpy(func_list[func_cnt], tmp.name);
+            func_cnt++;
+        }
     }
     ;
 
@@ -1401,17 +1470,19 @@ Exp : Exp ASSIGNOP Exp {
                         MyType argu = MyType_default;
                         strcpy(argu.name, newnode->child->child->id);
                         Mylink tttp = search(this_scope, argu); // 据卢爹说一定能搜到，在此就直接拿了用
-                        assert(tttp != NULL);
-                        argu = *tttp;
-                        // print_mynode(argu);
-                        // Arguments[vari_num] = (char*)malloc(sizeof(argu.type));
-                        strcpy(Arguments[vari_num++], argu.type);
-                        if(ttp==NULL || strcmp(parameter.type, argu.type)){
-                            right = 0;
-                        }
-                        if(ttp != NULL){
-                            // Parameter[para_num] = (char*)malloc(sizeof(parameter.type));
-                            strcpy(Parameter[para_num++], parameter.type);
+                        // assert(tttp != NULL);
+                        if(tttp != NULL) {
+                            argu = *tttp;
+                            // print_mynode(argu);
+                            // Arguments[vari_num] = (char*)malloc(sizeof(argu.type));
+                            strcpy(Arguments[vari_num++], argu.type);
+                            if(ttp==NULL || strcmp(parameter.type, argu.type)){
+                                right = 0;
+                            }
+                            if(ttp != NULL){
+                                // Parameter[para_num] = (char*)malloc(sizeof(parameter.type));
+                                strcpy(Parameter[para_num++], parameter.type);
+                            }
                         }
                     }
                     // parameter.def = 0;
@@ -1793,7 +1864,18 @@ int main(int argc, char** argv) {
 	yyrestart(f);
 	yyparse();
 
-    /*----检查Error 18和19----*/
+    /*----检查Error 18----*/
+    MyType tmp = MyType_default;
+    for(int i = 0; i < func_cnt; i++) {
+        strcpy(tmp.name, func_list[i]);
+        MyType* mt = search(this_scope, tmp);
+        if(mt) {
+            if(!mt->def) {
+                errors++;
+                printf("Error %d at line %d : Undefined function \'%s\'\n", DECLARED_BUT_NOT_DEFINED, mt->dimension, tmp.name);
+            }
+        } 
+    }
 
 	FILE *f1 = fopen("output.txt", "w");
 	if(!f1) {
