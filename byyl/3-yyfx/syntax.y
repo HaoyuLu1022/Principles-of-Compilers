@@ -234,7 +234,7 @@ ExtDef : Specifier ExtDecList SEMI {
                     varifunc[1] += 1;
                     if(varifunc[1] > '9'){
                         varifunc[0] += 1;
-                        varifunc[1] = 0;
+                        varifunc[1] = '0';
                     }
                     result = my_insert(&tmp.varilist, t);
 
@@ -302,7 +302,7 @@ ExtDef : Specifier ExtDecList SEMI {
                     varifunc[1] += 1;
                     if(varifunc[1] > '9'){
                         varifunc[0] += 1;
-                        varifunc[1] = 0;
+                        varifunc[1] = '0';
                     }
                     result = my_insert(&tmp.varilist, t);
 
@@ -381,6 +381,7 @@ StructSpecifier : STRUCT OptTag LC Mid RC {
             
             // char* mid = "Mid";
             // tmp.varilist = (struct rb_root*)malloc(sizeof(struct rb_root*));
+            char VariStruct[12] = {"00_varistct"};
             do {
                 MyType temp = MyType_default;
                 temp.def = 1;
@@ -398,6 +399,13 @@ StructSpecifier : STRUCT OptTag LC Mid RC {
                     // tmp.varilist = (struct rb_root*)malloc(sizeof(struct rb_root*));
                     int result = my_insert(&tmp.varilist, temp);
                     // printf("Whether successful: %d\n", result);
+                    strcpy(temp.name, VariStruct);
+                    result = my_insert(&tmp.varilist, temp);
+                    VariStruct[1] += 1;
+                    if(VariStruct[1] > '9'){
+                        VariStruct[0] += 1;
+                        VariStruct[1] = '0';
+                    }
 
                     if(newnew->child->bro != NULL) {
                         newnew = newnew->child->bro->bro;
@@ -405,7 +413,6 @@ StructSpecifier : STRUCT OptTag LC Mid RC {
                     else break;
                 } while(newnew != NULL);
                 // free(temp.type);
-
                 // printf("newnode->child->bro: %s\n", newnode->child->bro->name);
                 if(newnode->child) { // strcmp(newnode->child->bro->name, "Mid") == 0
                     newnode = newnode->child->bro;
@@ -910,6 +917,50 @@ Exp : Exp ASSIGNOP Exp {
                 // printf("%s\n", $3->child->child->id);
                 strcpy(t3.name, $3->child->id);
                 MyType* t4 = search(this_scope, t3);
+                // printf("%s %s\n", t2->type, t4->type);
+                int right = 1;
+                MyType tmp = MyType_default;
+                strcpy(tmp.name, t2->type);
+                Mylink s1 = search(this_scope, tmp);
+
+                strcpy(tmp.name, t4->type);
+                Mylink s2 = search(this_scope, tmp);
+                if(s1 && s2 && s1->def && s2->def){   // 先判断这俩结构体是否定义过
+                    // printf("来测我啊！");
+
+                    // print_mynode(*s1);
+                    // print_mynode(*s2);
+
+                    char VariStruct[12] = {"00_varistct"};
+                    strcpy(tmp.name, VariStruct);
+                    struct my_node* Varis1 = my_search(&(s1->varilist), tmp);
+                    struct my_node* Varis2 = my_search(&(s2->varilist), tmp);
+
+                    while(Varis1 || Varis2) {
+                        // printf("%s %s\n", Varis1->info.type, Varis2->info.type);
+                        if(Varis1 == NULL||Varis2==NULL){
+                            right = 0;
+                        }
+                        else if(strcmp(Varis1->info.type, Varis2->info.type)){
+                            right = 0;
+                        }
+                        VariStruct[1] += 1;
+                        if(VariStruct[1] > '9'){
+                            VariStruct[0] += 1;
+                            VariStruct[1] = '0';
+                        }
+                        strcpy(tmp.name, VariStruct);
+                        Varis1 = my_search(&(s1->varilist), tmp);
+                        Varis2 = my_search(&(s2->varilist), tmp);
+                    }
+                    // printf("\n");
+                }
+                else right = 0;  // 还是感觉应该写未定义
+                if(right == 0){
+                    printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row);
+                    errors ++;
+                }
+                /*
                 if(strcmp(t2->type, t4->type)) {
                     errors++;
                     printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
@@ -917,6 +968,7 @@ Exp : Exp ASSIGNOP Exp {
                     // sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
                     // myerror(msg);
                 }
+                */
             }
             else if(!strcmp($3->child->name, "FLOAT")) {
                 if(strcmp(t2->type, "float")) {
@@ -1511,7 +1563,7 @@ Exp : Exp ASSIGNOP Exp {
                     varifunc[1] += 1;
                     if(varifunc[1] > '9'){
                         varifunc[0] += 1;
-                        varifunc[1] = 0;
+                        varifunc[1] = '0';
                     }
                     // result = my_insert(&tmp.varilist, temp);
                     if(newnode->child->bro != NULL) {
@@ -1527,7 +1579,7 @@ Exp : Exp ASSIGNOP Exp {
                     varifunc[1] += 1;
                     if(varifunc[1] > '9'){
                         varifunc[0] += 1;
-                        varifunc[1] = 0;
+                        varifunc[1] = '0';
                     }
                     strcpy(parameter.name, varifunc);
                     tpp = my_search(&(mt->varilist), parameter);
@@ -1601,7 +1653,7 @@ Exp : Exp ASSIGNOP Exp {
                     varifunc[1] += 1;
                     if(varifunc[1] > '9'){
                         varifunc[0] += 1;
-                        varifunc[1] = 0;
+                        varifunc[1] = '0';
                     }
                     strcpy(parameter.name, varifunc);
                     tpp = my_search(&(mt->varilist), parameter);
