@@ -2,6 +2,42 @@
 
 <hr>
 
+## 更新
+
+- 修复了浅拷贝问题，在使用时注意无需分配内存和删除内存，建议使用`MyType tmp = MyType_default`更方便地初始化。
+- 修复`print`函数，可以使用打印符号表啦~
+
+在此例举使用新`MyType`的示例：
+```c
+// ...
+| ID LP RP {
+        $$ = insNode($1, "FunDec", @1.first_line, NON_TERMINAL);
+        $1->bro = $2;
+        $2->bro = $3;
+        MyType tmp = MyType_default;   // 在此创建局部变量
+        // tmp.name = (char*)malloc(sizeof($1->id));   // 无需开内存
+        strcpy(tmp.name, $1->id);  // 注意为了防止msg炸了，name、type和return_type都只开了20的大小
+        if(search(this_scope, tmp)) {
+            char msg[100];
+            sprintf(msg, "Error %d at line %d : Redefined function \'%s\'", REDEFINED_FUNCTION, last_row, tmp.name);
+            myerror(msg);
+        }
+        else {
+            // printf("insert function \'%s\'\n", tmp.name);
+            tmp.def = 1;
+            tmp.isfunc = 1;
+            this_scope = insert(this_scope, tmp);
+
+            // free(tmp.type);  // 无需释放~
+            tmp.def = 0;
+            tmp.isfunc = 0;
+        }
+        // free(tmp.name);   // 无需释放~
+    }
+```
+
+<hr>
+
 这个文件主要使用Linux内核的rbtree.h和rbtree.c封装完成，下文为本文件的主要函数简介。
 
 一开始的include和define不是咱写的不用管，先看我定义的结构体mytype

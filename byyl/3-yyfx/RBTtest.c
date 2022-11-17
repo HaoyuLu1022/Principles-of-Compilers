@@ -14,21 +14,20 @@
 typedef unsigned int Type;
 typedef struct mytype {
     int def;  // 是否被定义
-    char* name;   // 变量名，主键
+    char name[20];   // 变量名，主键
     // char* tag; // new: 结构体后面可以加个“别名”
     // int scope;   // 作用域，这个应该不需要了，用模拟栈的方法搞了
     int isvariable;  // 是否为VARIABLE
-    char* type;  // 类型
-    int isint;		// 是否为整数
-    int isfloat;		// 是否为浮点数
+    char type[20];  // 类型
     int isstruct;  // 是否为STRUCT
     int isfunc;  // 是否为FUNCTION
     int isarr;  // 是否为ARRAY，lhy真够吧，天下策划一个傻逼样
     int dimension;   // 数组维度
-    char* return_type;  // func返回类型
-    struct rb_root* varilist; // 结构体和函数的属性/参数列表
-    // struct rb_root* funcvarlist;  // func参数列表，只能放结构体和变量
-}MyType, *Mylink;
+    char return_type[20];  // func返回类型
+    struct rb_root varilist; // 结构体和函数的属性/参数列表
+} MyType, *Mylink;
+
+MyType MyType_default = {0, "", 0, "", 0, 0, 0, 0, ""};
 
 struct my_node {
     struct rb_node rb_node;    // 红黑树节点
@@ -61,15 +60,16 @@ void print_mynode(MyType info){   // 这个本来没必要写的，但是怕铸�
     */
     printf("def : %d\n", info.def);
     printf("name : %s\n", info.name);
+    printf("type : %s\n", info.type);
     if(info.isvariable || info.isarr)
         printf("type : %s\n", info.type);
     if(info.isarr)
         printf("dimension : %d\n", info.dimension);
     if(info.isfunc)
-        printf("return_type : %s", info.return_type);
+        printf("return_type : %s\n", info.return_type);
     if(info.isstruct){
         printf("struct : struct maybe...\n");
-        my_print(info.varilist);
+        my_print(&info.varilist);
     }
 }
 
@@ -95,7 +95,8 @@ unsigned int RSHash(char* str, unsigned int len)
 }
 
 unsigned int GetVariKey(MyType a){
-    char s[500];
+    // char s[500];
+    char* s = (char*)malloc(sizeof(a.name));
     strcpy(s, a.name);
     return RSHash(s, strlen(s));
 }
@@ -180,7 +181,7 @@ void my_delete(struct rb_root *root, MyType info)
  */
 static void print_rbtree(struct rb_node *tree, MyType info, int direction)
 {
-    Type key = GetVariKey(info);
+    // Type key = GetVariKey(info);
     if(tree != NULL)
     {
         if(direction==0){    // tree是根节点
@@ -195,7 +196,7 @@ static void print_rbtree(struct rb_node *tree, MyType info, int direction)
         if (tree->rb_left)
             print_rbtree(tree->rb_left, rb_entry(tree->rb_left, struct my_node, rb_node)->info, -1);
         if (tree->rb_right)
-            print_rbtree(tree->rb_right,rb_entry(tree->rb_right, struct my_node, rb_node)->info,  1);
+            print_rbtree(tree->rb_right,rb_entry(tree->rb_right, struct my_node, rb_node)->info, 1);
     }
 }
 
@@ -231,6 +232,7 @@ VariLink push_scope(VariLink vl) {
     // printf("pushing scope!!\n");
     VariLink varilink = (VariLink)malloc(sizeof(VariLink));
     varilink->last = vl;
+    varilink->top = vl->top + 1;
     return varilink;
 }
 
@@ -242,16 +244,19 @@ VariLink pop_scope(VariLink vl) {
 }
 
 VariLink insert(VariLink vl, MyType x) {
-    my_insert(&vl->my_root, x);
+    // printf("vl->top: %d\n", vl->top);
+    int result = my_insert(&vl->my_root, x);
+    // printf("Insert result: %d\n", result);
     return vl;
 }
 
 void print(VariLink vl) {
-    int num = 1;
+    printf("Scope %d : \n", vl->top);
+    my_print(&vl->my_root);
     while(vl->last != NULL){
-        printf("Scope %d : \n", num++);
-        my_print(&vl->my_root);
         vl = vl->last;
+        printf("Scope %d : \n", vl->top);
+        my_print(&vl->my_root);
     }
 }
 
