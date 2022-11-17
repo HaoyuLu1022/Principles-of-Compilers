@@ -605,14 +605,14 @@ static const yytype_int8 yytranslate[] =
   /* YYRLINE[YYN] -- Source line where rule number YYN was defined.  */
 static const yytype_int16 yyrline[] =
 {
-       0,    93,    93,    98,   102,   107,   175,   181,   259,   328,
-     331,   343,   346,   353,   442,   476,   479,   484,   489,   527,
-     550,   557,   562,   567,   584,   592,   596,   600,   620,   727,
-     732,   737,   746,   750,   755,   758,   777,   784,   793,   811,
-     814,   821,   824,   831,   834,   840,   846,   851,   858,  1000,
-    1007,  1069,  1130,  1191,  1253,  1314,  1375,  1436,  1444,  1451,
-    1458,  1627,  1701,  1757,  1820,  1843,  1857,  1870,  1877,  1884,
-    1893,  1898
+       0,    93,    93,    98,   102,   107,   175,   181,   260,   329,
+     332,   344,   347,   354,   443,   477,   480,   485,   490,   528,
+     551,   558,   563,   568,   585,   593,   597,   601,   621,   728,
+     733,   738,   747,   751,   756,   759,   778,   785,   794,   812,
+     815,   822,   825,   832,   835,   841,   847,   852,   859,  1001,
+    1008,  1070,  1131,  1192,  1254,  1315,  1376,  1437,  1445,  1452,
+    1459,  1628,  1702,  1758,  1821,  1844,  1858,  1871,  1878,  1885,
+    1894,  1899
 };
 #endif
 
@@ -1749,7 +1749,8 @@ yyreduce:
                 // myerror(msg);
             }
         }
-
+		strcpy(Compst_return_type, "null");
+		
         MyType* mt = search(this_scope, tmp);
         if(mt) {
             if(mt->def) {
@@ -1806,11 +1807,11 @@ yyreduce:
         
         this_scope = pop_scope(this_scope);
     }
-#line 1810 "syntax.tab.c"
+#line 1811 "syntax.tab.c"
     break;
 
   case 8:
-#line 259 "syntax.y"
+#line 260 "syntax.y"
                             {
         yyval = insNode(yyvsp[-2], "ExtDef", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -1878,45 +1879,45 @@ yyreduce:
             func_cnt++;
         }
     }
-#line 1882 "syntax.tab.c"
+#line 1883 "syntax.tab.c"
     break;
 
   case 9:
-#line 328 "syntax.y"
+#line 329 "syntax.y"
                     {
         yyval = insNode(yyvsp[0], "ExtDecList", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 1890 "syntax.tab.c"
+#line 1891 "syntax.tab.c"
     break;
 
   case 10:
-#line 331 "syntax.y"
+#line 332 "syntax.y"
                               {
         yyval = insNode(yyvsp[-2], "ExtDecList", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 1900 "syntax.tab.c"
+#line 1901 "syntax.tab.c"
     break;
 
   case 11:
-#line 343 "syntax.y"
+#line 344 "syntax.y"
                  {
         yyval = insNode(yyvsp[0], "Specifier", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 1908 "syntax.tab.c"
+#line 1909 "syntax.tab.c"
     break;
 
   case 12:
-#line 346 "syntax.y"
+#line 347 "syntax.y"
                       {
         yyval = insNode(yyvsp[0], "Specifier", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 1916 "syntax.tab.c"
+#line 1917 "syntax.tab.c"
     break;
 
   case 13:
-#line 353 "syntax.y"
+#line 354 "syntax.y"
                                           {
 // StructSpecifier : STRUCT OptTag LC DefList RC {
         yyval = insNode(yyvsp[-4], "StructSpecifier", (yylsp[-4]).first_line, NON_TERMINAL);
@@ -2006,11 +2007,11 @@ yyreduce:
 
         this_scope = pop_scope(this_scope);
     }
-#line 2010 "syntax.tab.c"
+#line 2011 "syntax.tab.c"
     break;
 
   case 14:
-#line 442 "syntax.y"
+#line 443 "syntax.y"
                  {
         yyval = insNode(yyvsp[-1], "StructSpecifier", (yylsp[-1]).first_line, NON_TERMINAL);
         yyvsp[-1]->bro = yyvsp[0];
@@ -2043,35 +2044,35 @@ yyreduce:
         // free(tmp.type);
         flgStruct = 2;
     }
-#line 2047 "syntax.tab.c"
+#line 2048 "syntax.tab.c"
     break;
 
   case 15:
-#line 476 "syntax.y"
+#line 477 "syntax.y"
             {
         yyval = insNode(yyvsp[0], "OptTag", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 2055 "syntax.tab.c"
+#line 2056 "syntax.tab.c"
     break;
 
   case 16:
-#line 479 "syntax.y"
+#line 480 "syntax.y"
       {
         yyval = insNode(NULL, "OptTag", yylineno, NON_TERMINAL);
     }
-#line 2063 "syntax.tab.c"
+#line 2064 "syntax.tab.c"
     break;
 
   case 17:
-#line 484 "syntax.y"
+#line 485 "syntax.y"
          {
         yyval = insNode(yyvsp[0], "Tag", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 2071 "syntax.tab.c"
+#line 2072 "syntax.tab.c"
     break;
 
   case 18:
-#line 489 "syntax.y"
+#line 490 "syntax.y"
                           {
         yyval = insNode(yyvsp[-3], "FunDec", (yylsp[-3]).first_line, NON_TERMINAL);
         yyvsp[-3]->bro = yyvsp[-2];
@@ -2110,11 +2111,11 @@ yyreduce:
             // this_scope = insert(this_scope, tmp);
         // }
     }
-#line 2114 "syntax.tab.c"
+#line 2115 "syntax.tab.c"
     break;
 
   case 19:
-#line 527 "syntax.y"
+#line 528 "syntax.y"
                {
         yyval = insNode(yyvsp[-2], "FunDec", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -2138,84 +2139,84 @@ yyreduce:
         //     tmp.isfunc = 0;
         // }
     }
-#line 2142 "syntax.tab.c"
+#line 2143 "syntax.tab.c"
     break;
 
   case 20:
-#line 550 "syntax.y"
+#line 551 "syntax.y"
                          {
 		char msg[100];
 		sprintf(msg, "VarList.");
 		myerror(msg);
 	}
-#line 2152 "syntax.tab.c"
+#line 2153 "syntax.tab.c"
     break;
 
   case 21:
-#line 557 "syntax.y"
+#line 558 "syntax.y"
                                  {
         yyval = insNode(yyvsp[-2], "VarList", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2162 "syntax.tab.c"
+#line 2163 "syntax.tab.c"
     break;
 
   case 22:
-#line 562 "syntax.y"
+#line 563 "syntax.y"
                {
         yyval = insNode(yyvsp[0], "VarList", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 2170 "syntax.tab.c"
+#line 2171 "syntax.tab.c"
     break;
 
   case 23:
-#line 567 "syntax.y"
+#line 568 "syntax.y"
                             {
         yyval = insNode(yyvsp[-1], "ParamDec", (yylsp[-1]).first_line, NON_TERMINAL);
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2179 "syntax.tab.c"
+#line 2180 "syntax.tab.c"
     break;
 
   case 24:
-#line 584 "syntax.y"
+#line 585 "syntax.y"
                    {
         yyval = insNode(yyvsp[-2], "CompSt", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2189 "syntax.tab.c"
+#line 2190 "syntax.tab.c"
     break;
 
   case 25:
-#line 592 "syntax.y"
+#line 593 "syntax.y"
               {
         yyval = insNode(yyvsp[-1], "Mid", (yylsp[-1]).first_line, NON_TERMINAL);
         yyvsp[-1]->bro = yyvsp[0];
 	}
-#line 2198 "syntax.tab.c"
+#line 2199 "syntax.tab.c"
     break;
 
   case 26:
-#line 596 "syntax.y"
+#line 597 "syntax.y"
                    {
         yyval = insNode(yyvsp[-1], "Mid", (yylsp[-1]).first_line, NON_TERMINAL);
         yyvsp[-1]->bro = yyvsp[0];
 	}
-#line 2207 "syntax.tab.c"
+#line 2208 "syntax.tab.c"
     break;
 
   case 27:
-#line 600 "syntax.y"
+#line 601 "syntax.y"
           {
         yyval = insNode(NULL, "Mid", yylineno, NON_TERMINAL);
 	}
-#line 2215 "syntax.tab.c"
+#line 2216 "syntax.tab.c"
     break;
 
   case 28:
-#line 620 "syntax.y"
+#line 621 "syntax.y"
                              {
         yyval = insNode(yyvsp[-2], "Def", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -2323,68 +2324,68 @@ yyreduce:
         // flgStruct = 0;
         flgArr = 0;        
     }
-#line 2327 "syntax.tab.c"
+#line 2328 "syntax.tab.c"
     break;
 
   case 29:
-#line 727 "syntax.y"
+#line 728 "syntax.y"
                                  {
 		char msg[100];
 		sprintf(msg, "error: Missing \";\"");	//necessary
 		myerror(msg);
 	}
-#line 2337 "syntax.tab.c"
+#line 2338 "syntax.tab.c"
     break;
 
   case 30:
-#line 732 "syntax.y"
+#line 733 "syntax.y"
                          {
     	char msg[100];
 		sprintf(msg, "Syntax error.");
 		myerror(msg);
     }
-#line 2347 "syntax.tab.c"
+#line 2348 "syntax.tab.c"
     break;
 
   case 31:
-#line 737 "syntax.y"
+#line 738 "syntax.y"
                                {
 		char msg[100];
 		sprintf(msg, "Syntax error.");
 		myerror(msg);
 	}
-#line 2357 "syntax.tab.c"
+#line 2358 "syntax.tab.c"
     break;
 
   case 32:
-#line 746 "syntax.y"
+#line 747 "syntax.y"
              {
         yyval = insNode(yyvsp[-1], "Stmt", (yylsp[-1]).first_line, NON_TERMINAL);
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2366 "syntax.tab.c"
+#line 2367 "syntax.tab.c"
     break;
 
   case 33:
-#line 750 "syntax.y"
+#line 751 "syntax.y"
                 {
 		char msg[100];
 		sprintf(msg, "error: Missing \";\"");
 		myerror(msg);
 	}
-#line 2376 "syntax.tab.c"
+#line 2377 "syntax.tab.c"
     break;
 
   case 34:
-#line 755 "syntax.y"
+#line 756 "syntax.y"
              {
         yyval = insNode(yyvsp[0], "Stmt", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 2384 "syntax.tab.c"
+#line 2385 "syntax.tab.c"
     break;
 
   case 35:
-#line 758 "syntax.y"
+#line 759 "syntax.y"
                       {
         yyval = insNode(yyvsp[-2], "Stmt", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -2404,11 +2405,11 @@ yyreduce:
         // printf("return type name: %s\n", $2->child->name);
         // strcpy(Compst_return_type, $2->child->name);
     }
-#line 2408 "syntax.tab.c"
+#line 2409 "syntax.tab.c"
     break;
 
   case 36:
-#line 777 "syntax.y"
+#line 778 "syntax.y"
                                               {
         yyval = insNode(yyvsp[-4], "Stmt", (yylsp[-4]).first_line, NON_TERMINAL);
         yyvsp[-4]->bro = yyvsp[-3];
@@ -2416,11 +2417,11 @@ yyreduce:
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2420 "syntax.tab.c"
+#line 2421 "syntax.tab.c"
     break;
 
   case 37:
-#line 784 "syntax.y"
+#line 785 "syntax.y"
                                   {
         yyval = insNode(yyvsp[-6], "Stmt", (yylsp[-6]).first_line, NON_TERMINAL);
         yyvsp[-6]->bro = yyvsp[-5];
@@ -2430,11 +2431,11 @@ yyreduce:
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2434 "syntax.tab.c"
+#line 2435 "syntax.tab.c"
     break;
 
   case 38:
-#line 793 "syntax.y"
+#line 794 "syntax.y"
                            {
         yyval = insNode(yyvsp[-4], "Stmt", (yylsp[-4]).first_line, NON_TERMINAL);
         yyvsp[-4]->bro = yyvsp[-3];
@@ -2442,97 +2443,97 @@ yyreduce:
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2446 "syntax.tab.c"
+#line 2447 "syntax.tab.c"
     break;
 
   case 39:
-#line 811 "syntax.y"
+#line 812 "syntax.y"
               {
         yyval = insNode(yyvsp[0], "DecList", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 2454 "syntax.tab.c"
+#line 2455 "syntax.tab.c"
     break;
 
   case 40:
-#line 814 "syntax.y"
+#line 815 "syntax.y"
                         {
         yyval = insNode(yyvsp[-2], "DecList", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2464 "syntax.tab.c"
+#line 2465 "syntax.tab.c"
     break;
 
   case 41:
-#line 821 "syntax.y"
+#line 822 "syntax.y"
              {
         yyval = insNode(yyvsp[0], "Dec", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 2472 "syntax.tab.c"
+#line 2473 "syntax.tab.c"
     break;
 
   case 42:
-#line 824 "syntax.y"
+#line 825 "syntax.y"
                           {
         yyval = insNode(yyvsp[-2], "Dec", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2482 "syntax.tab.c"
+#line 2483 "syntax.tab.c"
     break;
 
   case 43:
-#line 831 "syntax.y"
+#line 832 "syntax.y"
             {
         yyval = insNode(yyvsp[0], "VarDec", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 2490 "syntax.tab.c"
+#line 2491 "syntax.tab.c"
     break;
 
   case 44:
-#line 834 "syntax.y"
+#line 835 "syntax.y"
                        {
         yyval = insNode(yyvsp[-3], "VarDec", (yylsp[-3]).first_line, NON_TERMINAL);
         yyvsp[-3]->bro = yyvsp[-2];
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2501 "syntax.tab.c"
+#line 2502 "syntax.tab.c"
     break;
 
   case 45:
-#line 840 "syntax.y"
+#line 841 "syntax.y"
                       {
         yyval = insNode(yyvsp[-3], "VarDec", (yylsp[-3]).first_line, NON_TERMINAL);
         yyvsp[-3]->bro = yyvsp[-2];
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2512 "syntax.tab.c"
+#line 2513 "syntax.tab.c"
     break;
 
   case 46:
-#line 846 "syntax.y"
+#line 847 "syntax.y"
                          {
         char msg[100];
         sprintf(msg, "Missing \"]\".");
 		myerror(msg);
     }
-#line 2522 "syntax.tab.c"
+#line 2523 "syntax.tab.c"
     break;
 
   case 47:
-#line 851 "syntax.y"
+#line 852 "syntax.y"
                             {
 		char msg[100];
 		sprintf(msg, "int.");
 		myerror(msg);
 	}
-#line 2532 "syntax.tab.c"
+#line 2533 "syntax.tab.c"
     break;
 
   case 48:
-#line 858 "syntax.y"
+#line 859 "syntax.y"
                        {
         yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -2675,11 +2676,11 @@ yyreduce:
         // }
         // // \end{jcy 6}
     }
-#line 2679 "syntax.tab.c"
+#line 2680 "syntax.tab.c"
     break;
 
   case 49:
-#line 1000 "syntax.y"
+#line 1001 "syntax.y"
                              { 
 		char msg[100];
         sprintf(msg, "Syntax error."); // ASSIGNOP not in front of Exp
@@ -2687,11 +2688,11 @@ yyreduce:
 		// errors++;
 		myerror(msg);
 	}
-#line 2691 "syntax.tab.c"
+#line 2692 "syntax.tab.c"
     break;
 
   case 50:
-#line 1007 "syntax.y"
+#line 1008 "syntax.y"
                   {
         yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -2754,11 +2755,11 @@ yyreduce:
         //     myerror(msg);
         // }
     }
-#line 2758 "syntax.tab.c"
+#line 2759 "syntax.tab.c"
     break;
 
   case 51:
-#line 1069 "syntax.y"
+#line 1070 "syntax.y"
                  {
         yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -2820,11 +2821,11 @@ yyreduce:
         //     myerror(msg);
         // }
     }
-#line 2824 "syntax.tab.c"
+#line 2825 "syntax.tab.c"
     break;
 
   case 52:
-#line 1130 "syntax.y"
+#line 1131 "syntax.y"
                     {
         yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -2886,11 +2887,11 @@ yyreduce:
         //     myerror(msg);
         // }
     }
-#line 2890 "syntax.tab.c"
+#line 2891 "syntax.tab.c"
     break;
 
   case 53:
-#line 1191 "syntax.y"
+#line 1192 "syntax.y"
                    {
         yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -2953,11 +2954,11 @@ yyreduce:
         //     myerror(msg);
         // }
     }
-#line 2957 "syntax.tab.c"
+#line 2958 "syntax.tab.c"
     break;
 
   case 54:
-#line 1253 "syntax.y"
+#line 1254 "syntax.y"
                     {
         yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -3019,11 +3020,11 @@ yyreduce:
         //     myerror(msg);
         // }
     }
-#line 3023 "syntax.tab.c"
+#line 3024 "syntax.tab.c"
     break;
 
   case 55:
-#line 1314 "syntax.y"
+#line 1315 "syntax.y"
                    {
         yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -3085,11 +3086,11 @@ yyreduce:
         //     myerror(msg);
         // }
     }
-#line 3089 "syntax.tab.c"
+#line 3090 "syntax.tab.c"
     break;
 
   case 56:
-#line 1375 "syntax.y"
+#line 1376 "syntax.y"
                   {
         yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -3151,11 +3152,11 @@ yyreduce:
         //     myerror(msg);
         // }
     }
-#line 3155 "syntax.tab.c"
+#line 3156 "syntax.tab.c"
     break;
 
   case 57:
-#line 1436 "syntax.y"
+#line 1437 "syntax.y"
                 {
         yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -3164,11 +3165,11 @@ yyreduce:
         // $$->name = $2->name;
         yyval->isAssignable = yyvsp[-1]->isAssignable;
     }
-#line 3168 "syntax.tab.c"
+#line 3169 "syntax.tab.c"
     break;
 
   case 58:
-#line 1444 "syntax.y"
+#line 1445 "syntax.y"
                 {
         yyval = insNode(yyvsp[-1], "Exp", (yylsp[-1]).first_line, NON_TERMINAL);
         yyvsp[-1]->bro = yyvsp[0];
@@ -3176,11 +3177,11 @@ yyreduce:
         // $$->name = $2->name;
         yyval->isAssignable = 0;
     }
-#line 3180 "syntax.tab.c"
+#line 3181 "syntax.tab.c"
     break;
 
   case 59:
-#line 1451 "syntax.y"
+#line 1452 "syntax.y"
               {
         yyval = insNode(yyvsp[-1], "Exp", (yylsp[-1]).first_line, NON_TERMINAL);
         yyvsp[-1]->bro = yyvsp[0];
@@ -3188,11 +3189,11 @@ yyreduce:
         // $$->name = $2->name;
         yyval->isAssignable = 0;
     }
-#line 3192 "syntax.tab.c"
+#line 3193 "syntax.tab.c"
     break;
 
   case 60:
-#line 1458 "syntax.y"
+#line 1459 "syntax.y"
                     {
         yyval = insNode(yyvsp[-3], "Exp", (yylsp[-3]).first_line, NON_TERMINAL);
         yyvsp[-3]->bro = yyvsp[-2];
@@ -3362,11 +3363,11 @@ yyreduce:
             // myerror(msg);
         }
     }
-#line 3366 "syntax.tab.c"
+#line 3367 "syntax.tab.c"
     break;
 
   case 61:
-#line 1627 "syntax.y"
+#line 1628 "syntax.y"
                {
         yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -3441,11 +3442,11 @@ yyreduce:
             // myerror(msg);
         }
     }
-#line 3445 "syntax.tab.c"
+#line 3446 "syntax.tab.c"
     break;
 
   case 62:
-#line 1701 "syntax.y"
+#line 1702 "syntax.y"
                     {
         yyval = insNode(yyvsp[-3], "Exp", (yylsp[-3]).first_line, NON_TERMINAL);
         yyvsp[-3]->bro = yyvsp[-2];
@@ -3502,11 +3503,11 @@ yyreduce:
         // 类型传递
         // \end{jcy 10}
     }
-#line 3506 "syntax.tab.c"
+#line 3507 "syntax.tab.c"
     break;
 
   case 63:
-#line 1757 "syntax.y"
+#line 1758 "syntax.y"
                      { // 结构体
 		yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
 		yyvsp[-2]->bro = yyvsp[-1];
@@ -3570,11 +3571,11 @@ yyreduce:
 		}
         //	\end{jcy 13}
 	}
-#line 3574 "syntax.tab.c"
+#line 3575 "syntax.tab.c"
     break;
 
   case 64:
-#line 1820 "syntax.y"
+#line 1821 "syntax.y"
              {
 		yyval = insNode(yyvsp[0], "Exp", (yylsp[0]).first_line, NON_TERMINAL);
 
@@ -3598,11 +3599,11 @@ yyreduce:
         }
         // free(tmp.name);
 	}
-#line 3602 "syntax.tab.c"
+#line 3603 "syntax.tab.c"
     break;
 
   case 65:
-#line 1843 "syntax.y"
+#line 1844 "syntax.y"
               {
 		yyval = insNode(yyvsp[0], "Exp", (yylsp[0]).first_line, NON_TERMINAL);
 
@@ -3617,11 +3618,11 @@ yyreduce:
 
         yyval->isAssignable = 0;
 	}
-#line 3621 "syntax.tab.c"
+#line 3622 "syntax.tab.c"
     break;
 
   case 66:
-#line 1857 "syntax.y"
+#line 1858 "syntax.y"
                 {
 		yyval = insNode(yyvsp[0], "Exp", (yylsp[0]).first_line, NON_TERMINAL);
 
@@ -3635,11 +3636,11 @@ yyreduce:
         this_scope = insert(this_scope, tmp);
         yyval->isAssignable = 0;
 	}
-#line 3639 "syntax.tab.c"
+#line 3640 "syntax.tab.c"
     break;
 
   case 67:
-#line 1870 "syntax.y"
+#line 1871 "syntax.y"
                       {
 		char msg[100];
         sprintf(msg, "Syntax error.");
@@ -3647,11 +3648,11 @@ yyreduce:
 		// errors++;
 		myerror(msg);
 	}
-#line 3651 "syntax.tab.c"
+#line 3652 "syntax.tab.c"
     break;
 
   case 68:
-#line 1877 "syntax.y"
+#line 1878 "syntax.y"
                          {
 		char msg[100];
         sprintf(msg, "Syntax error.");
@@ -3659,11 +3660,11 @@ yyreduce:
 		// errors++;
 		myerror(msg);
 	}
-#line 3663 "syntax.tab.c"
+#line 3664 "syntax.tab.c"
     break;
 
   case 69:
-#line 1884 "syntax.y"
+#line 1885 "syntax.y"
                          {
 		char msg[100];
         sprintf(msg, "Syntax error.");
@@ -3671,29 +3672,29 @@ yyreduce:
 		// errors++;
 		myerror(msg);
 	}
-#line 3675 "syntax.tab.c"
+#line 3676 "syntax.tab.c"
     break;
 
   case 70:
-#line 1893 "syntax.y"
+#line 1894 "syntax.y"
                       {
         yyval = insNode(yyvsp[-2], "CompSt", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 3685 "syntax.tab.c"
+#line 3686 "syntax.tab.c"
     break;
 
   case 71:
-#line 1898 "syntax.y"
+#line 1899 "syntax.y"
           {
         yyval = insNode(yyvsp[0], "CompSt", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 3693 "syntax.tab.c"
+#line 3694 "syntax.tab.c"
     break;
 
 
-#line 3697 "syntax.tab.c"
+#line 3698 "syntax.tab.c"
 
       default: break;
     }
@@ -3931,7 +3932,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 1903 "syntax.y"
+#line 1904 "syntax.y"
 
 // #include "lex.yy.c"
 
