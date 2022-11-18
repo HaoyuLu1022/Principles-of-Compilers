@@ -1,26 +1,10 @@
-int main(){
-	if(i - 2 == 1){  // note
-		i = i + 8
-	}
-	float p
-	i = 2.52;
-}
-
-
-/*
-int main()
+float func1()
 {
-    a[p = 2] = 3;
-    return 0;
+	float c;
+	return c;
 }
-*/
-/*
-int a[4];
-int p;
 
-int main()
+float func2()
 {
-    a[p = 2] = 3;
-    return 0;
+	int a;
 }
-*/

@@ -200,9 +200,8 @@ ExtDef : Specifier ExtDecList SEMI {
                 // myerror(msg);
             }
         }
-
-        strcpy(Compst_return_type, "null");
-
+		strcpy(Compst_return_type, "null");
+		
         MyType* mt = search(this_scope, tmp);
         if(mt) {
             if(mt->def) {

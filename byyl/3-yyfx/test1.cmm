@@ -3,7 +3,7 @@ int fun(){
 }
 
 int main(){
-	float f = 0.;
+	float f = 0.;	//此处因未能完成对ID变量类型的赋值，故下一行会报错,后面的样例这种问题还有很多
 	f = f + 0.1;
 	fun();
 	return 0;

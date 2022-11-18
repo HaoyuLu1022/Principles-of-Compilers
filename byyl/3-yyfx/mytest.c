@@ -1,0 +1,17 @@
+struct A{
+  float a;
+  int c;
+};
+struct B{
+  float b;
+  float c;
+};
+struct C{float m; int n;};
+int main(){
+  struct A aa;
+  struct B bb;
+  struct C cc;
+  aa = bb;
+  aa = cc;
+}
+
