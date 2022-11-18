@@ -31,3 +31,4 @@ struct node *iniNode(char *name, int lines, NODE_TYPE t);
 struct node *insNode(struct node *n, char *name, int lines, NODE_TYPE t);
 void printNode(struct node *n, FILE *f, int depth);
 void printTree(struct node *head, int depth, FILE *f);
+
