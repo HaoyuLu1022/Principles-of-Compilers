@@ -120,11 +120,26 @@ gcc syntax.tab.c SyntaxTree.c -lfl -ly -o parser
 -   [x] 15.   结构体域名重复
 -   [x] 16.   结构体名字重复
 -   [x] 17.   使用未定义结构体定义变量
--   [ ] 18.   *函数声明但未定义
--   [ ] 19.   *函数声明冲突
+-   [x] 18.   *函数声明但未定义
+-   [x] 19.   *函数声明冲突
 
 注：*代表附加要求
 
--   自底向上传递属性参数的思路会破坏语法树结构，导致段错误
--   使用ASSIGNOP的产生式有两处，Exp -> Exp ASSIGNOP Exp和VarDec -> VarDec ASSIGNOP Exp，所以要分开实现
--   声明和定义相关的产生式处语义分析的处理非常重要
+## 实验4 中间代码生成
+
+环境准备：
+
+```sh
+sudo apt install python-qt4
+```
+
+然后在NJU许畅教授编译原理的课程网页https://cs.nju.edu.cn/_upload/tpl/01/55/341/template341/2_compiler/index.html中下载虚拟机的代码，解压后用python2.7运行irsim.py
+
+```sh
+python2 irsim.py
+```
+
+>   注意上面给的网站里每个实验有个所谓的“测试用例（超强）”，说不定可以。。。
+
+### Quick Start
+
