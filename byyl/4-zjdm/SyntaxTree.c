@@ -9,10 +9,16 @@ struct node *iniNode(char *name, int lines, NODE_TYPE t) {
     newNode->type = t;
     newNode->name = name;
     newNode->isAssignable = 1;
-    if(!strcmp(newNode->name, "INT") || newNode->type == INT_TYPE)
+    if(!strcmp(newNode->name, "INT") || newNode->type == INT_TYPE) {
         newNode->intValue = atoi(yytext);
-    else if(!strcmp(newNode->name, "FLOAT") || newNode->type == FLOAT_TYPE)
+        strcpy(newNode->property, "int");
+    }
+        
+    else if(!strcmp(newNode->name, "FLOAT") || newNode->type == FLOAT_TYPE) {
         newNode->type = atof(yytext);
+        strcpy(newNode->property, "float");
+    }
+        
     else newNode->intValue = 1;
     return newNode;
 }

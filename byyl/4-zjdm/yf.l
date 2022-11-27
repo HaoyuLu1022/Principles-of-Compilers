@@ -7,6 +7,7 @@
 	int cols = 1;
 	int last_row = 1;
 	int this_row = 1;
+	int CompstCNT = 0;
 	extern VariLink this_scope;
 	#define YY_USER_ACTION yylloc.first_line = yylloc.last_line = yylineno; \
         yylloc.first_column = cols; \
@@ -291,6 +292,7 @@ COMMA ,
 	newnode->id = strdup(yytext);
 
 	this_scope = push_scope(this_scope);
+	CompstCNT++;
 	return LC;
 }
 {RC} {
@@ -300,6 +302,7 @@ COMMA ,
 	yylval = newnode;
 	newnode->id = strdup(yytext);
 
+	CompstCNT--;
 	// this_scope = pop_scope(this_scope);
 	return RC;
 }

@@ -18,6 +18,7 @@ struct node {
     int lines;
     char *name;
     NODE_TYPE type;
+    char property[20];
     int isAssignable; // 取0或1指示是否可赋值
     union {
         char *id;

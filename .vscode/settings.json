@@ -6,6 +6,7 @@
         "xlocale": "c",
         "system_error": "c",
         "*.cmm": "cpp",
-        "syntaxtree.h": "c"
+        "syntaxtree.h": "c",
+        "cmath": "cpp"
     }
 }
