@@ -229,12 +229,34 @@ ExtDef : Specifier ExtDecList SEMI {
                     MyType t = MyType_default;
                     t.def = 1;
                     t.isvariable = 1;
-                    strcpy(t.type, n->child->child->child->id);
-                    strcpy(t.name, n->child->child->bro->child->id);
+                    
+                    if(!flgStruct)
+                        strcpy(t.type, n->child->child->child->id);
+                    else
+                        strcpy(t.type, n->child->child->child->child->bro->child->id);
+                    
+                    if(flgArr) {
+                        struct node* newnode = n->child->child->bro;
+                        // printf("%s\n", newnode->name);
+                        while(!strcmp(newnode->name, "VarDec")) {
+                            newnode = newnode->child;
+                            // printf("name: %s\n", newnode->name);
+                        }
+                        strcpy(t.name, newnode->id);
+                        t.isarr = 1;
+                        t.dimension = n->child->child->bro->child->bro->bro->intValue;
+                        // printf("array: %s[%d]\n", t.name, t.dimension);
+                    }
+                    else 
+                        strcpy(t.name, n->child->child->bro->child->id);
                     int result = my_insert(&tmp.varilist, t);
+                    
 
                     t = MyType_default;
-                    strcpy(t.type, n->child->child->child->id);
+                    if(!flgStruct)
+                        strcpy(t.type, n->child->child->child->id);
+                    else
+                        strcpy(t.type, n->child->child->child->child->bro->child->id);
                     strcpy(t.name, varifunc);
                     varifunc[1] += 1;
                     if(varifunc[1] > '9'){
@@ -258,7 +280,8 @@ ExtDef : Specifier ExtDecList SEMI {
             my_insert(&this_scope->last->my_root, tmp);
             // print(this_scope);
         }
-		// jcy 8	
+		// jcy 8
+        flgStruct = 0;
         free(variList);
         variList = (VariLink)malloc(sizeof(VariLink));
         this_scope = pop_scope(this_scope);
@@ -483,18 +506,32 @@ Tag : ID {
     ;
 
 FunDec : ID LP VarList RP {
+    
         $$ = insNode($1, "FunDec", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
         $3->bro = $4;
        
-        printf("id: %s\n", $3->child->child->child->id);
+        // printf("flag: %d\n", flgArr);
         variList = (VariLink)malloc(sizeof(VariLink));
         struct node* newnode = $3;
         do {
             MyType tmp = MyType_default;
-            strcpy(tmp.name, $3->child->child->bro->child->id);
-            strcpy(tmp.type, $3->child->child->child->id);
+            if(flgArr) {
+                strcpy(tmp.name, $3->child->child->bro->child->child->id);
+                tmp.isarr = 1;
+                tmp.dimension = $3->child->child->bro->child->bro->bro->intValue;
+            }
+            else {
+                strcpy(tmp.name, $3->child->child->bro->child->id);
+            }
+            if(flgStruct) {
+                strcpy(tmp.type, $3->child->child->child->child->bro->child->id);
+            }
+            else {
+                strcpy(tmp.type, $3->child->child->child->id);
+            }
+                
             tmp.isvariable = 1;
             tmp.def = 1;
 
@@ -621,12 +658,18 @@ Def : Specifier DecList SEMI {
         do {
             MyType tmp = MyType_default;
             tmp.def = 1;
-            // printf("flgArr = %d\n", flgArr);
+            
             if(!flgArr) { // 不是数组
+            // printf("name: %s\n", newnode->child->child->child->name);
                 strcpy(tmp.name, newnode->child->child->child->id);
             }
             else { // 是数组
-                strcpy(tmp.name, newnode->child->child->child->child->id);
+                struct node* n = newnode->child->child->child->child;
+                while(!strcmp(n->name, "VarDec")) {
+                    n = n->child;
+                    // printf("name: %s\n", n->name);
+                }
+                strcpy(tmp.name, n->id);
             }
 
             if(my_search(&this_scope->my_root, tmp) || my_search(&variList->my_root, tmp)) { // 两种可能：struct xx {...} yy; 或 int a;
@@ -853,7 +896,7 @@ Exp : Exp ASSIGNOP Exp {
         $1->bro = $2;
         $2->bro = $3;
 
-        // printf("exp: %s\n", $1->child->name);
+        // printf("exp: %d\n", $1->child->type);
         if($1->child->type != STRING_TYPE && $1->child->type != NON_TERMINAL) {
             errors++;
             printf("Error %d at line %d : The left-hand side of assignment must be a variable\n", NEED_VARIABLE, last_row); 
@@ -862,41 +905,48 @@ Exp : Exp ASSIGNOP Exp {
             strcpy($$->property, $1->property);
         }
         else if($1->child->type == NON_TERMINAL) { // 说明可能是数组
+            // printf("yes\n");
             MyType t1 = MyType_default;
-            strcpy(t1.name, $1->child->child->id);
+            struct node* n = $1->child->child;
+            while(!strcmp(n->name, "Exp")) {
+                n = n->child;
+                // printf("name: %s\n", n->id);
+            }
+            strcpy(t1.name, n->id);
+
             MyType *t2 = search(this_scope, t1);
             if(t2) {
-                // printf("%s\n", $3->child->name);
+                // printf("name: %s\n", $3->child->name);
                 if(!strcmp($3->child->name, "ID")) { // $3->child->type == STRING_TYPE
                     MyType t3 = MyType_default;
-                    // printf("%s\n", $3->child->child->id);
-                    strcpy(t3.name, $3->child->child->id);
+                    // printf("%s\n", $3->child->id);
+                    strcpy(t3.name, $3->child->id);
                     MyType* t4 = search(this_scope, t3);
-                    if(t4)
-                        if(strcmp(t2->type, t4->type)) {
-                            errors++;
-                            printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                            // char msg[100];
-                            // sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                            // myerror(msg);
+                    if(t4) {
+                        if(t4->isfunc) {
+                            if(strcmp(t2->type, t4->return_type)) {
+                                errors++;
+                                printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row);
+                            }
                         }
+                        else {
+                            if(strcmp(t2->type, t4->type)) {
+                                errors++;
+                                printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+                            }
+                        }
+                    }
                 }
                 else if(!strcmp($3->child->name, "FLOAT")) {
                     if(strcmp(t2->type, "float")) {
                         errors++;
                         printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                        // char msg[100];
-                        // sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                        // myerror(msg);
                     }
                 }
                 else if(!strcmp($3->child->name, "INT")) {
                     if(strcmp(t2->type, "int")) {
                         errors++;
                         printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                        // char msg[100];
-                        // sprintf(msg, "Error %d at line %d : Type mismatched for assignment", TYPE_MISMATCH_ASSIGNMENT, last_row); 
-                        // myerror(msg);
                     }
                 }
             }
@@ -987,7 +1037,7 @@ Exp : Exp ASSIGNOP Exp {
         char num1[20] = {0};
         MyType t1 = MyType_default;
         MyType* t2;
-        printf("%s vs %s\n", $1->property, $3->property);
+        // printf("%s vs %s\n", $1->property, $3->property);
         
         if(strcmp($1->child->name, "ID")) { // $1->child->type != STRING_TYPE
             if(!strcmp($1->child->name, "INT")) {
@@ -1077,7 +1127,7 @@ Exp : Exp ASSIGNOP Exp {
         char num1[20] = {0};
         MyType t1 = MyType_default;
         MyType* t2;
-        printf("%s vs %s\n", $1->property, $3->property);
+        // printf("%s vs %s\n", $1->property, $3->property);
         
         if(strcmp($1->child->name, "ID")) { // $1->child->type != STRING_TYPE
             if(!strcmp($1->child->name, "INT")) {
@@ -1167,7 +1217,7 @@ Exp : Exp ASSIGNOP Exp {
         char num1[20] = {0};
         MyType t1 = MyType_default;
         MyType* t2;
-        printf("%s vs %s\n", $1->property, $3->property);
+        // printf("%s vs %s\n", $1->property, $3->property);
         
         if(strcmp($1->child->name, "ID")) { // $1->child->type != STRING_TYPE
             if(!strcmp($1->child->name, "INT")) {
@@ -1257,7 +1307,7 @@ Exp : Exp ASSIGNOP Exp {
         char num1[20] = {0};
         MyType t1 = MyType_default;
         MyType* t2;
-        printf("%s vs %s\n", $1->property, $3->property);
+        // printf("%s vs %s\n", $1->property, $3->property);
         
         if(strcmp($1->child->name, "ID")) { // $1->child->type != STRING_TYPE
             if(!strcmp($1->child->name, "INT")) {
@@ -1347,7 +1397,7 @@ Exp : Exp ASSIGNOP Exp {
         char num1[20] = {0};
         MyType t1 = MyType_default;
         MyType* t2;
-        printf("%s vs %s\n", $1->property, $3->property);
+        // printf("%s vs %s\n", $1->property, $3->property);
         
         if(strcmp($1->child->name, "ID")) { // $1->child->type != STRING_TYPE
             if(!strcmp($1->child->name, "INT")) {
@@ -1437,7 +1487,7 @@ Exp : Exp ASSIGNOP Exp {
         char num1[20] = {0};
         MyType t1 = MyType_default;
         MyType* t2;
-        printf("%s vs %s\n", $1->property, $3->property);
+        // printf("%s vs %s\n", $1->property, $3->property);
         
         if(strcmp($1->child->name, "ID")) { // $1->child->type != STRING_TYPE
             if(!strcmp($1->child->name, "INT")) {
@@ -1527,7 +1577,7 @@ Exp : Exp ASSIGNOP Exp {
         char num1[20] = {0};
         MyType t1 = MyType_default;
         MyType* t2;
-        printf("%s vs %s\n", $1->property, $3->property);
+        // printf("%s vs %s\n", $1->property, $3->property);
         
         if(strcmp($1->child->name, "ID")) { // $1->child->type != STRING_TYPE
             if(!strcmp($1->child->name, "INT")) {
@@ -1644,7 +1694,7 @@ Exp : Exp ASSIGNOP Exp {
             
             if(mt->isfunc) {
                 if(!strcmp(Compst_return_type, "null")) {
-                    printf("return type: %s\n", mt->return_type);
+                    // printf("return type: %s\n", mt->return_type);
                     strcpy($$->property, mt->return_type);
                 }
                 else {
@@ -1878,9 +1928,29 @@ Exp : Exp ASSIGNOP Exp {
             
 		    strcpy(tmp.name, $1->child->id);
 		    MyType* ml = search(this_scope, tmp);
-            
-		    if(search(this_scope, tmp)) {
-		    	if(ml->isarr) {
+            // print(this_scope);
+            // my_print(&variList->my_root);
+            if(ml) {
+                if(ml->isarr) {
+		    		// \begin{jcy 12}
+                    // printf("%s\n", $3->child->name);
+		    		if(strcmp($3->child->name, "INT")) {
+                        if(!strcmp($3->child->name, "FLOAT")) {
+                            errors++;
+                            printf("Error %d at line %d : \'%f\' is not an integer\n", ARRAY_ACCESS_OPERATEOR_NOT_INTEGER, last_row, $3->child->floatValue);
+                        }
+		    		}
+		    		// \end{jcy 12}
+		    	}
+		    	else {
+                    errors++;
+                    printf("Error %d at line %d : \'%s\' is not an array\n", NOT_ARRAY, last_row, tmp.name);
+		    	}
+            }
+            else {
+                ml = &my_search(&variList->my_root, tmp)->info;
+                if(ml) {
+                    if(ml->isarr) {
 		    		// \begin{jcy 12}
                     // printf("%s\n", $3->child->name);
 		    		if(strcmp($3->child->name, "INT")) {
@@ -1889,35 +1959,21 @@ Exp : Exp ASSIGNOP Exp {
                             errors++;
                             printf("Error %d at line %d : \'%f\' is not an integer\n", ARRAY_ACCESS_OPERATEOR_NOT_INTEGER, last_row, $3->child->floatValue);
                         }
-		        		//     sprintf(msg, "Error %d at line %d : \'%f\' is not an integer", ARRAY_ACCESS_OPERATEOR_NOT_INTEGER, last_row, $3->child->floatValue);
-		        		// myerror(msg);
 		    		}
 		    		// \end{jcy 12}
-		    	}
-		    	else {
+                    }
+                    else {
+                        errors++;
+                        printf("Error %d at line %d : \'%s\' is not an array\n", NOT_ARRAY, last_row, tmp.name);
+                    }
+                }
+                else {
                     errors++;
-                    printf("Error %d at line %d : \'%s\' is not an array\n", NOT_ARRAY, last_row, tmp.name);
-		    		// char msg[100];
-		        	// sprintf(msg, "Error %d at line %d : \'%s\' is not an array", NOT_ARRAY, last_row, tmp.name);
-		        	// myerror(msg);
-		    	}
-		    }
-		    else {
-                errors++;
-                printf("Error %d at line %d : Undefined variable \'%s\'\n", UNDEFINED_VARIABLE, last_row, tmp.name);
-		        // char msg[100];
-		        // sprintf(msg, "Error %d at line %d : Undefined variable \'%s\'", UNDEFINED_VARIABLE, last_row, tmp.name);
-		        // myerror(msg);
-		    }
-        
+                    printf("Error %d at line %d : Undefined variable \'%s\'\n", UNDEFINED_VARIABLE, last_row, tmp.name);
+                }
+            }
+      
         }
-        else {
-            errors++;
-            printf("Error %d at line %d : \'%s\' is not an array\n", NOT_ARRAY, last_row, tmp.name);
-		    // char msg[100];
-		    // sprintf(msg, "Error %d at line %d : \'%s\' is not an array", NOT_ARRAY, last_row, tmp.name);
-	        // myerror(msg);        
-		}
         //一个$1是否为数组变量的检查，一个$3是否为整数的检查（忽略段错误）
         // 类型传递
         // \end{jcy 10}
@@ -1996,11 +2052,10 @@ Exp : Exp ASSIGNOP Exp {
         if(mt) { 
             tmp.def = 1;
             strcpy($$->property, mt->type);
-            printf("type: %s\n", $$->property);
         }
         else if(mn) {
             tmp.def = 1;
-            strcpy($$->property, mn->info.type);printf("type: %s\n", $$->property);
+            strcpy($$->property, mn->info.type);
         }
         else { // 变量未定义
             errors++;
