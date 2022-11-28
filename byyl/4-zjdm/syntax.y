@@ -209,7 +209,7 @@ ExtDef : Specifier ExtDecList SEMI {
 
         struct my_node* mt = my_search(&this_scope->my_root, tmp); // 确认当前的新作用域没有声明
         if(mt) {
-            printf("def %d\n", mt->info.def);
+            // printf("def %d\n", mt->info.def);
             if(mt->info.def) {
                 errors++;
                 printf("Error %d at line %d : Redefined function \'%s\'\n", REDEFINED_FUNCTION, last_row, tmp.name);
@@ -277,7 +277,7 @@ ExtDef : Specifier ExtDecList SEMI {
             }
             // my_print(&tmp.varilist);
             this_scope = insert(this_scope, tmp);
-            my_insert(&this_scope->last->my_root, tmp);
+            // my_insert(&this_scope->last->my_root, tmp);
             // print(this_scope);
         }
 		// jcy 8
@@ -376,7 +376,6 @@ Specifier : TYPE {
         }
     }
     | StructSpecifier {
-        printf("id: %s\n", $1->child->bro->child->id);
         $$ = insNode($1, "Specifier", @1.first_line, NON_TERMINAL);
     }
     
@@ -512,11 +511,15 @@ FunDec : ID LP VarList RP {
         $2->bro = $3;
         $3->bro = $4;
        
-        // printf("flag: %d\n", flgArr);
+        MyType temp = MyType_default;
         variList = (VariLink)malloc(sizeof(VariLink));
-        struct node* newnode = $3;
+        struct node* newnode = $3; // newnode始终指向VarList
+        char varifunc[12] = {"00_varifunc"};
         do {
             MyType tmp = MyType_default;
+            tmp.def = 1;
+            tmp.isvariable = 1;
+
             if(flgArr) {
                 strcpy(tmp.name, $3->child->child->bro->child->child->id);
                 tmp.isarr = 1;
@@ -525,23 +528,37 @@ FunDec : ID LP VarList RP {
             else {
                 strcpy(tmp.name, $3->child->child->bro->child->id);
             }
+
             if(flgStruct) {
                 strcpy(tmp.type, $3->child->child->child->child->bro->child->id);
             }
             else {
                 strcpy(tmp.type, $3->child->child->child->id);
             }
-                
-            tmp.isvariable = 1;
-            tmp.def = 1;
 
             int result = my_insert(&variList->my_root, tmp);
+            my_insert(&temp.varilist, tmp);
+
+            tmp = MyType_default;
+            if(flgStruct) {
+                strcpy(tmp.type, $3->child->child->child->child->bro->child->id);
+            }
+            else {
+                strcpy(tmp.type, $3->child->child->child->id);
+            }
+            strcpy(tmp.name, varifunc);
+            varifunc[1] += 1;
+            if(varifunc[1] > '9') {
+                varifunc[0] += 1;
+                varifunc[1] = '0';
+            }
+            my_insert(&temp.varilist, tmp);
+
             if(newnode->child->bro) {
                 newnode = newnode->child->bro->bro;
             }
             else break;
         } while(newnode);
-        MyType temp = MyType_default;
         temp.isfunc = 1;
         strcpy(temp.name, $1->id);
         MyType* mt = search(this_scope, temp);
@@ -896,7 +913,7 @@ Exp : Exp ASSIGNOP Exp {
         $1->bro = $2;
         $2->bro = $3;
 
-        // printf("exp: %d\n", $1->child->type);
+        // printf("%s vs %s\n", $1->property, $3->property);
         if($1->child->type != STRING_TYPE && $1->child->type != NON_TERMINAL) {
             errors++;
             printf("Error %d at line %d : The left-hand side of assignment must be a variable\n", NEED_VARIABLE, last_row); 
@@ -1708,26 +1725,21 @@ Exp : Exp ASSIGNOP Exp {
                 // }
                 // this_scope = insert(this_scope, tmp);
                 // dxr to do
-                struct node* newnode = $3;
+                struct node* newnode = $3; // newnode始终指向Args
                 // printf("%s\n", newnode->child->child->id);
                 char varifunc[12] = {"00_varifunc"};
                 char Parameter[10][10];
                 char Arguments[10][10];
                 int right = 1, vari_num = 0, para_num = 0;
                 MyType parameter = MyType_default; // 形参
-                do { // 函数的参数列表 实参
-
-                    
+                do { // 函数的参数列表 实参 
                     strcpy(parameter.name, varifunc);
                     // printf("%s\n", parameter.name);
                     struct my_node* ttp = my_search(&(mt->varilist), parameter);
-                    // print_mynode(ttp->info);
-                    // my_print(&(mt->varilist));
                     if(ttp != NULL) {
                         parameter = ttp->info;
                         // printf("%s : %s\n", mt->name, parameter.type);
                     }  // 后面做了
-                    
                     if(strcmp(newnode->child->child->name, "ID")){  // 不是变量
                         // printf("%s\n", newnode->child->child->name);
                         char argu[20];
@@ -1739,7 +1751,8 @@ Exp : Exp ASSIGNOP Exp {
                             strcpy(argu, "float");
                         }
                         else if(!strcmp(newnode->child->child->name, "Exp")) {
-                            printf("莫急\n");
+                            // printf("property: %s\n", newnode->child->child->property);
+                            strcpy(argu, newnode->child->child->property);
                         }
                         else {
                             printf("你说你妈呢\n");
@@ -1750,7 +1763,7 @@ Exp : Exp ASSIGNOP Exp {
                         strcpy(Arguments[vari_num++], argu);
                         if(ttp == NULL || strcmp(parameter.type, argu)){
                             right = 0;
-                            // printf("%s %s %s\n", mt->name, parameter.type, argu);
+                            printf("test1: %s test2: %s test3: %s\n", mt->name, parameter.type, argu);
                         }
                         if(ttp != NULL){
                             // Parameter[para_num] = (char*)malloc(sizeof(parameter.type));
@@ -1802,7 +1815,6 @@ Exp : Exp ASSIGNOP Exp {
                     right = 0;
                 }
                 if(right == 0) {
-                    // char msg[1000];
                     printf("Error %d at line %d : Function \'%s(", FUNCTION_MISMATCH, last_row, mt->name);
                     for(int i = 0; i < vari_num; i ++){
                         if(i != vari_num - 1)
@@ -1826,18 +1838,15 @@ Exp : Exp ASSIGNOP Exp {
                 //	\begin{jcy 11}
                 errors++;
                 printf("Error %d at line %d : \'%s\' is not a function\n", NOT_FUNCTION, last_row, tmp.name);
-		        // char msg[100];
-            	// sprintf(msg, "Error %d at line %d : \'%s\' is not a function", NOT_FUNCTION, last_row, tmp.name);
-            	// myerror(msg);
                 // 	\end{jcy 11}
             }
+        }
+        else if(!strcmp($1->id, "write")) {
+
         }
         else { // 函数未定义
             errors++;
             printf("Error %d at line %d : Undefined function \'%s\'\n", UNDEFINED_FUNCTION, last_row, tmp.name);
-            // char msg[100];
-            // sprintf(msg, "Error %d at line %d : Undefined function \'%s\'", UNDEFINED_FUNCTION, last_row, tmp.name);
-            // myerror(msg);
         }
     }
     | ID LP RP {
@@ -1902,18 +1911,15 @@ Exp : Exp ASSIGNOP Exp {
                 //	\begin{jcy 11}
                 errors++;
                 printf("Error %d at line %d : \'%s\' is not a function\n", NOT_FUNCTION, last_row, tmp.name);
-		        // char msg[100];
-            	// sprintf(msg, "Error %d at line %d : \'%s\' is not a function", NOT_FUNCTION, last_row, tmp.name);
-            	// myerror(msg);
                 // 	\end{jcy 11}
             }
+        }
+        else if(!strcmp($1->id, "read")) {
+
         }
         else { // 函数未定义
             errors++;
             printf("Error %d at line %d : Undefined function \'%s\'\n", UNDEFINED_FUNCTION, last_row, tmp.name);
-            // char msg[100];
-            // sprintf(msg, "Error %d at line %d : Undefined function \'%s\'", UNDEFINED_FUNCTION, last_row, tmp.name);
-            // myerror(msg);
         }
     }
     | Exp LB Exp RB {
@@ -1989,10 +1995,9 @@ Exp : Exp ASSIGNOP Exp {
 		    strcpy(tmp.name, $1->child->id);
             MyType* ml = search(this_scope, tmp);
             // print(this_scope);
-		    if(ml != NULL) { //先获取这个名字的东西，然后看看它是不是结构体：如果不是结构体，则判为错误13；若是结构体，开始看ID是否存在：如果ID存在，将其属性赋给规约后的结果；若ID不存在，则判为错误14
-		        // Mylink ml = search(this_scope, tmp);
+		    if(ml != NULL) { //先获取这个名字的东西，然后看看它是不是结构体
+                // 如果不是结构体，则判为错误13；若是结构体，开始看ID是否存在：如果ID存在，将其属性赋给规约后的结果；若ID不存在，则判为错误14
 		        if(ml->isstruct) {
-		        	// error 14 	to be continued...
                     MyType t1 = MyType_default;
                     strcpy(t1.name, ml->type);
                     MyType* t2 = search(this_scope, t1); // 找到该结构体类型的定义
@@ -2001,43 +2006,24 @@ Exp : Exp ASSIGNOP Exp {
                     MyType t3 = MyType_default;
                     strcpy(t3.name, $3->id);
 
-                    if(my_search(&t2->varilist, t3)) {
-                        // printf("Yes!!\n");
+                    struct my_node* tmp = my_search(&t2->varilist, t3);
+                    if(tmp) {
+                        strcpy($$->property, tmp->info.type);
                     }
                     else {
                         errors++;
                         printf("Error %d at line %d : Non-existing field \'%s\'\n", NOT_EXISTENT_FIELD, last_row, $3->id);
-                        // char msg[100];
-                        // sprintf(msg, "Error %d at line %d : Non-existing field \'%s\'", NOT_EXISTENT_FIELD, last_row, $3->id);
-                        // myerror(msg);
                     }
-		        	// this_scope = insert(this_scope, tmp); // 不能insert，只能查
 		        }
-		        // tmp.type = $1->type;
-		        // my_insert(&mytree, tmp);
 		        else {
                     errors++;
                     printf("Error %d at line %d : Illegal use of \'.\'\n", DOT_ILLEGAL_USE, last_row);
-		        	// char msg[100];
-	        		// sprintf(msg, "Error %d at line %d : Illegal use of \'.\'", DOT_ILLEGAL_USE, last_row);
-	        		// myerror(msg);
 		        }
-		    }/*
-		    else { // 结构体未定义
-		    	$$->varDef = 0;
-		    	// \begin{jcy 17}
-		        char msg[100];
-		        sprintf(msg, "Error %d at line %d : Undefined struct \'%s\'", UNDEFINED_STRUCT, last_row, tmp.name);
-		        myerror(msg);
-		        // \end{jcy 17}
-		    }*/
+		    }
 		}
 		else {
             errors++;
             printf("Error %d at line %d : Illegal use of \'.\'\n", DOT_ILLEGAL_USE, last_row);
-			// char msg[100];
-	        // sprintf(msg, "Error %d at line %d : Illegal use of \'.\'", DOT_ILLEGAL_USE, last_row);
-	        // myerror(msg);
 		}
         //	\end{jcy 13}
 	}
