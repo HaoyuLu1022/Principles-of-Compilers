@@ -192,20 +192,11 @@ ExtDef : Specifier ExtDecList SEMI {
         // tmp.return_type = (char*)malloc(sizeof($1->child->id));
         strcpy(tmp.return_type, Compst_return_type);
         
-        // if(strcmp(Compst_return_type, "null")) {
-        //     if(strcmp(tmp.return_type, Compst_return_type)) {
-        //     // if(tmp.return_type != Compst_return_type) {
-        //         errors++;
-        //         printf("Error %d at line %d : Type mismatched for return\n", TYPE_MISMATCH_RETURN, last_row);
-        //         // char msg[100];
-        //         // sprintf(msg, "Error %d at line %d : Type mismatched for return", TYPE_MISMATCH_RETURN, last_row);
-        //         // myerror(msg);
-        //     }
-        // }
 		strcpy(Compst_return_type, "null");
 		// printf("return type: %s\n", tmp.return_type);
         MyType* t = search(this_scope, tmp);
         strcpy(t->return_type, tmp.return_type); // 给上级作用域中的函数声明赋返回值类型
+        if(!t->def) t->def = 1;
 
         struct my_node* mt = my_search(&this_scope->my_root, tmp); // 确认当前的新作用域没有声明
         if(mt) {
@@ -236,7 +227,7 @@ ExtDef : Specifier ExtDecList SEMI {
                         strcpy(t.type, n->child->child->child->child->bro->child->id);
                     
                     if(flgArr) {
-                        struct node* newnode = n->child->child->bro;
+                        struct node* newnode = n->child->child->bro; // newnode始终指向VarDec
                         // printf("%s\n", newnode->name);
                         while(!strcmp(newnode->name, "VarDec")) {
                             newnode = newnode->child;
@@ -275,10 +266,8 @@ ExtDef : Specifier ExtDecList SEMI {
             else {
                 // printf("没啥\n");
             }
-            // my_print(&tmp.varilist);
-            this_scope = insert(this_scope, tmp);
+            // this_scope = insert(this_scope, tmp);
             // my_insert(&this_scope->last->my_root, tmp);
-            // print(this_scope);
         }
 		// jcy 8
         flgStruct = 0;
@@ -511,6 +500,7 @@ FunDec : ID LP VarList RP {
         $2->bro = $3;
         $3->bro = $4;
        
+        print(this_scope);
         MyType temp = MyType_default;
         variList = (VariLink)malloc(sizeof(VariLink));
         struct node* newnode = $3; // newnode始终指向VarList
@@ -521,9 +511,13 @@ FunDec : ID LP VarList RP {
             tmp.isvariable = 1;
 
             if(flgArr) {
-                strcpy(tmp.name, $3->child->child->bro->child->child->id);
+                struct node* n = newnode->child->child->bro; // n始终指向VarDec
+                while(!strcmp(n->name, "VarDec")) {
+                    n = n->child;
+                }
+                strcpy(tmp.name, n->id);
                 tmp.isarr = 1;
-                tmp.dimension = $3->child->child->bro->child->bro->bro->intValue;
+                tmp.dimension = newnode->child->child->bro->child->bro->bro->intValue;
             }
             else {
                 strcpy(tmp.name, $3->child->child->bro->child->id);
@@ -572,6 +566,9 @@ FunDec : ID LP VarList RP {
                 // printf("没啥\n");
             }
         } // waiting
+        else {
+            mt->def = 1; // 11-29
+        }
         this_scope = insert(this_scope, temp);
     }
     | ID LP RP {
@@ -798,34 +795,17 @@ Stmt :
         $1->bro = $2;
         $2->bro = $3;
 
-        if($2->type == 1) {
-            if(strcmp(Compst_return_type, "int")) {
-                errors++;
-                printf("Error %d at line %d : Type mismatched for return\n", TYPE_MISMATCH_RETURN, last_row);
-            }
+        struct node* newnode = $2; // newnode始终指向Exp
+        char returnType[20] = {"null"};
+        while(newnode->type == NON_TERMINAL) {
+            newnode = newnode->child;
+            strcpy(returnType, newnode->name);
         }
-        else if($2->type == 2) {
-            if(strcmp(Compst_return_type, "float")) {
-                errors++;
-                printf("Error %d at line %d : Type mismatched for return\n", TYPE_MISMATCH_RETURN, last_row);
-            }
+        
+        if(strcmp(Compst_return_type, strlwr(returnType))) {
+            errors++;
+            printf("Error %d at line %d : Type mismatched for return\n", TYPE_MISMATCH_RETURN, last_row);
         }
-        else if($2->type == STRING_TYPE) {
-            if(strcmp(Compst_return_type, $2->id)) {
-                errors++;
-                printf("Error %d at line %d : Type mismatched for return\n", TYPE_MISMATCH_RETURN, last_row);
-            }
-        }
-        // printf("return_type: %d\n", $2->type);
-        // if(!strcmp($2->child->name, "int") || $2->type == 1) { // $2->child->type == INT_TYPE
-        //     strcpy(Compst_return_type, "int");
-        // }
-        // else if(!strcmp($2->child->name, "float") || $2->type == 2) { // $2->child->type == FLOAT_TYPE
-        //     strcpy(Compst_return_type, "float");
-        // }
-        // else if($2->child->type == STRING_TYPE) {
-        //     strcpy(Compst_return_type, $2->child->name);
-        // }
     }
     | IF LP Exp RP Stmt %prec LOWER_THAN_ELSE {
         $$ = insNode($1, "Stmt", @1.first_line, NON_TERMINAL);
@@ -913,8 +893,11 @@ Exp : Exp ASSIGNOP Exp {
         $1->bro = $2;
         $2->bro = $3;
 
-        // printf("%s vs %s\n", $1->property, $3->property);
-        if($1->child->type != STRING_TYPE && $1->child->type != NON_TERMINAL) {
+        if($1->property[0] == '\0' || $3->property[0] == '\0') {
+            errors++;
+            printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
+        }
+        else if($1->child->type != STRING_TYPE && $1->child->type != NON_TERMINAL) {
             errors++;
             printf("Error %d at line %d : The left-hand side of assignment must be a variable\n", NEED_VARIABLE, last_row); 
         }
