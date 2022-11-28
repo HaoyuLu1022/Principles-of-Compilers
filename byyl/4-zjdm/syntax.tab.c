@@ -612,8 +612,8 @@ static const yytype_int16 yyrline[] =
      753,   758,   767,   771,   776,   779,   813,   820,   829,   847,
      850,   857,   860,   867,   870,   876,   882,   887,   894,  1025,
     1032,  1122,  1212,  1302,  1392,  1482,  1572,  1662,  1669,  1675,
-    1681,  1843,  1919,  2029,  2092,  2114,  2119,  2124,  2131,  2138,
-    2147,  2152
+    1681,  1843,  1919,  1981,  2044,  2066,  2071,  2076,  2083,  2090,
+    2099,  2104
 };
 #endif
 
@@ -1841,7 +1841,7 @@ yyreduce:
 
   case 8:
 #line 289 "syntax.y"
-                            {
+                            {			//不会出现在中间代码生成中
         yyval = insNode(yyvsp[-2], "ExtDef", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
@@ -3683,22 +3683,16 @@ yyreduce:
 		    		// \begin{jcy 12}
                     // printf("%s\n", $3->child->name);
 		    		if(strcmp(yyvsp[-1]->child->name, "INT")) {
-		    			// char msg[100];
                         if(!strcmp(yyvsp[-1]->child->name, "FLOAT")) {
                             errors++;
                             printf("Error %d at line %d : \'%f\' is not an integer\n", ARRAY_ACCESS_OPERATEOR_NOT_INTEGER, last_row, yyvsp[-1]->child->floatValue);
                         }
-		        		//     sprintf(msg, "Error %d at line %d : \'%f\' is not an integer", ARRAY_ACCESS_OPERATEOR_NOT_INTEGER, last_row, $3->child->floatValue);
-		        		// myerror(msg);
 		    		}
 		    		// \end{jcy 12}
 		    	}
 		    	else {
                     errors++;
                     printf("Error %d at line %d : \'%s\' is not an array\n", NOT_ARRAY, last_row, tmp.name);
-		    		// char msg[100];
-		        	// sprintf(msg, "Error %d at line %d : \'%s\' is not an array", NOT_ARRAY, last_row, tmp.name);
-		        	// myerror(msg);
 		    	}
             }
             else {
@@ -3713,17 +3707,12 @@ yyreduce:
                             errors++;
                             printf("Error %d at line %d : \'%f\' is not an integer\n", ARRAY_ACCESS_OPERATEOR_NOT_INTEGER, last_row, yyvsp[-1]->child->floatValue);
                         }
-		        		//     sprintf(msg, "Error %d at line %d : \'%f\' is not an integer", ARRAY_ACCESS_OPERATEOR_NOT_INTEGER, last_row, $3->child->floatValue);
-		        		// myerror(msg);
 		    		}
 		    		// \end{jcy 12}
                     }
                     else {
                         errors++;
                         printf("Error %d at line %d : \'%s\' is not an array\n", NOT_ARRAY, last_row, tmp.name);
-                        // char msg[100];
-                        // sprintf(msg, "Error %d at line %d : \'%s\' is not an array", NOT_ARRAY, last_row, tmp.name);
-                        // myerror(msg);
                     }
                 }
                 else {
@@ -3731,54 +3720,17 @@ yyreduce:
                     printf("Error %d at line %d : Undefined variable \'%s\'\n", UNDEFINED_VARIABLE, last_row, tmp.name);
                 }
             }
-		    // if(search(this_scope, tmp) || my_search(&variList->my_root, tmp)) {printf("yes\n");
-		    // 	if(ml->isarr) {
-		    // 		// \begin{jcy 12}
-            //         // printf("%s\n", $3->child->name);
-		    // 		if(strcmp($3->child->name, "INT")) {
-		    // 			// char msg[100];
-            //             if(!strcmp($3->child->name, "FLOAT")) {
-            //                 errors++;
-            //                 printf("Error %d at line %d : \'%f\' is not an integer\n", ARRAY_ACCESS_OPERATEOR_NOT_INTEGER, last_row, $3->child->floatValue);
-            //             }
-		    //     		//     sprintf(msg, "Error %d at line %d : \'%f\' is not an integer", ARRAY_ACCESS_OPERATEOR_NOT_INTEGER, last_row, $3->child->floatValue);
-		    //     		// myerror(msg);
-		    // 		}
-		    // 		// \end{jcy 12}
-		    // 	}
-		    // 	else {
-            //         errors++;
-            //         printf("Error %d at line %d : \'%s\' is not an array\n", NOT_ARRAY, last_row, tmp.name);
-		    // 		// char msg[100];
-		    //     	// sprintf(msg, "Error %d at line %d : \'%s\' is not an array", NOT_ARRAY, last_row, tmp.name);
-		    //     	// myerror(msg);
-		    // 	}
-		    // }
-		    // else {
-            //     errors++;
-            //     printf("Error %d at line %d : Undefined variable \'%s\'\n", UNDEFINED_VARIABLE, last_row, tmp.name);
-		    //     // char msg[100];
-		    //     // sprintf(msg, "Error %d at line %d : Undefined variable \'%s\'", UNDEFINED_VARIABLE, last_row, tmp.name);
-		    //     // myerror(msg);
-		    // }
-        
+      
         }
-        // else {
-        //     errors++;
-        //     printf("Error %d at line %d : \'%s\' is not an array\n", NOT_ARRAY, last_row, tmp.name);
-		//     // char msg[100];
-		//     // sprintf(msg, "Error %d at line %d : \'%s\' is not an array", NOT_ARRAY, last_row, tmp.name);
-	    //     // myerror(msg);        
-		// }
         //一个$1是否为数组变量的检查，一个$3是否为整数的检查（忽略段错误）
         // 类型传递
         // \end{jcy 10}
     }
-#line 3778 "syntax.tab.c"
+#line 3730 "syntax.tab.c"
     break;
 
   case 63:
-#line 2029 "syntax.y"
+#line 1981 "syntax.y"
                      { // 结构体
 		yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
 		yyvsp[-2]->bro = yyvsp[-1];
@@ -3842,11 +3794,11 @@ yyreduce:
 		}
         //	\end{jcy 13}
 	}
-#line 3846 "syntax.tab.c"
+#line 3798 "syntax.tab.c"
     break;
 
   case 64:
-#line 2092 "syntax.y"
+#line 2044 "syntax.y"
              {
 		yyval = insNode(yyvsp[0], "Exp", (yylsp[0]).first_line, NON_TERMINAL);
 
@@ -3869,31 +3821,31 @@ yyreduce:
         }
         // free(tmp.name);
 	}
-#line 3873 "syntax.tab.c"
+#line 3825 "syntax.tab.c"
     break;
 
   case 65:
-#line 2114 "syntax.y"
+#line 2066 "syntax.y"
               {
 		yyval = insNode(yyvsp[0], "Exp", (yylsp[0]).first_line, NON_TERMINAL);
 
         strcpy(yyval->property, yyvsp[0]->property);
 	}
-#line 3883 "syntax.tab.c"
+#line 3835 "syntax.tab.c"
     break;
 
   case 66:
-#line 2119 "syntax.y"
+#line 2071 "syntax.y"
                 {
 		yyval = insNode(yyvsp[0], "Exp", (yylsp[0]).first_line, NON_TERMINAL);
 
         strcpy(yyval->property, yyvsp[0]->property);
 	}
-#line 3893 "syntax.tab.c"
+#line 3845 "syntax.tab.c"
     break;
 
   case 67:
-#line 2124 "syntax.y"
+#line 2076 "syntax.y"
                       {
 		char msg[100];
         sprintf(msg, "Syntax error.");
@@ -3901,11 +3853,11 @@ yyreduce:
 		// errors++;
 		myerror(msg);
 	}
-#line 3905 "syntax.tab.c"
+#line 3857 "syntax.tab.c"
     break;
 
   case 68:
-#line 2131 "syntax.y"
+#line 2083 "syntax.y"
                          {
 		char msg[100];
         sprintf(msg, "Syntax error.");
@@ -3913,11 +3865,11 @@ yyreduce:
 		// errors++;
 		myerror(msg);
 	}
-#line 3917 "syntax.tab.c"
+#line 3869 "syntax.tab.c"
     break;
 
   case 69:
-#line 2138 "syntax.y"
+#line 2090 "syntax.y"
                          {
 		char msg[100];
         sprintf(msg, "Syntax error.");
@@ -3925,29 +3877,29 @@ yyreduce:
 		// errors++;
 		myerror(msg);
 	}
-#line 3929 "syntax.tab.c"
+#line 3881 "syntax.tab.c"
     break;
 
   case 70:
-#line 2147 "syntax.y"
+#line 2099 "syntax.y"
                       {
         yyval = insNode(yyvsp[-2], "CompSt", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 3939 "syntax.tab.c"
+#line 3891 "syntax.tab.c"
     break;
 
   case 71:
-#line 2152 "syntax.y"
+#line 2104 "syntax.y"
           {
         yyval = insNode(yyvsp[0], "CompSt", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 3947 "syntax.tab.c"
+#line 3899 "syntax.tab.c"
     break;
 
 
-#line 3951 "syntax.tab.c"
+#line 3903 "syntax.tab.c"
 
       default: break;
     }
@@ -4185,16 +4137,17 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 2157 "syntax.y"
+#line 2109 "syntax.y"
 
 // #include "lex.yy.c"
 
 int main(int argc, char** argv) {
+	//char foutName[20];
     this_scope = init(this_scope);
     variList = init(variList);
-
 	if(argc <= 1) return 1;
 	FILE* f = fopen(argv[1], "r");
+	FILE *f2 = fopen(argv[2], "w");
 	if(!f) {
 		perror(argv[1]);
 		return 1;
@@ -4215,7 +4168,7 @@ int main(int argc, char** argv) {
             }
         } 
     }
-
+	
 	FILE *f1 = fopen("output.txt", "w");
 	if(!f1) {
 		perror(argv[1]);
@@ -4224,9 +4177,14 @@ int main(int argc, char** argv) {
 	if(!errors) {
         printf("None!!!\n");
 		f1 = fopen("output.txt", "w");
-        
 		printTree(head, 0, f1);
+		
+		f2 = fopen(argv[2], "w");
+		//translate_Program(head, f2);
 	}
+	fclose(f);
+	fclose(f1);
+	fclose(f2);
 	return 0;
 }
 
