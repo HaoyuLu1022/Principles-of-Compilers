@@ -324,7 +324,7 @@ ExtDef : Specifier ExtDecList SEMI {
             else {
                 // printf("没啥\n");
             }
-            this_scope = insert(this_scope, tmp);
+            // this_scope = insert(this_scope, tmp);
             // my_insert(&this_scope->last->my_root, tmp);
             // printf("%s\n", tmp.name);
             strcpy(func_list[func_cnt], tmp.name);
@@ -500,7 +500,7 @@ FunDec : ID LP VarList RP {
         $2->bro = $3;
         $3->bro = $4;
        
-        print(this_scope);
+        // print(this_scope);
         MyType temp = MyType_default;
         variList = (VariLink)malloc(sizeof(VariLink));
         struct node* newnode = $3; // newnode始终指向VarList
@@ -520,25 +520,27 @@ FunDec : ID LP VarList RP {
                 tmp.dimension = newnode->child->child->bro->child->bro->bro->intValue;
             }
             else {
-                strcpy(tmp.name, $3->child->child->bro->child->id);
+                strcpy(tmp.name, newnode->child->child->bro->child->id);
             }
 
             if(flgStruct) {
-                strcpy(tmp.type, $3->child->child->child->child->bro->child->id);
+                strcpy(tmp.type, newnode->child->child->child->child->bro->child->id);
             }
             else {
-                strcpy(tmp.type, $3->child->child->child->id);
+                // printf("type: %s\n", newnode->child->child->child->id);
+                strcpy(tmp.type, newnode->child->child->child->id);
             }
 
             int result = my_insert(&variList->my_root, tmp);
             my_insert(&temp.varilist, tmp);
 
             tmp = MyType_default;
+            tmp.isvariable = 1;
             if(flgStruct) {
-                strcpy(tmp.type, $3->child->child->child->child->bro->child->id);
+                strcpy(tmp.type, newnode->child->child->child->child->bro->child->id);
             }
             else {
-                strcpy(tmp.type, $3->child->child->child->id);
+                strcpy(tmp.type, newnode->child->child->child->id);
             }
             strcpy(tmp.name, varifunc);
             varifunc[1] += 1;
@@ -566,9 +568,6 @@ FunDec : ID LP VarList RP {
                 // printf("没啥\n");
             }
         } // waiting
-        else {
-            mt->def = 1; // 11-29
-        }
         this_scope = insert(this_scope, temp);
     }
     | ID LP RP {
@@ -893,6 +892,7 @@ Exp : Exp ASSIGNOP Exp {
         $1->bro = $2;
         $2->bro = $3;
 
+        // printf("%s vs %s\n", $1->property, $3->property);
         if($1->property[0] == '\0' || $3->property[0] == '\0') {
             errors++;
             printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
@@ -1685,13 +1685,9 @@ Exp : Exp ASSIGNOP Exp {
         $3->bro = $4;
 
         MyType tmp = MyType_default;
-        // tmp.name = (char*)malloc(sizeof($1->id));
         strcpy(tmp.name, $1->id);
-        // $$->isAssignable = 0;
         MyType* mt = search(this_scope, tmp);
-        if(mt != NULL) { 
-            // tmp.def = 1;
-            
+        if(mt != NULL) {
             if(mt->isfunc) {
                 if(!strcmp(Compst_return_type, "null")) {
                     // printf("return type: %s\n", mt->return_type);
@@ -1700,33 +1696,27 @@ Exp : Exp ASSIGNOP Exp {
                 else {
                     strcpy($$->property, Compst_return_type);
                 }
-                // if(!strcmp(mt->return_type, "int")) {
-                //     $$->type == 1;
-                // }
-                // else if(!strcmp(mt->return_type, "float")) {
-                //     $$->type == 2;
-                // }
-                // this_scope = insert(this_scope, tmp);
                 // dxr to do
                 struct node* newnode = $3; // newnode始终指向Args
-                // printf("%s\n", newnode->child->child->id);
+                // printf("%d\n", newnode->child->child->intValue);
                 char varifunc[12] = {"00_varifunc"};
                 char Parameter[10][10];
                 char Arguments[10][10];
-                int right = 1, vari_num = 0, para_num = 0;
+                int right = 1;
+                int vari_num = 0;
+                int para_num = 0;
                 MyType parameter = MyType_default; // 形参
                 do { // 函数的参数列表 实参 
                     strcpy(parameter.name, varifunc);
-                    // printf("%s\n", parameter.name);
                     struct my_node* ttp = my_search(&(mt->varilist), parameter);
                     if(ttp != NULL) {
                         parameter = ttp->info;
+                        // print_mynode(parameter);
+                        // print(this_scope);
                         // printf("%s : %s\n", mt->name, parameter.type);
                     }  // 后面做了
                     if(strcmp(newnode->child->child->name, "ID")){  // 不是变量
-                        // printf("%s\n", newnode->child->child->name);
                         char argu[20];
-                        // printf("%d\n", newnode->child->child->type);
                         if(strcmp(newnode->child->child->name, "INT") == 0 || newnode->child->type == 1){
                             strcpy(argu, "int");
                         }
@@ -1742,18 +1732,17 @@ Exp : Exp ASSIGNOP Exp {
                             exit(0);
                         }
                         // printf("%s\n", argu);
-                        // Arguments[vari_num] = (char*)malloc(sizeof(argu));
                         strcpy(Arguments[vari_num++], argu);
                         if(ttp == NULL || strcmp(parameter.type, argu)){
                             right = 0;
                             printf("test1: %s test2: %s test3: %s\n", mt->name, parameter.type, argu);
                         }
                         if(ttp != NULL){
-                            // Parameter[para_num] = (char*)malloc(sizeof(parameter.type));
+                            printf("type: %s\n", parameter.type);
                             strcpy(Parameter[para_num++], parameter.type);
                         }
                     }
-                    else{
+                    else{printf("yes\n");
                         MyType argu = MyType_default;
                         strcpy(argu.name, newnode->child->child->id);
                         Mylink tttp = search(this_scope, argu); // 据卢爹说一定能搜到，在此就直接拿了用
@@ -1772,6 +1761,7 @@ Exp : Exp ASSIGNOP Exp {
                             }
                         }
                     }
+                    // for(int i = 0; i < vari_num; i++) printf("实参: %s\n", Arguments[i]);
                     varifunc[1] += 1;
                     if(varifunc[1] > '9'){
                         varifunc[0] += 1;
@@ -1783,10 +1773,15 @@ Exp : Exp ASSIGNOP Exp {
                     }
                     else break;
                 } while(newnode != NULL);
+                // printf("varifunc = %s\n", varifunc);
                 strcpy(parameter.name, varifunc);
+                // my_print(&(mt->varilist));
                 struct my_node* tpp = my_search(&(mt->varilist), parameter);
+                // printf("before: %d\n", para_num);
                 while(tpp){
                     parameter = tpp->info;
+                    // print_mynode(parameter);
+                    printf("type: %s\n", parameter.type);
                     strcpy(Parameter[para_num++], parameter.type);
                     varifunc[1] += 1;
                     if(varifunc[1] > '9'){
@@ -1797,6 +1792,8 @@ Exp : Exp ASSIGNOP Exp {
                     tpp = my_search(&(mt->varilist), parameter);
                     right = 0;
                 }
+                printf("after: %d\n", para_num);
+                // for(int i = 0; i < para_num; i++) printf("形参: %s\n", Parameter[i]);
                 if(right == 0) {
                     printf("Error %d at line %d : Function \'%s(", FUNCTION_MISMATCH, last_row, mt->name);
                     for(int i = 0; i < vari_num; i ++){
@@ -1911,6 +1908,8 @@ Exp : Exp ASSIGNOP Exp {
         $2->bro = $3;
         $3->bro = $4;
         // \begin{jcy 10}
+
+        strcpy($$->property, $1->property);
         MyType tmp = MyType_default;
         if($1->child->type == STRING_TYPE) {			//主要是因为直接是数值的话，它没有RBT上的name
 		    // tmp.name = (char*)malloc(sizeof($1->child->id));

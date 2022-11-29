@@ -167,7 +167,7 @@
 # define YY_YY_SYNTAX_TAB_H_INCLUDED
 /* Debug traces.  */
 #ifndef YYDEBUG
-# define YYDEBUG 0
+# define YYDEBUG 1
 #endif
 #if YYDEBUG
 extern int yydebug;
@@ -607,13 +607,13 @@ static const yytype_int8 yytranslate[] =
 static const yytype_int16 yyrline[] =
 {
        0,    94,    94,    99,   103,   108,   177,   183,   278,   336,
-     339,   351,   367,   374,   455,   483,   486,   491,   496,   574,
-     595,   602,   607,   612,   629,   637,   641,   645,   665,   762,
-     767,   772,   781,   785,   790,   793,   810,   817,   826,   844,
-     847,   854,   857,   864,   867,   873,   879,   884,   891,  1025,
+     339,   351,   367,   374,   455,   483,   486,   491,   496,   573,
+     594,   601,   606,   611,   628,   636,   640,   644,   664,   761,
+     766,   771,   780,   784,   789,   792,   809,   816,   825,   843,
+     846,   853,   856,   863,   866,   872,   878,   883,   890,  1025,
     1032,  1122,  1212,  1302,  1392,  1482,  1572,  1662,  1669,  1675,
-    1681,  1835,  1908,  1970,  2013,  2035,  2040,  2045,  2052,  2059,
-    2068,  2073
+    1681,  1832,  1905,  1969,  2012,  2034,  2039,  2044,  2051,  2058,
+    2067,  2072
 };
 #endif
 
@@ -1879,7 +1879,7 @@ yyreduce:
             else {
                 // printf("没啥\n");
             }
-            this_scope = insert(this_scope, tmp);
+            // this_scope = insert(this_scope, tmp);
             // my_insert(&this_scope->last->my_root, tmp);
             // printf("%s\n", tmp.name);
             strcpy(func_list[func_cnt], tmp.name);
@@ -2086,7 +2086,7 @@ yyreduce:
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
        
-        print(this_scope);
+        // print(this_scope);
         MyType temp = MyType_default;
         variList = (VariLink)malloc(sizeof(VariLink));
         struct node* newnode = yyvsp[-1]; // newnode始终指向VarList
@@ -2106,25 +2106,27 @@ yyreduce:
                 tmp.dimension = newnode->child->child->bro->child->bro->bro->intValue;
             }
             else {
-                strcpy(tmp.name, yyvsp[-1]->child->child->bro->child->id);
+                strcpy(tmp.name, newnode->child->child->bro->child->id);
             }
 
             if(flgStruct) {
-                strcpy(tmp.type, yyvsp[-1]->child->child->child->child->bro->child->id);
+                strcpy(tmp.type, newnode->child->child->child->child->bro->child->id);
             }
             else {
-                strcpy(tmp.type, yyvsp[-1]->child->child->child->id);
+                // printf("type: %s\n", newnode->child->child->child->id);
+                strcpy(tmp.type, newnode->child->child->child->id);
             }
 
             int result = my_insert(&variList->my_root, tmp);
             my_insert(&temp.varilist, tmp);
 
             tmp = MyType_default;
+            tmp.isvariable = 1;
             if(flgStruct) {
-                strcpy(tmp.type, yyvsp[-1]->child->child->child->child->bro->child->id);
+                strcpy(tmp.type, newnode->child->child->child->child->bro->child->id);
             }
             else {
-                strcpy(tmp.type, yyvsp[-1]->child->child->child->id);
+                strcpy(tmp.type, newnode->child->child->child->id);
             }
             strcpy(tmp.name, varifunc);
             varifunc[1] += 1;
@@ -2152,16 +2154,13 @@ yyreduce:
                 // printf("没啥\n");
             }
         } // waiting
-        else {
-            mt->def = 1; // 11-29
-        }
         this_scope = insert(this_scope, temp);
     }
-#line 2161 "syntax.tab.c"
+#line 2160 "syntax.tab.c"
     break;
 
   case 19:
-#line 574 "syntax.y"
+#line 573 "syntax.y"
                {
         yyval = insNode(yyvsp[-2], "FunDec", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -2183,84 +2182,84 @@ yyreduce:
         } // waiting
         this_scope = insert(this_scope, temp);
     }
-#line 2187 "syntax.tab.c"
+#line 2186 "syntax.tab.c"
     break;
 
   case 20:
-#line 595 "syntax.y"
+#line 594 "syntax.y"
                          {
 		char msg[100];
 		sprintf(msg, "VarList.");
 		myerror(msg);
 	}
-#line 2197 "syntax.tab.c"
+#line 2196 "syntax.tab.c"
     break;
 
   case 21:
-#line 602 "syntax.y"
+#line 601 "syntax.y"
                                  {
         yyval = insNode(yyvsp[-2], "VarList", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2207 "syntax.tab.c"
+#line 2206 "syntax.tab.c"
     break;
 
   case 22:
-#line 607 "syntax.y"
+#line 606 "syntax.y"
                {
         yyval = insNode(yyvsp[0], "VarList", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 2215 "syntax.tab.c"
+#line 2214 "syntax.tab.c"
     break;
 
   case 23:
-#line 612 "syntax.y"
+#line 611 "syntax.y"
                             {
         yyval = insNode(yyvsp[-1], "ParamDec", (yylsp[-1]).first_line, NON_TERMINAL);
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2224 "syntax.tab.c"
+#line 2223 "syntax.tab.c"
     break;
 
   case 24:
-#line 629 "syntax.y"
+#line 628 "syntax.y"
                    {
         yyval = insNode(yyvsp[-2], "CompSt", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2234 "syntax.tab.c"
+#line 2233 "syntax.tab.c"
     break;
 
   case 25:
-#line 637 "syntax.y"
+#line 636 "syntax.y"
               {
         yyval = insNode(yyvsp[-1], "Mid", (yylsp[-1]).first_line, NON_TERMINAL);
         yyvsp[-1]->bro = yyvsp[0];
 	}
-#line 2243 "syntax.tab.c"
+#line 2242 "syntax.tab.c"
     break;
 
   case 26:
-#line 641 "syntax.y"
+#line 640 "syntax.y"
                    {
         yyval = insNode(yyvsp[-1], "Mid", (yylsp[-1]).first_line, NON_TERMINAL);
         yyvsp[-1]->bro = yyvsp[0];
 	}
-#line 2252 "syntax.tab.c"
+#line 2251 "syntax.tab.c"
     break;
 
   case 27:
-#line 645 "syntax.y"
+#line 644 "syntax.y"
           {
         yyval = insNode(NULL, "Mid", yylineno, NON_TERMINAL);
 	}
-#line 2260 "syntax.tab.c"
+#line 2259 "syntax.tab.c"
     break;
 
   case 28:
-#line 665 "syntax.y"
+#line 664 "syntax.y"
                              {
         yyval = insNode(yyvsp[-2], "Def", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -2358,68 +2357,68 @@ yyreduce:
         // flgStruct = 0;
         flgArr = 0;        
     }
-#line 2362 "syntax.tab.c"
+#line 2361 "syntax.tab.c"
     break;
 
   case 29:
-#line 762 "syntax.y"
+#line 761 "syntax.y"
                                  {
 		char msg[100];
 		sprintf(msg, "error: Missing \";\"");	//necessary
 		myerror(msg);
 	}
-#line 2372 "syntax.tab.c"
+#line 2371 "syntax.tab.c"
     break;
 
   case 30:
-#line 767 "syntax.y"
+#line 766 "syntax.y"
                          {
     	char msg[100];
 		sprintf(msg, "Syntax error.");
 		myerror(msg);
     }
-#line 2382 "syntax.tab.c"
+#line 2381 "syntax.tab.c"
     break;
 
   case 31:
-#line 772 "syntax.y"
+#line 771 "syntax.y"
                                {
 		char msg[100];
 		sprintf(msg, "Syntax error.");
 		myerror(msg);
 	}
-#line 2392 "syntax.tab.c"
+#line 2391 "syntax.tab.c"
     break;
 
   case 32:
-#line 781 "syntax.y"
+#line 780 "syntax.y"
              {
         yyval = insNode(yyvsp[-1], "Stmt", (yylsp[-1]).first_line, NON_TERMINAL);
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2401 "syntax.tab.c"
+#line 2400 "syntax.tab.c"
     break;
 
   case 33:
-#line 785 "syntax.y"
+#line 784 "syntax.y"
                 {
 		char msg[100];
 		sprintf(msg, "error: Missing \";\"");
 		myerror(msg);
 	}
-#line 2411 "syntax.tab.c"
+#line 2410 "syntax.tab.c"
     break;
 
   case 34:
-#line 790 "syntax.y"
+#line 789 "syntax.y"
              {
         yyval = insNode(yyvsp[0], "Stmt", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 2419 "syntax.tab.c"
+#line 2418 "syntax.tab.c"
     break;
 
   case 35:
-#line 793 "syntax.y"
+#line 792 "syntax.y"
                       {
         yyval = insNode(yyvsp[-2], "Stmt", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -2437,11 +2436,11 @@ yyreduce:
             printf("Error %d at line %d : Type mismatched for return\n", TYPE_MISMATCH_RETURN, last_row);
         }
     }
-#line 2441 "syntax.tab.c"
+#line 2440 "syntax.tab.c"
     break;
 
   case 36:
-#line 810 "syntax.y"
+#line 809 "syntax.y"
                                               {
         yyval = insNode(yyvsp[-4], "Stmt", (yylsp[-4]).first_line, NON_TERMINAL);
         yyvsp[-4]->bro = yyvsp[-3];
@@ -2449,11 +2448,11 @@ yyreduce:
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2453 "syntax.tab.c"
+#line 2452 "syntax.tab.c"
     break;
 
   case 37:
-#line 817 "syntax.y"
+#line 816 "syntax.y"
                                   {
         yyval = insNode(yyvsp[-6], "Stmt", (yylsp[-6]).first_line, NON_TERMINAL);
         yyvsp[-6]->bro = yyvsp[-5];
@@ -2463,11 +2462,11 @@ yyreduce:
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2467 "syntax.tab.c"
+#line 2466 "syntax.tab.c"
     break;
 
   case 38:
-#line 826 "syntax.y"
+#line 825 "syntax.y"
                            {
         yyval = insNode(yyvsp[-4], "Stmt", (yylsp[-4]).first_line, NON_TERMINAL);
         yyvsp[-4]->bro = yyvsp[-3];
@@ -2475,102 +2474,103 @@ yyreduce:
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2479 "syntax.tab.c"
+#line 2478 "syntax.tab.c"
     break;
 
   case 39:
-#line 844 "syntax.y"
+#line 843 "syntax.y"
               {
         yyval = insNode(yyvsp[0], "DecList", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 2487 "syntax.tab.c"
+#line 2486 "syntax.tab.c"
     break;
 
   case 40:
-#line 847 "syntax.y"
+#line 846 "syntax.y"
                         {
         yyval = insNode(yyvsp[-2], "DecList", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2497 "syntax.tab.c"
+#line 2496 "syntax.tab.c"
     break;
 
   case 41:
-#line 854 "syntax.y"
+#line 853 "syntax.y"
              {
         yyval = insNode(yyvsp[0], "Dec", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 2505 "syntax.tab.c"
+#line 2504 "syntax.tab.c"
     break;
 
   case 42:
-#line 857 "syntax.y"
+#line 856 "syntax.y"
                           {
         yyval = insNode(yyvsp[-2], "Dec", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2515 "syntax.tab.c"
+#line 2514 "syntax.tab.c"
     break;
 
   case 43:
-#line 864 "syntax.y"
+#line 863 "syntax.y"
             {
         yyval = insNode(yyvsp[0], "VarDec", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 2523 "syntax.tab.c"
+#line 2522 "syntax.tab.c"
     break;
 
   case 44:
-#line 867 "syntax.y"
+#line 866 "syntax.y"
                        {
         yyval = insNode(yyvsp[-3], "VarDec", (yylsp[-3]).first_line, NON_TERMINAL);
         yyvsp[-3]->bro = yyvsp[-2];
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2534 "syntax.tab.c"
+#line 2533 "syntax.tab.c"
     break;
 
   case 45:
-#line 873 "syntax.y"
+#line 872 "syntax.y"
                       {
         yyval = insNode(yyvsp[-3], "VarDec", (yylsp[-3]).first_line, NON_TERMINAL);
         yyvsp[-3]->bro = yyvsp[-2];
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 2545 "syntax.tab.c"
+#line 2544 "syntax.tab.c"
     break;
 
   case 46:
-#line 879 "syntax.y"
+#line 878 "syntax.y"
                          {
         char msg[100];
         sprintf(msg, "Missing \"]\".");
 		myerror(msg);
     }
-#line 2555 "syntax.tab.c"
+#line 2554 "syntax.tab.c"
     break;
 
   case 47:
-#line 884 "syntax.y"
+#line 883 "syntax.y"
                             {
 		char msg[100];
 		sprintf(msg, "int.");
 		myerror(msg);
 	}
-#line 2565 "syntax.tab.c"
+#line 2564 "syntax.tab.c"
     break;
 
   case 48:
-#line 891 "syntax.y"
+#line 890 "syntax.y"
                        {
         yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
 
+        // printf("%s vs %s\n", $1->property, $3->property);
         if(yyvsp[-2]->property[0] == '\0' || yyvsp[0]->property[0] == '\0') {
             errors++;
             printf("Error %d at line %d : Type mismatched for assignment\n", TYPE_MISMATCH_ASSIGNMENT, last_row); 
@@ -3423,13 +3423,9 @@ yyreduce:
         yyvsp[-1]->bro = yyvsp[0];
 
         MyType tmp = MyType_default;
-        // tmp.name = (char*)malloc(sizeof($1->id));
         strcpy(tmp.name, yyvsp[-3]->id);
-        // $$->isAssignable = 0;
         MyType* mt = search(this_scope, tmp);
-        if(mt != NULL) { 
-            // tmp.def = 1;
-            
+        if(mt != NULL) {
             if(mt->isfunc) {
                 if(!strcmp(Compst_return_type, "null")) {
                     // printf("return type: %s\n", mt->return_type);
@@ -3438,33 +3434,27 @@ yyreduce:
                 else {
                     strcpy(yyval->property, Compst_return_type);
                 }
-                // if(!strcmp(mt->return_type, "int")) {
-                //     $$->type == 1;
-                // }
-                // else if(!strcmp(mt->return_type, "float")) {
-                //     $$->type == 2;
-                // }
-                // this_scope = insert(this_scope, tmp);
                 // dxr to do
                 struct node* newnode = yyvsp[-1]; // newnode始终指向Args
-                // printf("%s\n", newnode->child->child->id);
+                // printf("%d\n", newnode->child->child->intValue);
                 char varifunc[12] = {"00_varifunc"};
                 char Parameter[10][10];
                 char Arguments[10][10];
-                int right = 1, vari_num = 0, para_num = 0;
+                int right = 1;
+                int vari_num = 0;
+                int para_num = 0;
                 MyType parameter = MyType_default; // 形参
                 do { // 函数的参数列表 实参 
                     strcpy(parameter.name, varifunc);
-                    // printf("%s\n", parameter.name);
                     struct my_node* ttp = my_search(&(mt->varilist), parameter);
                     if(ttp != NULL) {
                         parameter = ttp->info;
+                        // print_mynode(parameter);
+                        // print(this_scope);
                         // printf("%s : %s\n", mt->name, parameter.type);
                     }  // 后面做了
                     if(strcmp(newnode->child->child->name, "ID")){  // 不是变量
-                        // printf("%s\n", newnode->child->child->name);
                         char argu[20];
-                        // printf("%d\n", newnode->child->child->type);
                         if(strcmp(newnode->child->child->name, "INT") == 0 || newnode->child->type == 1){
                             strcpy(argu, "int");
                         }
@@ -3480,18 +3470,17 @@ yyreduce:
                             exit(0);
                         }
                         // printf("%s\n", argu);
-                        // Arguments[vari_num] = (char*)malloc(sizeof(argu));
                         strcpy(Arguments[vari_num++], argu);
                         if(ttp == NULL || strcmp(parameter.type, argu)){
                             right = 0;
                             printf("test1: %s test2: %s test3: %s\n", mt->name, parameter.type, argu);
                         }
                         if(ttp != NULL){
-                            // Parameter[para_num] = (char*)malloc(sizeof(parameter.type));
+                            printf("type: %s\n", parameter.type);
                             strcpy(Parameter[para_num++], parameter.type);
                         }
                     }
-                    else{
+                    else{printf("yes\n");
                         MyType argu = MyType_default;
                         strcpy(argu.name, newnode->child->child->id);
                         Mylink tttp = search(this_scope, argu); // 据卢爹说一定能搜到，在此就直接拿了用
@@ -3510,6 +3499,7 @@ yyreduce:
                             }
                         }
                     }
+                    // for(int i = 0; i < vari_num; i++) printf("实参: %s\n", Arguments[i]);
                     varifunc[1] += 1;
                     if(varifunc[1] > '9'){
                         varifunc[0] += 1;
@@ -3521,10 +3511,15 @@ yyreduce:
                     }
                     else break;
                 } while(newnode != NULL);
+                // printf("varifunc = %s\n", varifunc);
                 strcpy(parameter.name, varifunc);
+                // my_print(&(mt->varilist));
                 struct my_node* tpp = my_search(&(mt->varilist), parameter);
+                // printf("before: %d\n", para_num);
                 while(tpp){
                     parameter = tpp->info;
+                    // print_mynode(parameter);
+                    printf("type: %s\n", parameter.type);
                     strcpy(Parameter[para_num++], parameter.type);
                     varifunc[1] += 1;
                     if(varifunc[1] > '9'){
@@ -3535,6 +3530,8 @@ yyreduce:
                     tpp = my_search(&(mt->varilist), parameter);
                     right = 0;
                 }
+                printf("after: %d\n", para_num);
+                // for(int i = 0; i < para_num; i++) printf("形参: %s\n", Parameter[i]);
                 if(right == 0) {
                     printf("Error %d at line %d : Function \'%s(", FUNCTION_MISMATCH, last_row, mt->name);
                     for(int i = 0; i < vari_num; i ++){
@@ -3570,11 +3567,11 @@ yyreduce:
             printf("Error %d at line %d : Undefined function \'%s\'\n", UNDEFINED_FUNCTION, last_row, tmp.name);
         }
     }
-#line 3574 "syntax.tab.c"
+#line 3571 "syntax.tab.c"
     break;
 
   case 61:
-#line 1835 "syntax.y"
+#line 1832 "syntax.y"
                {
         yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
@@ -3648,17 +3645,19 @@ yyreduce:
             printf("Error %d at line %d : Undefined function \'%s\'\n", UNDEFINED_FUNCTION, last_row, tmp.name);
         }
     }
-#line 3652 "syntax.tab.c"
+#line 3649 "syntax.tab.c"
     break;
 
   case 62:
-#line 1908 "syntax.y"
+#line 1905 "syntax.y"
                     {
         yyval = insNode(yyvsp[-3], "Exp", (yylsp[-3]).first_line, NON_TERMINAL);
         yyvsp[-3]->bro = yyvsp[-2];
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
         // \begin{jcy 10}
+
+        strcpy(yyval->property, yyvsp[-3]->property);
         MyType tmp = MyType_default;
         if(yyvsp[-3]->child->type == STRING_TYPE) {			//主要是因为直接是数值的话，它没有RBT上的name
 		    // tmp.name = (char*)malloc(sizeof($1->child->id));
@@ -3715,11 +3714,11 @@ yyreduce:
         // 类型传递
         // \end{jcy 10}
     }
-#line 3719 "syntax.tab.c"
+#line 3718 "syntax.tab.c"
     break;
 
   case 63:
-#line 1970 "syntax.y"
+#line 1969 "syntax.y"
                      { // 结构体
 		yyval = insNode(yyvsp[-2], "Exp", (yylsp[-2]).first_line, NON_TERMINAL);
 		yyvsp[-2]->bro = yyvsp[-1];
@@ -3763,11 +3762,11 @@ yyreduce:
 		}
         //	\end{jcy 13}
 	}
-#line 3767 "syntax.tab.c"
+#line 3766 "syntax.tab.c"
     break;
 
   case 64:
-#line 2013 "syntax.y"
+#line 2012 "syntax.y"
              {
 		yyval = insNode(yyvsp[0], "Exp", (yylsp[0]).first_line, NON_TERMINAL);
 
@@ -3790,31 +3789,31 @@ yyreduce:
         }
         // free(tmp.name);
 	}
-#line 3794 "syntax.tab.c"
+#line 3793 "syntax.tab.c"
     break;
 
   case 65:
-#line 2035 "syntax.y"
+#line 2034 "syntax.y"
               {
 		yyval = insNode(yyvsp[0], "Exp", (yylsp[0]).first_line, NON_TERMINAL);
 
         strcpy(yyval->property, yyvsp[0]->property);
 	}
-#line 3804 "syntax.tab.c"
+#line 3803 "syntax.tab.c"
     break;
 
   case 66:
-#line 2040 "syntax.y"
+#line 2039 "syntax.y"
                 {
 		yyval = insNode(yyvsp[0], "Exp", (yylsp[0]).first_line, NON_TERMINAL);
 
         strcpy(yyval->property, yyvsp[0]->property);
 	}
-#line 3814 "syntax.tab.c"
+#line 3813 "syntax.tab.c"
     break;
 
   case 67:
-#line 2045 "syntax.y"
+#line 2044 "syntax.y"
                       {
 		char msg[100];
         sprintf(msg, "Syntax error.");
@@ -3822,11 +3821,11 @@ yyreduce:
 		// errors++;
 		myerror(msg);
 	}
-#line 3826 "syntax.tab.c"
+#line 3825 "syntax.tab.c"
     break;
 
   case 68:
-#line 2052 "syntax.y"
+#line 2051 "syntax.y"
                          {
 		char msg[100];
         sprintf(msg, "Syntax error.");
@@ -3834,11 +3833,11 @@ yyreduce:
 		// errors++;
 		myerror(msg);
 	}
-#line 3838 "syntax.tab.c"
+#line 3837 "syntax.tab.c"
     break;
 
   case 69:
-#line 2059 "syntax.y"
+#line 2058 "syntax.y"
                          {
 		char msg[100];
         sprintf(msg, "Syntax error.");
@@ -3846,29 +3845,29 @@ yyreduce:
 		// errors++;
 		myerror(msg);
 	}
-#line 3850 "syntax.tab.c"
+#line 3849 "syntax.tab.c"
     break;
 
   case 70:
-#line 2068 "syntax.y"
+#line 2067 "syntax.y"
                       {
         yyval = insNode(yyvsp[-2], "CompSt", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
-#line 3860 "syntax.tab.c"
+#line 3859 "syntax.tab.c"
     break;
 
   case 71:
-#line 2073 "syntax.y"
+#line 2072 "syntax.y"
           {
         yyval = insNode(yyvsp[0], "CompSt", (yylsp[0]).first_line, NON_TERMINAL);
     }
-#line 3868 "syntax.tab.c"
+#line 3867 "syntax.tab.c"
     break;
 
 
-#line 3872 "syntax.tab.c"
+#line 3871 "syntax.tab.c"
 
       default: break;
     }
@@ -4106,7 +4105,7 @@ yyreturn:
 #endif
   return yyresult;
 }
-#line 2078 "syntax.y"
+#line 2077 "syntax.y"
 
 // #include "lex.yy.c"
 
