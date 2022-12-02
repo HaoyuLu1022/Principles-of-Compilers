@@ -63,8 +63,11 @@ void print_mynode(MyType info){   // 这个本来没必要写的，但是怕铸�
         printf("type : %s\n", info.type);
     if(info.isarr)
         printf("dimension : %d\n", info.dimension);
-    if(info.isfunc)
+    if(info.isfunc) {
         printf("return_type : %s\n", info.return_type);
+        printf("Parameter list: \n");
+        my_print(&info.varilist);
+    }
     if(info.isstruct){
         printf("struct : struct maybe...\nVarilist:\n");
         my_print(&info.varilist);
