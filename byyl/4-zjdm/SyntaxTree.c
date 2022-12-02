@@ -82,10 +82,14 @@ void printTree(struct node *head, int depth, FILE *f) {
     printTree(head->bro, depth, f);
 }
 
-int findNum(int n) {
+int findNum(int n, FILE *f) {
 	for(int i = 0; i <= 99; i ++ ){
 		if(t[i] == n) return i;
-		else if(t[i] == 0 && i > 0) return i;
+		else if(t[i] == 0 && i > 0){
+			fprintf(f, "t%d := #%d\n", i, n);
+			t[i] = n;
+			return i;
+		}
 	}
 }
 
@@ -108,6 +112,7 @@ void translate_ExtDef(struct node *head, FILE *f) {
 		else if(!strcmp(head->child->bro->name, "FunDec")){
 			translate_FunDec(head->child->bro, f);				
 			translate_CompSt(head->child->bro->bro, f);		
+			fprintf(f, "\n");
 		}
 	}
 }
@@ -156,10 +161,14 @@ void translate_Def(struct node *head, FILE *f) {
 	//pass
 }
 
-void translate_Stmt(struct node *head, FILE *f) {
+void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是否需要再加一个跳转, 若有else则为1
+	printf("Stmt\n");
+	int back1, back2, back3;
 	if(!strcmp(head->child->name, "CompSt")) translate_CompSt(head->child, f);
 	else if(!strcmp(head->child->name, "Exp")){
+		//printf("tag1\n");
 		translate_Exp(head->child, f);		
+		//printf("tag2\n");
 		fprintf(f, "\n");
 	}
 	else if(!strcmp(head->child->name, "RETURN")){
@@ -171,14 +180,25 @@ void translate_Stmt(struct node *head, FILE *f) {
 		fprintf(f, "IF ");
 		translate_Exp(head->child->bro->bro, f);
 		fprintf(f, "GOTO label%d\n", r);
-		r += 1;
+		back1 = r; r += 1;
 		fprintf(f, "GOTO label%d\n", r);
-		r += 1;
-		fprintf("LABEL fdsfdgshdhf") //忘写了
+		back2 = r; r += 1;
+		fprintf(f, "LABEL label%d :\n", back1);
+		//printf("before\n");
 		translate_Stmt(head->child->bro->bro->bro->bro, f);
-		fprintf(f, "GOTO label%d\n", r);
-		r += 1;
-		if(head->child->bro->bro->bro->bro->bro != NULL) translate_Stmt(head->child->bro->bro->bro->bro->bro->bro, f);
+		
+		//printf("after\n");
+		
+		if(head->child->bro->bro->bro->bro->bro != NULL){
+			fprintf(f, "GOTO label%d\n", r);
+			back3 = r; r += 1;
+			//translate_Stmt(head->child->bro->bro->bro->bro->bro->bro, f);
+		}
+		fprintf(f, "LABEL label%d :\n", back2);
+		if(head->child->bro->bro->bro->bro->bro != NULL){
+			translate_Stmt(head->child->bro->bro->bro->bro->bro->bro, f);
+		}
+		fprintf(f, "LABEL label%d :\n", back3);
 	}
 	else if(!strcmp(head->child->name, "WHILE")){
 		//对应产生式: Stmt : WHILE LP Exp RP Stmt
@@ -194,11 +214,12 @@ void translate_Exp(struct node *head, FILE *f) {
 	else if(head->child->bro->bro == NULL){
 		//没有写NOT Exp
 		if(!strcmp(head->child->name, "MINUS")){
-			if(!strcmp(head->child->bro->child->name, "INT")) fprintf(f, "#-%s ", head->child->bro->child->id);
+			if(!strcmp(head->child->bro->child->name, "INT")) fprintf(f, "#-%d ", head->child->bro->child->intValue);
 			//else	好像也没有这种情况？
 		}
 	}
 	else if(head->child->bro->bro->bro == NULL){
+		//printf("tag3\n");
 		if(!strcmp(head->child->name, "LP")) translate_Exp(head->child->bro, f);
 		// else if(!strcmp(head->child))	需要补一个结构体的，对应产生式Exp DOT ID
 		
@@ -244,26 +265,36 @@ void translate_Exp(struct node *head, FILE *f) {
 			translate_Exp(head->child->bro->bro, f);
 		}
 		else if(!strcmp(head->child->bro->name, "ASSIGNOP")) {
-			if(!strcmp(head->child->bro->bro->child->id, "read")){
-				fprintf(f, "READ %s\n", head->child->id);
+			printf("tag4\n");
+			if(!strcmp(head->child->bro->bro->child->name, "ID") && !strcmp(head->child->bro->bro->child->id, "read")){
+				printf("tag6\n");
+				fprintf(f, "READ %s", head->child->child->id);
+				printf("tag9\n");
 			}
 			else{
+				printf("tag5\n");
 				translate_Exp(head->child, f);
+				printf("tag6\n");
 				fprintf(f, ":= ");
 				translate_Exp(head->child->bro->bro, f);
+				printf("tag7\n");
 			}
 		}
 	}
 	else if(head->child->bro->bro->bro->bro == NULL){
 		if(!strcmp(head->child->name, "ID")){
+			printf("tag8\n");
 			//调用对应的有参函数
 			if(!strcmp(head->child->id, "write")){
 				if(!strcmp(head->child->bro->bro->child->child->name, "ID")){
-					fprintf(f, "WRITE %s\n", head->child->bro->bro->child->child->id);	//ext2还需要改
+					fprintf(f, "WRITE %s", head->child->bro->bro->child->child->id);	//ext2还需要改
 				}
 				else if(!strcmp(head->child->bro->bro->child->child->name, "INT")){
 					//fprintf(f, "%d\n", head->child->bro->bro->child->child->intValue);
-					fprintf(f, "WRITE t%d\n", findNum(head->child->bro->bro->child->child->intValue));
+					fprintf(f, "WRITE t%d", findNum(head->child->bro->bro->child->child->intValue, f));
+				}
+				else if(!strcmp(head->child->bro->bro->child->child->name, "MINUS")){
+					fprintf(f, "WRITE t%d", findNum(-head->child->bro->bro->child->child->bro->intValue, f));
 				}
 			}
 		}

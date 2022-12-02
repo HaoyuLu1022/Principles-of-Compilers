@@ -1,0 +1,96 @@
+Program (1)
+	ExtDefList (1)
+		ExtDef (1)
+			Specifier (1)
+				TYPE : int
+			FunDec (1)
+				ID : main
+				LP : (
+				RP : )
+			CompSt (2)
+				LC : {
+				Empty : Empty
+				DefList (3)
+					Def (3)
+						Specifier (3)
+							TYPE : int
+						DecList (3)
+							Dec (3)
+								VarDec (3)
+									ID : n
+						SEMI : ;
+					Empty : Empty
+					StmtList (4)
+						Stmt (4)
+							Exp (4)
+								Exp (4)
+									ID : n
+								ASSIGNOP : =
+								Exp (4)
+									ID : read
+									LP : (
+									RP : )
+							SEMI : ;
+						Empty : Empty
+						StmtList (5)
+							Stmt (5)
+								IF : if
+								LP : (
+								Exp (5)
+									Exp (5)
+										ID : n
+									RELOP : >
+									Exp (5)
+										INT : 0
+								RP : )
+								Stmt (5)
+									Exp (5)
+										ID : write
+										LP : (
+										CompSt (5)
+											Exp (5)
+												INT : 1
+										RP : )
+									SEMI : ;
+								ELSE : else
+								Stmt (6)
+									IF : if
+									LP : (
+									Exp (6)
+										Exp (6)
+											ID : n
+										RELOP : <
+										Exp (6)
+											INT : 0
+									RP : )
+									Stmt (6)
+										Exp (6)
+											ID : write
+											LP : (
+											CompSt (6)
+												Exp (6)
+													MINUS : -
+													Exp (6)
+														INT : 1
+											RP : )
+										SEMI : ;
+									ELSE : else
+									Stmt (7)
+										Exp (7)
+											ID : write
+											LP : (
+											CompSt (7)
+												Exp (7)
+													INT : 0
+											RP : )
+										SEMI : ;
+							Empty : Empty
+							StmtList (8)
+								Stmt (8)
+									RETURN : return
+									Exp (8)
+										INT : 0
+									SEMI : ;
+								Empty : Empty
+				RC : }
+		ExtDefList (10)

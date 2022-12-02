@@ -2003,7 +2003,7 @@ int main(int argc, char** argv) {
     variList = init(variList);
 	if(argc <= 1) return 1;
 	FILE* f = fopen(argv[1], "r");
-	FILE *f2 = fopen(argv[2], "w");
+	FILE* f2 = fopen(argv[2], "w");
 	if(!f) {
 		perror(argv[1]);
 		return 1;
@@ -2036,7 +2036,7 @@ int main(int argc, char** argv) {
 		printTree(head, 0, f1);
 		
 		f2 = fopen(argv[2], "w");
-		//translate_Program(head, f2);
+		translate_Program(head, f2);
 	}
 	fclose(f);
 	fclose(f1);
