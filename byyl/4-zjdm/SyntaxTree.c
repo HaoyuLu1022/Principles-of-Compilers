@@ -4,6 +4,7 @@
 int t[100];		//存储临时变量，仅用于在程序中的立即数，其余变量直接用其原名
 //int top = 1;	//用来指示变量名用到哪个位置了
 int r = 1;		//用来指示label的标签
+int returnCNT = 0, paraCNT = 0;
 
 struct node *iniNode(char *name, int lines, NODE_TYPE t) {
     struct node *newNode = (struct node *)malloc(sizeof(struct node));
@@ -127,7 +128,7 @@ void translate_ExtDecList(struct node *head, FILE *f) {
 	if(head->child->bro != NULL) translate_ExtDecList(head->child->bro->bro, f);
 }
 
-void translate_FunDec(struct node *head, FILE *f) {
+void translate_FunDec(struct node *head, FILE *f) { // FunDec: ID LP VarList RP
 	fprintf(f, "FUNCTION %s :\n", head->child->id);
 	if(!strcmp(head->child->bro->bro->name, "VarList")) 
 		translate_VarList(head->child->bro->bro, f);	//to be continued	考虑增加一个参数表示来源（变量声明是否为函数的参数）
@@ -162,7 +163,7 @@ void translate_Def(struct node *head, FILE *f) {
 }
 
 void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是否需要再加一个跳转, 若有else则为1
-	printf("Stmt\n");
+	// printf("Stmt\n");
 	int back1, back2, back3;
 	if(!strcmp(head->child->name, "CompSt")) translate_CompSt(head->child, f);
 	else if(!strcmp(head->child->name, "Exp")){
@@ -227,6 +228,10 @@ void translate_Exp(struct node *head, FILE *f) {
 			if(strcmp(head->child->id, "read")){		//调用对应的函数，写对应的语句
 				//fprintf(f, "READ %s", );
 			}
+
+			else if(!strcmp(head->child->bro->name, "LP")) { // Exp: ID LP RP
+				// fprintf(f, "ARG v%d\n", returnCNT);
+			}
 			// else 	Exp AssignOp Exp处有对应的操作
 		}
 		else if(!strcmp(head->child->bro->name, "DIV")) {
@@ -265,25 +270,25 @@ void translate_Exp(struct node *head, FILE *f) {
 			translate_Exp(head->child->bro->bro, f);
 		}
 		else if(!strcmp(head->child->bro->name, "ASSIGNOP")) {
-			printf("tag4\n");
+			// printf("tag4\n");
 			if(!strcmp(head->child->bro->bro->child->name, "ID") && !strcmp(head->child->bro->bro->child->id, "read")){
-				printf("tag6\n");
+				// printf("tag6\n");
 				fprintf(f, "READ %s", head->child->child->id);
-				printf("tag9\n");
+				// printf("tag9\n");
 			}
 			else{
-				printf("tag5\n");
+				// printf("tag5\n");
 				translate_Exp(head->child, f);
-				printf("tag6\n");
+				// printf("tag6\n");
 				fprintf(f, ":= ");
 				translate_Exp(head->child->bro->bro, f);
-				printf("tag7\n");
+				// printf("tag7\n");
 			}
 		}
 	}
 	else if(head->child->bro->bro->bro->bro == NULL){
 		if(!strcmp(head->child->name, "ID")){
-			printf("tag8\n");
+			// printf("tag8\n");
 			//调用对应的有参函数
 			if(!strcmp(head->child->id, "write")){
 				if(!strcmp(head->child->bro->bro->child->child->name, "ID")){
@@ -297,6 +302,8 @@ void translate_Exp(struct node *head, FILE *f) {
 					fprintf(f, "WRITE t%d", findNum(-head->child->bro->bro->child->child->bro->intValue, f));
 				}
 			}
+			else if(head->child->bro) { // Exp: ID LP Args RP
+			}
 		}
 		// 还差一个数组调用，对应产生式Exp LB Exp RB
 	}
@@ -308,5 +315,6 @@ void translate_VarDec(struct node *head, FILE *f) {
 }
 
 void translate_VarList(struct node *head, FILE *f) {
-
+	fprintf(f, "PARAM %s\n", head->child->child->bro->child->id); // 可能需要考虑数组
+	// paraCNT++;
 }
