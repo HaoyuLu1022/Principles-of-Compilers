@@ -268,7 +268,7 @@ ExtDef : Specifier ExtDecList SEMI {
         variList = (VariLink)malloc(sizeof(VariLink));
         this_scope = pop_scope(this_scope);
     }
-    | Specifier FunDec SEMI {
+    | Specifier FunDec SEMI {			//不会出现在中间代码生成中
         $$ = insNode($1, "ExtDef", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
@@ -1998,11 +1998,12 @@ Args : Exp COMMA Args {
 // #include "lex.yy.c"
 
 int main(int argc, char** argv) {
+	//char foutName[20];
     this_scope = init(this_scope);
     variList = init(variList);
-
 	if(argc <= 1) return 1;
 	FILE* f = fopen(argv[1], "r");
+	FILE* f2 = fopen(argv[2], "w");
 	if(!f) {
 		perror(argv[1]);
 		return 1;
@@ -2023,7 +2024,7 @@ int main(int argc, char** argv) {
             }
         } 
     }
-
+	
 	FILE *f1 = fopen("output.txt", "w");
 	if(!f1) {
 		perror(argv[1]);
@@ -2032,9 +2033,14 @@ int main(int argc, char** argv) {
 	if(!errors) {
         printf("None!!!\n");
 		f1 = fopen("output.txt", "w");
-        
 		printTree(head, 0, f1);
+		
+		f2 = fopen(argv[2], "w");
+		translate_Program(head, f2);
 	}
+	fclose(f);
+	fclose(f1);
+	fclose(f2);
 	return 0;
 }
 
