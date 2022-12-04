@@ -9,11 +9,11 @@ int fact(int n)
 int main()
 {
   int m, result;
-  // m = read();
+  m = read();
   if (m > 1)
     result = fact(m);
   else
     result = 1;
-  // write(result);
+  write(result);
   return 0;
 }

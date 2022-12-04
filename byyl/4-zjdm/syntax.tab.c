@@ -3771,7 +3771,7 @@ yyreduce:
   case 70:
 #line 1987 "syntax.y"
                       {
-        yyval = insNode(yyvsp[-2], "CompSt", (yylsp[-2]).first_line, NON_TERMINAL);
+        yyval = insNode(yyvsp[-2], "Args", (yylsp[-2]).first_line, NON_TERMINAL);
         yyvsp[-2]->bro = yyvsp[-1];
         yyvsp[-1]->bro = yyvsp[0];
     }
@@ -3781,7 +3781,7 @@ yyreduce:
   case 71:
 #line 1992 "syntax.y"
           {
-        yyval = insNode(yyvsp[0], "CompSt", (yylsp[0]).first_line, NON_TERMINAL);
+        yyval = insNode(yyvsp[0], "Args", (yylsp[0]).first_line, NON_TERMINAL);
     }
 #line 3787 "syntax.tab.c"
     break;

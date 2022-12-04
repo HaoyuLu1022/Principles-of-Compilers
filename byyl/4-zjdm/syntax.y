@@ -1985,12 +1985,12 @@ Exp : Exp ASSIGNOP Exp {
     ;
 
 Args : Exp COMMA Args {
-        $$ = insNode($1, "CompSt", @1.first_line, NON_TERMINAL);
+        $$ = insNode($1, "Args", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
     }
     | Exp {
-        $$ = insNode($1, "CompSt", @1.first_line, NON_TERMINAL);
+        $$ = insNode($1, "Args", @1.first_line, NON_TERMINAL);
     }
     ;
 	

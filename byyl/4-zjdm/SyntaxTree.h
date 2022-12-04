@@ -59,7 +59,7 @@ void translate_DecList(struct node *head, FILE *f);
 void translate_VarDec(struct node *head, FILE *f);
 void translate_Dec(struct node *head, FILE *f);
 // 基本表达式的翻译模式
-void translate_Exp(struct node *head, FILE *f);
+char* translate_Exp(struct node *head, FILE *f);
 //void translate_Exp(struct node *head, FILE *f, Operand place);
 // 条件表达式的翻译模式
 //void translate_Cond(struct node *head, FILE *f, Operand lable_true, Operand lable_false);

@@ -47,7 +47,7 @@ Program (1)
 									Exp (5)
 										ID : write
 										LP : (
-										CompSt (5)
+										Args (5)
 											Exp (5)
 												INT : 1
 										RP : )
@@ -67,7 +67,7 @@ Program (1)
 										Exp (6)
 											ID : write
 											LP : (
-											CompSt (6)
+											Args (6)
 												Exp (6)
 													MINUS : -
 													Exp (6)
@@ -79,7 +79,7 @@ Program (1)
 										Exp (7)
 											ID : write
 											LP : (
-											CompSt (7)
+											Args (7)
 												Exp (7)
 													INT : 0
 											RP : )

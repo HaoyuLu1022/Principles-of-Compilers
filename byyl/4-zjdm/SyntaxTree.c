@@ -4,7 +4,8 @@
 int t[100];		//存储临时变量，仅用于在程序中的立即数，其余变量直接用其原名
 //int top = 1;	//用来指示变量名用到哪个位置了
 int r = 1;		//用来指示label的标签
-int returnCNT = 0, paraCNT = 0;
+int returnCNT = 0, paraCNT = 0, tcnt = 0;
+char* tmp = "null";
 
 struct node *iniNode(char *name, int lines, NODE_TYPE t) {
     struct node *newNode = (struct node *)malloc(sizeof(struct node));
@@ -165,17 +166,19 @@ void translate_Def(struct node *head, FILE *f) {
 void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是否需要再加一个跳转, 若有else则为1
 	// printf("Stmt\n");
 	int back1, back2, back3;
-	if(!strcmp(head->child->name, "CompSt")) translate_CompSt(head->child, f);
+	if(!strcmp(head->child->name, "CompSt"))
+		translate_CompSt(head->child, f);
 	else if(!strcmp(head->child->name, "Exp")){
 		//printf("tag1\n");
-		translate_Exp(head->child, f);		
+		translate_Exp(head->child, f);
 		//printf("tag2\n");
 		fprintf(f, "\n");
 	}
 	else if(!strcmp(head->child->name, "RETURN")){
-		fprintf(f, "RETURN ");
-		translate_Exp(head->child->bro, f);
-		fprintf(f, "\n");
+		// fprintf(f, "RETURN ");
+		char* res = translate_Exp(head->child->bro, f);
+		fprintf(f, "RETURN %s\n", res);
+		// fprintf(f, "\n");
 	}
 	else if(!strcmp(head->child->name, "IF")) {
 		fprintf(f, "IF ");
@@ -185,10 +188,10 @@ void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是�
 		fprintf(f, "GOTO label%d\n", r);
 		back2 = r; r += 1;
 		fprintf(f, "LABEL label%d :\n", back1);
-		//printf("before\n");
+		// printf("before\n");
 		translate_Stmt(head->child->bro->bro->bro->bro, f);
 		
-		//printf("after\n");
+		// printf("after\n");
 		
 		if(head->child->bro->bro->bro->bro->bro != NULL){
 			fprintf(f, "GOTO label%d\n", r);
@@ -207,21 +210,38 @@ void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是�
 	}
 }
 
-void translate_Exp(struct node *head, FILE *f) {
+char* translate_Exp(struct node *head, FILE *f) {
 	if(head->child->bro == NULL){
-		if(!strcmp(head->child->name, "ID")) fprintf(f, "%s ", head->child->id);
-		else if(!strcmp(head->child->name, "INT")) fprintf(f, "#%d ", head->child->intValue);
+		if(!strcmp(head->child->name, "ID")) {
+			// fprintf(f, "%s ", head->child->id);
+			tmp = (char*)malloc(sizeof(head->child->id));
+			sprintf(tmp, "%s ", head->child->id);
+			// return head->child->id;
+		}
+		else if(!strcmp(head->child->name, "INT")) {
+			// fprintf(f, "#%d ", head->child->intValue);
+			tmp = (char*)malloc(sizeof(head->child->intValue+3));
+			sprintf(tmp, "#%d ", head->child->intValue);
+		}
 	}
 	else if(head->child->bro->bro == NULL){
 		//没有写NOT Exp
 		if(!strcmp(head->child->name, "MINUS")){
-			if(!strcmp(head->child->bro->child->name, "INT")) fprintf(f, "#-%d ", head->child->bro->child->intValue);
+			if(!strcmp(head->child->bro->child->name, "INT")) {
+				// fprintf(f, "#-%d ", head->child->bro->child->intValue);
+				tmp = (char*)malloc(sizeof(head->child->bro->child->intValue+3));
+				sprintf(tmp, "#-%d ", head->child->bro->child->intValue);
+			}
 			//else	好像也没有这种情况？
 		}
 	}
 	else if(head->child->bro->bro->bro == NULL){
 		//printf("tag3\n");
-		if(!strcmp(head->child->name, "LP")) translate_Exp(head->child->bro, f);
+		// printf("Exp: %s\n", head->child->bro->name);
+		if(!strcmp(head->child->name, "LP")) {
+			
+			translate_Exp(head->child->bro, f);
+		}
 		// else if(!strcmp(head->child))	需要补一个结构体的，对应产生式Exp DOT ID
 		
 		else if(!strcmp(head->child->name, "ID")){
@@ -235,39 +255,59 @@ void translate_Exp(struct node *head, FILE *f) {
 			// else 	Exp AssignOp Exp处有对应的操作
 		}
 		else if(!strcmp(head->child->bro->name, "DIV")) {
-			translate_Exp(head->child, f);
-			fprintf(f, "/ ");
-			translate_Exp(head->child->bro->bro, f);
+			char* tmp1 = translate_Exp(head->child, f);
+			// fprintf(f, "/ ");
+			char* tmp2 = translate_Exp(head->child->bro->bro, f);
+			fprintf(f, "t%d := %s/ %s\n", tcnt, tmp1, tmp2);
+			sprintf(tmp, "t%d", tcnt);
+			tcnt++;
 		}
 		else if(!strcmp(head->child->bro->name, "STAR")) {
-			translate_Exp(head->child, f);
-			fprintf(f, "* ");
-			translate_Exp(head->child->bro->bro, f);
+			char* tmp1 = translate_Exp(head->child, f);
+			// fprintf(f, "* ");
+			char* tmp2 = translate_Exp(head->child->bro->bro, f);
+			fprintf(f, "t%d := %s* %s\n", tcnt, tmp1, tmp2);
+			sprintf(tmp, "t%d", tcnt);
+			tcnt++;
 		}
 		else if(!strcmp(head->child->bro->name, "MINUS")) {
-			translate_Exp(head->child, f);
-			fprintf(f, "- ");
-			translate_Exp(head->child->bro->bro, f);
+			char* tmp1 = translate_Exp(head->child, f);
+			// fprintf(f, "- ");
+			char* tmp2 = translate_Exp(head->child->bro->bro, f);
+			fprintf(f, "t%d := %s- %s\n", tcnt, tmp1, tmp2);
+			sprintf(tmp, "t%d", tcnt);
+			tcnt++;
 		}
 		else if(!strcmp(head->child->bro->name, "PLUS")) {
-			translate_Exp(head->child, f);
-			fprintf(f, "+ ");
-			translate_Exp(head->child->bro->bro, f);
+			char* tmp1 = translate_Exp(head->child, f);
+			// fprintf(f, "+ ");
+			char* tmp2 = translate_Exp(head->child->bro->bro, f);
+			fprintf(f, "t%d := %s+ %s\n", tcnt, tmp1, tmp2);
+			sprintf(tmp, "t%d", tcnt);
+			tcnt++;
 		}
 		else if(!strcmp(head->child->bro->name, "RELOP")) {
-			translate_Exp(head->child, f);
-			fprintf(f, "%s ", head->child->bro->id);
-			translate_Exp(head->child->bro->bro, f);
+			char* tmp1 = translate_Exp(head->child, f);
+			// fprintf(f, "%s ", head->child->bro->id);
+			char* tmp2 = translate_Exp(head->child->bro->bro, f);
+			fprintf(f, "%s%s %s", tmp1, head->child->bro->id, tmp2); // 感觉这个是特例。。。
+			sprintf(tmp, "t%d", tcnt);
 		}
 		else if(!strcmp(head->child->bro->name, "OR")) {
-			translate_Exp(head->child, f);
-			fprintf(f, "|| ");
-			translate_Exp(head->child->bro->bro, f);
+			char* tmp1 = translate_Exp(head->child, f);
+			// fprintf(f, "|| ");
+			char* tmp2 = translate_Exp(head->child->bro->bro, f);
+			fprintf(f, "t%d := %s|| %s\n", tcnt, tmp1, tmp2);
+			sprintf(tmp, "t%d", tcnt);
+			tcnt++;
 		}
 		else if(!strcmp(head->child->bro->name, "AND")) {
-			translate_Exp(head->child, f);
-			fprintf(f, "&& ");
-			translate_Exp(head->child->bro->bro, f);
+			char* tmp1 = translate_Exp(head->child, f);
+			// fprintf(f, "&& ");
+			char* tmp2 = translate_Exp(head->child->bro->bro, f);
+			fprintf(f, "t%d := %s&& %s\n", tcnt, tmp1, tmp2);
+			sprintf(tmp, "t%d", tcnt);
+			tcnt++;
 		}
 		else if(!strcmp(head->child->bro->name, "ASSIGNOP")) {
 			// printf("tag4\n");
@@ -278,11 +318,12 @@ void translate_Exp(struct node *head, FILE *f) {
 			}
 			else{
 				// printf("tag5\n");
-				translate_Exp(head->child, f);
+				char* tmp1 = translate_Exp(head->child, f);
 				// printf("tag6\n");
-				fprintf(f, ":= ");
-				translate_Exp(head->child->bro->bro, f);
-				// printf("tag7\n");
+				// fprintf(f, ":= ");
+				char* tmp2 = translate_Exp(head->child->bro->bro, f);
+				fprintf(f, "%s:= %s\n", tmp1, tmp2);
+				sprintf(tmp, "%s", tmp1);
 			}
 		}
 	}
@@ -303,11 +344,31 @@ void translate_Exp(struct node *head, FILE *f) {
 				}
 			}
 			else if(head->child->bro) { // Exp: ID LP Args RP
+				struct node* newnode = head->child->bro->bro; // newnode始终指向Args
+				do {
+					if(!strcmp(newnode->child->name, "Exp")) {
+						char* tmp1 = translate_Exp(newnode->child, f);
+						fprintf(f, "ARG %s\n", tmp1);
+						// fprintf(f, "ARG t%d\n", tcnt);
+					}
+
+					if(newnode->child->bro)
+						newnode = newnode->child->bro->bro;
+					else
+						break;
+				} while(newnode->child->bro);
+				// tcnt--;
+
+				
+				// tcnt++;
+				fprintf(f, "t%d := CALL %s\n", tcnt, head->child->id);
+				sprintf(tmp, "t%d", tcnt);
+				tcnt++;
 			}
 		}
 		// 还差一个数组调用，对应产生式Exp LB Exp RB
 	}
-		
+	return tmp;
 }
 
 void translate_VarDec(struct node *head, FILE *f) {
