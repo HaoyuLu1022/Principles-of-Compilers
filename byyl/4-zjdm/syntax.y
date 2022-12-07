@@ -214,11 +214,16 @@ ExtDef : Specifier ExtDecList SEMI {
                     t.def = 1;
                     t.isvariable = 1;
                     
-                    if(!flgStruct)
+                    if(!strcmp(n->child->child->child->name, "StructSpecifier")) {
+                        flgStruct = 2;
+                    }
+                    if(!flgStruct) {
                         strcpy(t.type, n->child->child->child->id);
-                    else
+                    }
+                    else {
                         strcpy(t.type, n->child->child->child->child->bro->child->id);
-                    
+                    }
+
                     if(flgArr) {
                         struct node* newnode = n->child->child->bro; // newnode始终指向VarDec
                         // printf("%s\n", newnode->name);
@@ -231,16 +236,19 @@ ExtDef : Specifier ExtDecList SEMI {
                         t.dimension = n->child->child->bro->child->bro->bro->intValue;
                         // printf("array: %s[%d]\n", t.name, t.dimension);
                     }
-                    else 
+                    else {
                         strcpy(t.name, n->child->child->bro->child->id);
+                    }
                     int result = my_insert(&tmp.varilist, t);
                     
-
                     t = MyType_default;
-                    if(!flgStruct)
+                    if(!flgStruct) {
                         strcpy(t.type, n->child->child->child->id);
-                    else
+                    }
+                    else {
                         strcpy(t.type, n->child->child->child->child->bro->child->id);
+                        flgStruct = 0;
+                    }
                     strcpy(t.name, varifunc);
                     varifunc[1] += 1;
                     if(varifunc[1] > '9'){
@@ -501,7 +509,6 @@ FunDec : ID LP VarList RP {
                 strcpy(tmp.type, newnode->child->child->child->child->bro->child->id);
             }
             else {
-                // printf("type: %s\n", newnode->child->child->child->id);
                 strcpy(tmp.type, newnode->child->child->child->id);
             }
 
@@ -512,6 +519,7 @@ FunDec : ID LP VarList RP {
             tmp.isvariable = 1;
             if(flgStruct) {
                 strcpy(tmp.type, newnode->child->child->child->child->bro->child->id);
+                flgStruct = 0;
             }
             else {
                 strcpy(tmp.type, newnode->child->child->child->id);

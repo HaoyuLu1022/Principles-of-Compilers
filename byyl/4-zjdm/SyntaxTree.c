@@ -574,25 +574,26 @@ char* translate_Exp(struct node *head, FILE *f) {
 				}
 			}
 			else if(head->child->bro) { // Exp: ID LP Args RP
-				struct node* newnode = head->child->bro->bro; // newnode始终指向Args
-				do {
-					if(!strcmp(newnode->child->name, "Exp")) {
-						char* tmp1 = translate_Exp(newnode->child, f);
-						if(searchTree(root, tmp1) == 1) {
+				// struct node* newnode = head->child->bro->bro; // newnode始终指向Args
+				// do {
+				// 	if(!strcmp(newnode->child->name, "Exp")) {
+				// 		char* tmp1 = translate_Exp(newnode->child, f);
+				// 		if(searchTree(root, tmp1) == 1) {
 							
-							fprintf(f, "ARG &%s\n", tmp1);
-						}
-						else {
-							fprintf(f, "ARG %s\n", tmp1);
-						}
-						// 尚未还没有考虑多参数函数的倒序调用问题
-					}
+				// 			fprintf(f, "ARG &%s\n", tmp1);
+				// 		}
+				// 		else {
+				// 			fprintf(f, "ARG %s\n", tmp1);
+				// 		}
+				// 		// 尚未还没有考虑多参数函数的倒序调用问题
+				// 	}
 
-					if(newnode->child->bro)
-						newnode = newnode->child->bro->bro;
-					else
-						break;
-				} while(newnode->child->bro);
+				// 	if(newnode->child->bro)
+				// 		newnode = newnode->child->bro->bro;
+				// 	else
+				// 		break;
+				// } while(newnode->child->bro);
+				translate_Args(head->child->bro->bro, f);
 
 				fprintf(f, "t%d := CALL %s\n", tcnt, head->child->id);
 				tmp = (char*)malloc(sizeof(tcnt) + 3);
@@ -670,5 +671,22 @@ void translate_VarList(struct node *head, FILE *f) {
 	else { // 数组：VarList -> ParamDec -> Specifier -> VarDec -> VarDec -> ID
 		// printf("%s\n", head->child->child->bro->child->child->id);
 		fprintf(f, "PARAM %s\n", head->child->child->bro->child->child->id);
+	}
+
+	if(head->child->bro) {
+		translate_VarList(head->child->bro->bro, f);
+	}
+}
+
+void translate_Args(struct node* head, FILE *f) {
+	if(head->child->bro) { // Args : Exp COMMA Args
+		translate_Args(head->child->bro->bro, f);
+	}
+	char* tmp1 = translate_Exp(head->child, f);
+	if(searchTree(root, tmp1) == 1) {
+		fprintf(f, "ARG := &%s\n", tmp1);
+	}
+	else {
+		fprintf(f, "ARG %s\n", tmp1);
 	}
 }
