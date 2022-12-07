@@ -3,7 +3,7 @@
 
 int t[100];		//存储临时变量，仅用于在程序中的立即数，其余变量直接用其原名
 //int top = 1;	//用来指示变量名用到哪个位置了
-int r = 1;		//用来指示label的标签
+int r = 1, BACK, flagif = 1;		//用来指示label的标签
 int tcnt = 0;
 char* tmp = "null";
 int flagArr = 0, flagStruct = 0;
@@ -309,24 +309,28 @@ void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是�
 		translate_Exp(head->child->bro->bro, f);
 		fprintf(f, " GOTO label%d\n", r);
 		back1 = r; r += 1;
-		fprintf(f, " GOTO label%d\n", r);
-		back2 = r; r += 1;
-		fprintf(f, "LABEL label%d :\n", back1);
-		// printf("before\n");
-		translate_Stmt(head->child->bro->bro->bro->bro, f);
-		
-		// printf("after\n");
-		
-		if(head->child->bro->bro->bro->bro->bro != NULL){
-			fprintf(f, " GOTO label%d\n", r);
-			back3 = r; r += 1;
-			//translate_Stmt(head->child->bro->bro->bro->bro->bro->bro, f);
-		}
-		fprintf(f, "LABEL label%d :\n", back2);
-		if(head->child->bro->bro->bro->bro->bro != NULL){
+		if(head->child->bro->bro->bro->bro->bro && !strcmp(head->child->bro->bro->bro->bro->bro->bro->child->name, "IF")){ // else if 优化
+			// translate_Exp(head->child->bro->bro->bro->bro->bro->bro->child->bro->bro, f);
+			int tmp = flagif;
+			flagif = 0;
 			translate_Stmt(head->child->bro->bro->bro->bro->bro->bro, f);
+			fprintf(f, "GOTO label%d\n", BACK);
+			flagif = tmp;
 		}
-		fprintf(f, "LABEL label%d :\n", back3);
+		else if(head->child->bro->bro->bro->bro->bro != NULL){
+			translate_Stmt(head->child->bro->bro->bro->bro->bro->bro, f);
+			fprintf(f, "GOTO label%d\n", r);
+			BACK = r; r += 1;
+		}
+		else {
+			fprintf(f, "GOTO label%d\n", r);
+			BACK = r; r += 1;
+		}
+		fprintf(f, "LABEL label%d :\n", back1);
+		translate_Stmt(head->child->bro->bro->bro->bro, f);
+		if(flagif)
+		fprintf(f, "LABEL label%d :\n", BACK);
+		
 	}
 	else if(!strcmp(head->child->name, "WHILE")){
 		// 对应产生式: Stmt : WHILE LP Exp RP Stmt
