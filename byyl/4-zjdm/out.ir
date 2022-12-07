@@ -1,6 +1,5 @@
 FUNCTION add :
 PARAM temp
-PARAM m
 t0 := *temp
 t1 := temp + #4
 t2 := *t1
@@ -13,7 +12,6 @@ op := &opobj
 *op := #1
 t4 := op + #4
 *t4 := #2
-ARG n
 ARG op
 t5 := CALL add
 n := t5

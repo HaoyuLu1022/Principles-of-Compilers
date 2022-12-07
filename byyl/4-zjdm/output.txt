@@ -46,13 +46,6 @@ Program (1)
 										ID : Operands
 							VarDec (7)
 								ID : temp
-						COMMA : ,
-						VarList (7)
-							ParamDec (7)
-								Specifier (7)
-									TYPE : int
-								VarDec (7)
-									ID : m
 					RP : )
 				CompSt (8)
 					LC : {
@@ -150,10 +143,6 @@ Program (1)
 														Args (18)
 															Exp (18)
 																ID : op
-															COMMA : ,
-															Args (18)
-																Exp (18)
-																	ID : n
 														RP : )
 												SEMI : ;
 											Empty : Empty
