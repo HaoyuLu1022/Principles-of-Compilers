@@ -19,7 +19,8 @@ struct node {
     char *name;
     NODE_TYPE type;
     char property[20];
-    int isAssignable; // 取0或1指示是否可赋值
+    int isArr;
+    int isStruct;
     union {
         char *id;
         int intValue;
@@ -32,6 +33,7 @@ struct node *iniNode(char *name, int lines, NODE_TYPE t);
 struct node *insNode(struct node *n, char *name, int lines, NODE_TYPE t);
 void printNode(struct node *n, FILE *f, int depth);
 void printTree(struct node *head, int depth, FILE *f);
+int searchTree(struct node *head, char* varName);
 
 // 整体程序的翻译模式
 void translate_Program(struct node *head, FILE *f);
@@ -65,5 +67,5 @@ char* translate_Exp(struct node *head, FILE *f);
 //void translate_Cond(struct node *head, FILE *f, Operand lable_true, Operand lable_false);
 
 // 函数参数的翻译模式
-//void translate_Args(struct node *head, FILE *f, ArgList arg_list);
+void translate_Args(struct node *head, FILE *f);
 

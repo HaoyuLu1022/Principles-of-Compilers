@@ -16,6 +16,6 @@ int main()
   op.o1 = 1;
   op.o2 = 2;
   n = add(op);
-  //write(n);
+  write(n);
   return 0;
 }
