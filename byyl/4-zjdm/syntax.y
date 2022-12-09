@@ -3,7 +3,7 @@
 	#include <stdlib.h>
     #include <ctype.h>
     #include <assert.h>
-	#include "SyntaxTree.h"
+	#include "ir.h"
     // #include "RBTtest.c"
 
 	#define YYSTYPE struct node*

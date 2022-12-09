@@ -2,167 +2,256 @@ Program (1)
 	ExtDefList (1)
 		ExtDef (1)
 			Specifier (1)
-				StructSpecifier (1)
-					STRUCT : struct
-					OptTag (1)
-						ID : Operands
-					LC : {
-					Empty : Empty
-					DefList (3)
-						Def (3)
-							Specifier (3)
-								TYPE : int
-							DecList (3)
-								Dec (3)
-									VarDec (3)
-										ID : o1
-							SEMI : ;
-						Empty : Empty
-						DefList (4)
-							Def (4)
-								Specifier (4)
-									TYPE : int
-								DecList (4)
-									Dec (4)
-										VarDec (4)
-											ID : o2
-								SEMI : ;
-							Empty : Empty
-					RC : }
-			SEMI : ;
-		ExtDefList (7)
-			ExtDef (7)
-				Specifier (7)
-					TYPE : int
-				FunDec (7)
-					ID : add
-					LP : (
-					VarList (7)
-						ParamDec (7)
-							Specifier (7)
-								StructSpecifier (7)
-									STRUCT : struct
-									Tag (7)
-										ID : Operands
-							VarDec (7)
+				TYPE : int
+			FunDec (1)
+				ID : add
+				LP : (
+				VarList (1)
+					ParamDec (1)
+						Specifier (1)
+							TYPE : int
+						VarDec (1)
+							VarDec (1)
 								ID : temp
+							LB : [
+							INT : 2
+							RB : ]
+				RP : )
+			CompSt (2)
+				LC : {
+				Empty : Empty
+				StmtList (3)
+					Stmt (3)
+						RETURN : return
+						Exp (3)
+							LP : (
+							Exp (3)
+								Exp (3)
+									Exp (3)
+										ID : temp
+									LB : [
+									Exp (3)
+										INT : 0
+									RB : ]
+								PLUS : +
+								Exp (3)
+									Exp (3)
+										ID : temp
+									LB : [
+									Exp (3)
+										INT : 1
+									RB : ]
+							RP : )
+						SEMI : ;
+					Empty : Empty
+				RC : }
+		ExtDefList (6)
+			ExtDef (6)
+				Specifier (6)
+					TYPE : int
+				FunDec (6)
+					ID : main
+					LP : (
 					RP : )
-				CompSt (8)
+				CompSt (7)
 					LC : {
 					Empty : Empty
-					StmtList (9)
-						Stmt (9)
-							RETURN : return
-							Exp (9)
-								LP : (
-								Exp (9)
-									Exp (9)
-										Exp (9)
-											ID : temp
-										DOT : .
-										ID : o1
-									PLUS : +
-									Exp (9)
-										Exp (9)
-											ID : temp
-										DOT : .
-										ID : o2
-								RP : )
+					DefList (8)
+						Def (8)
+							Specifier (8)
+								TYPE : int
+							DecList (8)
+								Dec (8)
+									VarDec (8)
+										VarDec (8)
+											ID : op
+										LB : [
+										INT : 2
+										RB : ]
 							SEMI : ;
 						Empty : Empty
-					RC : }
-			ExtDefList (12)
-				ExtDef (12)
-					Specifier (12)
-						TYPE : int
-					FunDec (12)
-						ID : main
-						LP : (
-						RP : )
-					CompSt (13)
-						LC : {
-						Empty : Empty
-						DefList (14)
-							Def (14)
-								Specifier (14)
+						DefList (9)
+							Def (9)
+								Specifier (9)
 									TYPE : int
-								DecList (14)
-									Dec (14)
-										VarDec (14)
-											ID : n
+								DecList (9)
+									Dec (9)
+										VarDec (9)
+											VarDec (9)
+												VarDec (9)
+													ID : r
+												LB : [
+												INT : 1
+												RB : ]
+											LB : [
+											INT : 2
+											RB : ]
 								SEMI : ;
 							Empty : Empty
-							DefList (15)
-								Def (15)
-									Specifier (15)
-										StructSpecifier (15)
-											STRUCT : struct
-											Tag (15)
-												ID : Operands
-									DecList (15)
-										Dec (15)
-											VarDec (15)
-												ID : op
+							DefList (10)
+								Def (10)
+									Specifier (10)
+										TYPE : int
+									DecList (10)
+										Dec (10)
+											VarDec (10)
+												ID : i
+											ASSIGNOP : =
+											Exp (10)
+												INT : 0
+										COMMA : ,
+										DecList (10)
+											Dec (10)
+												VarDec (10)
+													ID : j
+												ASSIGNOP : =
+												Exp (10)
+													INT : 0
 									SEMI : ;
 								Empty : Empty
-								StmtList (16)
-									Stmt (16)
-										Exp (16)
-											Exp (16)
-												Exp (16)
-													ID : op
-												DOT : .
-												ID : o1
-											ASSIGNOP : =
-											Exp (16)
-												INT : 1
-										SEMI : ;
+								StmtList (11)
+									Stmt (11)
+										WHILE : while
+										LP : (
+										Exp (11)
+											Exp (11)
+												ID : i
+											RELOP : <
+											Exp (11)
+												INT : 2
+										RP : )
+										Stmt (12)
+											CompSt (12)
+												LC : {
+												Empty : Empty
+												StmtList (13)
+													Stmt (13)
+														WHILE : while
+														LP : (
+														Exp (13)
+															Exp (13)
+																ID : j
+															RELOP : <
+															Exp (13)
+																INT : 2
+														RP : )
+														Stmt (14)
+															CompSt (14)
+																LC : {
+																Empty : Empty
+																StmtList (15)
+																	Stmt (15)
+																		Exp (15)
+																			Exp (15)
+																				Exp (15)
+																					ID : op
+																				LB : [
+																				Exp (15)
+																					ID : j
+																				RB : ]
+																			ASSIGNOP : =
+																			Exp (15)
+																				Exp (15)
+																					ID : i
+																				PLUS : +
+																				Exp (15)
+																					ID : j
+																		SEMI : ;
+																	Empty : Empty
+																	StmtList (16)
+																		Stmt (16)
+																			Exp (16)
+																				Exp (16)
+																					ID : j
+																				ASSIGNOP : =
+																				Exp (16)
+																					Exp (16)
+																						ID : j
+																					PLUS : +
+																					Exp (16)
+																						INT : 1
+																			SEMI : ;
+																		Empty : Empty
+																RC : }
+													Empty : Empty
+													StmtList (18)
+														Stmt (18)
+															Exp (18)
+																Exp (18)
+																	Exp (18)
+																		Exp (18)
+																			ID : r
+																		LB : [
+																		Exp (18)
+																			INT : 0
+																		RB : ]
+																	LB : [
+																	Exp (18)
+																		ID : i
+																	RB : ]
+																ASSIGNOP : =
+																Exp (18)
+																	ID : add
+																	LP : (
+																	Args (18)
+																		Exp (18)
+																			ID : op
+																	RP : )
+															SEMI : ;
+														Empty : Empty
+														StmtList (19)
+															Stmt (19)
+																Exp (19)
+																	ID : write
+																	LP : (
+																	Args (19)
+																		Exp (19)
+																			Exp (19)
+																				Exp (19)
+																					ID : r
+																				LB : [
+																				Exp (19)
+																					INT : 0
+																				RB : ]
+																			LB : [
+																			Exp (19)
+																				ID : i
+																			RB : ]
+																	RP : )
+																SEMI : ;
+															Empty : Empty
+															StmtList (20)
+																Stmt (20)
+																	Exp (20)
+																		Exp (20)
+																			ID : i
+																		ASSIGNOP : =
+																		Exp (20)
+																			Exp (20)
+																				ID : i
+																			PLUS : +
+																			Exp (20)
+																				INT : 1
+																	SEMI : ;
+																Empty : Empty
+																StmtList (21)
+																	Stmt (21)
+																		Exp (21)
+																			Exp (21)
+																				ID : j
+																			ASSIGNOP : =
+																			Exp (21)
+																				INT : 0
+																		SEMI : ;
+																	Empty : Empty
+												RC : }
 									Empty : Empty
-									StmtList (17)
-										Stmt (17)
-											Exp (17)
-												Exp (17)
-													Exp (17)
-														ID : op
-													DOT : .
-													ID : o2
-												ASSIGNOP : =
-												Exp (17)
-													INT : 2
+									StmtList (23)
+										Stmt (23)
+											RETURN : return
+											Exp (23)
+												INT : 0
 											SEMI : ;
 										Empty : Empty
-										StmtList (18)
-											Stmt (18)
-												Exp (18)
-													Exp (18)
-														ID : n
-													ASSIGNOP : =
-													Exp (18)
-														ID : add
-														LP : (
-														Args (18)
-															Exp (18)
-																ID : op
-														RP : )
-												SEMI : ;
-											Empty : Empty
-											StmtList (19)
-												Stmt (19)
-													Exp (19)
-														ID : write
-														LP : (
-														Args (19)
-															Exp (19)
-																ID : n
-														RP : )
-													SEMI : ;
-												Empty : Empty
-												StmtList (20)
-													Stmt (20)
-														RETURN : return
-														Exp (20)
-															INT : 0
-														SEMI : ;
-													Empty : Empty
-						RC : }
-				ExtDefList (22)
+					RC : }
+			ExtDefList (24)
