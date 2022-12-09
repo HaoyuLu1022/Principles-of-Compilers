@@ -91,26 +91,67 @@ void printTree(struct node *head, int depth, FILE *f) {
     printTree(head->child, depth+1, f);
     printTree(head->bro, depth, f);
 }
+int arr[100], cnt = 0, st = 0, ed = 0;
 
 int searchTree(struct node* head, char* varName) {
+	if(ed) return 0;
 	int res = 0;
-	// printf("yes%s\n", head->child->name);
-	if(!head->child)
-		return 0;
+	printf("yes%s %d\n", head->name, st);
+	if(st && !strcmp(head->name, "LB")){
+		printf("here\n");
+		arr[cnt++] = head->bro->intValue;
+	}
+	if(st && !strcmp(head->name, "SEMI")){
+		printf("there\n");
+		st = 0;ed = 1;
+		return res;
+	}
+	if(!head->child){
+		if(head->bro)
+			res |= searchTree(head->bro, varName);
+			return res;
+	}
 	if(head->child->type == STRING_TYPE) {
 		// printf("dxr %s %s\n", head->child->id, varName);
 		if(!strcmp(head->child->id, varName)) {
-			if(head->child->bro) {
-				if(!strcmp(head->child->bro->name, "LB"))
+			if(head->bro) {
+				if(!strcmp(head->bro->name, "LB")){
+					st = 1;
+					if(head->bro)
+						res |= searchTree(head->bro, varName);
 					return 1; // 是数组
-				else
-					return 0;
+				}
+				else{
+					res |= searchTree(head->child, varName);
+					if(head->bro)
+						res |= searchTree(head->bro, varName);
+					return res;
+				}
 			}
-			else return 0;
+			else{
+				// if(st && )
+				
+				res |= searchTree(head->child, varName);
+				// printf("here\n");
+				if(head->bro){
+					// printf("%s\n", head->bro->name);
+					res |= searchTree(head->bro, varName);
+				}
+				
+				return res;
+			}
+		}
+		else{
+			res |= searchTree(head->child, varName);
+			if(head->bro){
+					// printf("%s\n", head->bro->name);
+				res |= searchTree(head->bro, varName);
+			}
+			return res;
 		}
 	}
 	else {
-		res = searchTree(head->child, varName);
+		res |= searchTree(head->child, varName);
 		if(head->bro)
 			res |= searchTree(head->bro, varName);
 	}
@@ -687,7 +728,13 @@ void translate_Args(struct node* head, FILE *f) {
 		translate_Args(head->child->bro->bro, f);
 	}
 	char* tmp1 = translate_Exp(head->child, f);
-	if(searchTree(root, tmp1) == 1) {
+	// fprintf(f, "yes%s\n", tmp1);
+	if(searchTree(root, tmp1)) {
+		printf("%d\n", cnt);
+		for(int i = 0; i < cnt ; i++){
+			printf("%d\n", arr[i]);
+		}
+		cnt = 0, ed = 0;  // 下次使用search前需要做
 		fprintf(f, "ARG := &%s\n", tmp1);
 	}
 	else {
