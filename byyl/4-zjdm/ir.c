@@ -580,14 +580,15 @@ void translate_Args(struct node* head, FILE *f) {
 	char* tmp1 = translate_Exp(head->child, f);
 	// fprintf(f, "yes%s\n", tmp1);
 	if(searchTree(root, tmp1)) {
-		printf("%d\n", cnt);
-		for(int i = 0; i < cnt ; i++) {
-			printf("%d\n", arr[i]);
-		}
-		cnt = 0, ed = 0;  // 下次使用search前需要做
+		// printf("%d\n", cnt);
+		// for(int i = 0; i < cnt ; i++) {
+		// 	printf("%d\n", arr[i]);
+		// }
+		
 		fprintf(f, "ARG &%s\n", tmp1);
 	}
 	else {
 		fprintf(f, "ARG %s\n", tmp1);
 	}
+	cnt = 0, ed = 0;  // 下次使用search前需要做
 }

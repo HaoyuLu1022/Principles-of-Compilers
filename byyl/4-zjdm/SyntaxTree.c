@@ -84,13 +84,13 @@ int arr[100], cnt = 0, st = 0, ed = 0;
 int searchTree(struct node* head, char* varName) {
 	if(ed) return 0;
 	int res = 0;
-	printf("yes%s %d\n", head->name, st);
+	// printf("yes%s %d\n", head->name, st);
 	if(st && !strcmp(head->name, "LB")){
-		printf("here\n");
+		// printf("here\n");
 		arr[cnt++] = head->bro->intValue;
 	}
 	if(st && !strcmp(head->name, "SEMI")){
-		printf("there\n");
+		// printf("there\n");
 		st = 0;ed = 1;
 		return res;
 	}
