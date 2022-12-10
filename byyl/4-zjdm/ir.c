@@ -16,9 +16,9 @@ int flagStructAssigned = 0;
 extern int arr[100], cnt, st, ed;
 
 int findNum(int n, FILE *f) {
-	for(int i = 0; i <= 99; i ++ ){
+	for(int i = 0; i <= 99; i ++ ) {
 		if(t[i] == n) return i;
-		else if(t[i] == 0 && i > 0){
+		else if(t[i] == 0 && i > 0) {
 			fprintf(f, "t%d := #%d\n", i, n);
 			t[i] = n;
 			return i;
@@ -40,11 +40,11 @@ void translate_ExtDefList(struct node *head, FILE *f) {
 
 void translate_ExtDef(struct node *head, FILE *f) {
 	translate_Specifier(head->child, f);
-	if(head->child->bro->bro != NULL){
-		if(!strcmp(head->child->bro->name, "ExtDecList")){
+	if(head->child->bro->bro != NULL) {
+		if(!strcmp(head->child->bro->name, "ExtDecList")) {
 			translate_ExtDecList(head->child->bro, f);
 		}
-		else if(!strcmp(head->child->bro->name, "FunDec")){
+		else if(!strcmp(head->child->bro->name, "FunDec")) {
 			translate_FunDec(head->child->bro, f);				
 			translate_CompSt(head->child->bro->bro, f);		
 			fprintf(f, "\n");
@@ -104,11 +104,11 @@ void translate_StructSpecifier(struct node *head, FILE *f) {
 
 void translate_Mid(struct node *head, FILE *f) {
 	if(head->child == NULL) return;
-	else if(!strcmp(head->child->name, "Def")){
+	else if(!strcmp(head->child->name, "Def")) {
 		translate_Def(head->child, f);			
 		translate_Mid(head->child->bro, f);
 	}
-	else if(!strcmp(head->child->name, "Stmt")){
+	else if(!strcmp(head->child->name, "Stmt")) {
 		translate_Stmt(head->child, f);				
 		translate_Mid(head->child->bro, f);
 	}
@@ -189,24 +189,26 @@ void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是�
 	int back1, back2, back3;
 	if(!strcmp(head->child->name, "CompSt"))
 		translate_CompSt(head->child, f);
-	else if(!strcmp(head->child->name, "Exp")){
+	else if(!strcmp(head->child->name, "Exp")) {
 		//printf("tag1\n");
 		translate_Exp(head->child, f);
 		//printf("tag2\n");
 		fprintf(f, "\n");
 	}
-	else if(!strcmp(head->child->name, "RETURN")){
+	else if(!strcmp(head->child->name, "RETURN")) {
 		// fprintf(f, "RETURN ");
 		char* res = translate_Exp(head->child->bro, f);
 		fprintf(f, "RETURN %s\n", res);
 		// fprintf(f, "\n");
 	}
 	else if(!strcmp(head->child->name, "IF")) {
+		sprintf(head->id, "label%d", r);
+
 		fprintf(f, "IF ");
 		translate_Exp(head->child->bro->bro, f);
 		fprintf(f, " GOTO label%d\n", r);
 		back1 = r; r += 1;
-		if(head->child->bro->bro->bro->bro->bro && !strcmp(head->child->bro->bro->bro->bro->bro->bro->child->name, "IF")){ // else if 优化
+		if(head->child->bro->bro->bro->bro->bro && !strcmp(head->child->bro->bro->bro->bro->bro->bro->child->name, "IF")) { // else if 优化
 			// translate_Exp(head->child->bro->bro->bro->bro->bro->bro->child->bro->bro, f);
 			int tmp = flagif;
 			flagif = 0;
@@ -214,7 +216,7 @@ void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是�
 			fprintf(f, "GOTO label%d\n", BACK);
 			flagif = tmp;
 		}
-		else if(head->child->bro->bro->bro->bro->bro != NULL){
+		else if(head->child->bro->bro->bro->bro->bro != NULL) {
 			translate_Stmt(head->child->bro->bro->bro->bro->bro->bro, f);
 			fprintf(f, "GOTO label%d\n", r);
 			BACK = r; r += 1;
@@ -229,8 +231,9 @@ void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是�
 		fprintf(f, "LABEL label%d :\n", BACK);
 		
 	}
-	else if(!strcmp(head->child->name, "WHILE")){
+	else if(!strcmp(head->child->name, "WHILE")) {
 		// 对应产生式: Stmt : WHILE LP Exp RP Stmt
+		sprintf(head->id, "label%d", r);
 		fprintf(f, "LABEL label%d : \n", r);
 		back1 = r;
 		r++;
@@ -252,7 +255,7 @@ void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是�
 }
 
 char* translate_Exp(struct node *head, FILE *f) {
-	if(head->child->bro == NULL){
+	if(head->child->bro == NULL) {
 		if(!strcmp(head->child->name, "ID")) {
 			// fprintf(f, "%s ", head->child->id);
 			tmp = (char*)malloc(sizeof(head->child->id));
@@ -265,9 +268,9 @@ char* translate_Exp(struct node *head, FILE *f) {
 			sprintf(tmp, "#%d", head->child->intValue);
 		}
 	}
-	else if(head->child->bro->bro == NULL){
+	else if(head->child->bro->bro == NULL) {
 		//没有写NOT Exp
-		if(!strcmp(head->child->name, "MINUS")){
+		if(!strcmp(head->child->name, "MINUS")) {
 			if(!strcmp(head->child->bro->child->name, "INT")) {
 				// fprintf(f, "#-%d ", head->child->bro->child->intValue);
 				tmp = (char*)malloc(sizeof(head->child->bro->child->intValue+3));
@@ -276,24 +279,20 @@ char* translate_Exp(struct node *head, FILE *f) {
 			//else	好像也没有这种情况？
 		}
 	}
-	else if(head->child->bro->bro->bro == NULL){
+	else if(head->child->bro->bro->bro == NULL) {
 		//printf("tag3\n");
 
-		if(!strcmp(head->child->name, "LP")) {
-			
+		if(!strcmp(head->child->name, "LP")) {		
 			translate_Exp(head->child->bro, f);
 		}
 		
-		else if(!strcmp(head->child->bro->name, "DOT")){ // 对应产生式Exp DOT ID
+		else if(!strcmp(head->child->bro->name, "DOT")) { // 对应产生式Exp DOT ID
 			//printf("tag4\n");
-			for(int i = 0; i < cntStruct; i ++ ){
-				for(int j = 1; j < 20; j ++ ){
-					if(!strcmp(allStruct[i][j], head->child->bro->bro->id)){
+			for(int i = 0; i < cntStruct; i ++ ) {
+				for(int j = 1; j < 20; j ++ ) {
+					if(!strcmp(allStruct[i][j], head->child->bro->bro->id)) {
 						// printf("tag5\n");
-						if(j == 1){
-							//printf("before\n");
-							//printf("%s\n", head->child->child->id);
-							//printf("%d\n", tcnt);
+						if(j == 1) {
 							if(flagStructAssigned == 0) {
 								fprintf(f, "t%d := *%s\n", tcnt, head->child->child->id);
 								//printf("tag8\n");
@@ -309,7 +308,7 @@ char* translate_Exp(struct node *head, FILE *f) {
 						}
 						else {
 							fprintf(f, "t%d := %s + #%d\n", tcnt, head->child->child->id, 4 * (j - 1)); tcnt ++;
-							if(flagStructAssigned == 0){
+							if(flagStructAssigned == 0) {
 								fprintf(f, "t%d := *t%d\n", tcnt, tcnt - 1);
 								tmp = (char*)malloc(sizeof(tcnt + 3));
 								sprintf(tmp, "t%d", tcnt);
@@ -328,8 +327,8 @@ char* translate_Exp(struct node *head, FILE *f) {
 			//printf("tag6\n");
 		}
 
-		else if(!strcmp(head->child->name, "ID")){
-			if(strcmp(head->child->id, "read")){		//调用对应的函数，写对应的语句
+		else if(!strcmp(head->child->name, "ID")) {
+			if(strcmp(head->child->id, "read")) {		//调用对应的函数，写对应的语句
 				//fprintf(f, "READ %s", );
 			}
 
@@ -345,6 +344,7 @@ char* translate_Exp(struct node *head, FILE *f) {
 			fprintf(f, "t%d := %s / %s\n", tcnt, tmp1, tmp2);
 			tmp = (char*)malloc(sizeof(tcnt) + 3);
 			sprintf(tmp, "t%d", tcnt);
+			strcpy(head->id, tmp);
 			tcnt++;
 		}
 		else if(!strcmp(head->child->bro->name, "STAR")) {
@@ -354,6 +354,7 @@ char* translate_Exp(struct node *head, FILE *f) {
 			fprintf(f, "t%d := %s * %s\n", tcnt, tmp1, tmp2);
 			tmp = (char*)malloc(sizeof(tcnt) + 3);
 			sprintf(tmp, "t%d", tcnt);
+			strcpy(head->id, tmp);
 			tcnt++;
 		}
 		else if(!strcmp(head->child->bro->name, "MINUS")) {
@@ -363,6 +364,7 @@ char* translate_Exp(struct node *head, FILE *f) {
 			fprintf(f, "t%d := %s - %s\n", tcnt, tmp1, tmp2);
 			tmp = (char*)malloc(sizeof(tcnt) + 3);
 			sprintf(tmp, "t%d", tcnt);
+			strcpy(head->id, tmp);
 			tcnt++;
 		}
 		else if(!strcmp(head->child->bro->name, "PLUS")) {
@@ -372,6 +374,7 @@ char* translate_Exp(struct node *head, FILE *f) {
 			fprintf(f, "t%d := %s + %s\n", tcnt, tmp1, tmp2);
 			tmp = (char*)malloc(sizeof(tcnt) + 3);
 			sprintf(tmp, "t%d", tcnt);
+			strcpy(head->id, tmp);
 			tcnt++;
 		}
 		else if(!strcmp(head->child->bro->name, "RELOP")) {
@@ -381,6 +384,7 @@ char* translate_Exp(struct node *head, FILE *f) {
 			fprintf(f, "%s %s %s", tmp1, head->child->bro->id, tmp2); // 感觉这个是特例。。。
 			tmp = (char*)malloc(sizeof(tcnt) + 3);
 			sprintf(tmp, "t%d", tcnt);
+			strcpy(head->id, "null");
 		}
 		else if(!strcmp(head->child->bro->name, "OR")) {
 			char* tmp1 = translate_Exp(head->child, f);
@@ -389,7 +393,8 @@ char* translate_Exp(struct node *head, FILE *f) {
 			fprintf(f, "t%d := %s || %s\n", tcnt, tmp1, tmp2);
 			tmp = (char*)malloc(sizeof(tcnt) + 3);
 			sprintf(tmp, "t%d", tcnt);
-			tcnt++;
+			strcpy(head->id, "null");
+			// tcnt++;
 		}
 		else if(!strcmp(head->child->bro->name, "AND")) {
 			char* tmp1 = translate_Exp(head->child, f);
@@ -398,11 +403,12 @@ char* translate_Exp(struct node *head, FILE *f) {
 			fprintf(f, "t%d := %s && %s\n", tcnt, tmp1, tmp2);
 			tmp = (char*)malloc(sizeof(tcnt) + 3);
 			sprintf(tmp, "t%d", tcnt);
-			tcnt++;
+			strcpy(head->id, "null");
+			// tcnt++;
 		}
 		else if(!strcmp(head->child->bro->name, "ASSIGNOP")) {
 			// printf("tag4\n");
-			if(!strcmp(head->child->bro->bro->child->name, "ID") && !strcmp(head->child->bro->bro->child->id, "read")){
+			if(!strcmp(head->child->bro->bro->child->name, "ID") && !strcmp(head->child->bro->bro->child->id, "read")) {
 				// printf("tag6\n");
 				fprintf(f, "READ %s", head->child->child->id);
 				// printf("tag9\n");
@@ -449,19 +455,19 @@ char* translate_Exp(struct node *head, FILE *f) {
 			}
 		}
 	}
-	else if(head->child->bro->bro->bro->bro == NULL){
-		if(!strcmp(head->child->name, "ID")){
+	else if(head->child->bro->bro->bro->bro == NULL) {
+		if(!strcmp(head->child->name, "ID")) {
 			// printf("tag8\n");
 			//调用对应的有参函数
-			if(!strcmp(head->child->id, "write")){
-				if(!strcmp(head->child->bro->bro->child->child->name, "ID")){
+			if(!strcmp(head->child->id, "write")) {
+				if(!strcmp(head->child->bro->bro->child->child->name, "ID")) {
 					fprintf(f, "WRITE %s", head->child->bro->bro->child->child->id);	//ext2还需要改
 				}
-				else if(!strcmp(head->child->bro->bro->child->child->name, "INT")){
+				else if(!strcmp(head->child->bro->bro->child->child->name, "INT")) {
 					//fprintf(f, "%d\n", head->child->bro->bro->child->child->intValue);
 					fprintf(f, "WRITE t%d", findNum(head->child->bro->bro->child->child->intValue, f));
 				}
-				else if(!strcmp(head->child->bro->bro->child->child->name, "MINUS")){
+				else if(!strcmp(head->child->bro->bro->child->child->name, "MINUS")) {
 					fprintf(f, "WRITE t%d", findNum(-head->child->bro->bro->child->child->bro->intValue, f));
 				}
 				else {
@@ -475,25 +481,6 @@ char* translate_Exp(struct node *head, FILE *f) {
 				}
 			}
 			else if(head->child->bro) { // Exp: ID LP Args RP
-				// struct node* newnode = head->child->bro->bro; // newnode始终指向Args
-				// do {
-				// 	if(!strcmp(newnode->child->name, "Exp")) {
-				// 		char* tmp1 = translate_Exp(newnode->child, f);
-				// 		if(searchTree(root, tmp1) == 1) {
-							
-				// 			fprintf(f, "ARG &%s\n", tmp1);
-				// 		}
-				// 		else {
-				// 			fprintf(f, "ARG %s\n", tmp1);
-				// 		}
-				// 		// 尚未还没有考虑多参数函数的倒序调用问题
-				// 	}
-
-				// 	if(newnode->child->bro)
-				// 		newnode = newnode->child->bro->bro;
-				// 	else
-				// 		break;
-				// } while(newnode->child->bro);
 				translate_Args(head->child->bro->bro, f);
 
 				fprintf(f, "t%d := CALL %s\n", tcnt, head->child->id);
@@ -587,7 +574,7 @@ void translate_Args(struct node* head, FILE *f) {
 	// fprintf(f, "yes%s\n", tmp1);
 	if(searchTree(root, tmp1)) {
 		printf("%d\n", cnt);
-		for(int i = 0; i < cnt ; i++){
+		for(int i = 0; i < cnt ; i++) {
 			printf("%d\n", arr[i]);
 		}
 		cnt = 0, ed = 0;  // 下次使用search前需要做

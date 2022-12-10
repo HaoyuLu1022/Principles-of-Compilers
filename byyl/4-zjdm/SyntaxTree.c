@@ -32,7 +32,7 @@ struct node *insNode(struct node *n, char *name, int lines, NODE_TYPE t) {
     parent->lines = lines;
     parent->type = t;
     parent->name = strdup(name);
-    parent->intValue = 1;
+    parent->id = (char*)malloc(sizeof(parent->name));
     head = parent;
     return parent;
 }

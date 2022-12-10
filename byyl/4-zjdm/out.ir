@@ -1,50 +1,28 @@
-FUNCTION add :
-PARAM temp
-t0 := *temp
-t1 := temp + #4
-t2 := *t1
-t3 := t0 + t2
-RETURN t3
+FUNCTION fact :
+PARAM n
+IF n == #1 GOTO label1
+t0 := n - #1
+ARG t0
+t1 := CALL fact
+t2 := n * t1
+RETURN t2
+GOTO label2
+LABEL label1 :
+RETURN n
+LABEL label2 :
 
 FUNCTION main :
-DEC op 8
-DEC r 8
-i := #0
-j := #0
-LABEL label1 : 
-IF i < #2 GOTO label2
- GOTO label3
-LABEL label2 : 
-LABEL label4 : 
-IF j < #2 GOTO label5
- GOTO label6
-LABEL label5 : 
-t4 := j * #4
-t5 := &op + t4
-t6 := i + j
-*t5 := t6
+READ m
+IF m > #1 GOTO label3
+result := #1
 
-t7 := j + #1
-j := t7
+GOTO label4
+LABEL label3 :
+ARG m
+t3 := CALL fact
+result := t3
 
- GOTO label4
-LABEL label6 : 
-t8 := i * #4
-t9 := &r + t8
-ARG &op
-t10 := CALL add
-*t9 := t10
-
-t11 := i * #4
-t12 := &r + t11
-t13 := *t12
-WRITE t13
-t14 := i + #1
-i := t14
-
-j := #0
-
- GOTO label1
-LABEL label3 : 
+LABEL label4 :
+WRITE result
 RETURN #0
 
