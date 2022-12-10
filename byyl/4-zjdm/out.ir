@@ -1,28 +1,21 @@
-FUNCTION fact :
-PARAM n
-IF n == #1 GOTO label1
-t0 := n - #1
-ARG t0
-t1 := CALL fact
-t2 := n * t1
-RETURN t2
-GOTO label2
-LABEL label1 :
-RETURN n
-LABEL label2 :
+FUNCTION add :
+PARAM temp
+t0 := *temp
+t1 := temp + #4
+t2 := *t1
+t3 := t0 + t2
+RETURN t3
 
 FUNCTION main :
-READ m
-IF m > #1 GOTO label3
-result := #1
+DEC opobj 8
+op := &opobj
+*op := #1
+t4 := op + #4
+*t4 := #2
+ARG op
+t5 := CALL add
+n := t5
 
-GOTO label4
-LABEL label3 :
-ARG m
-t3 := CALL fact
-result := t3
-
-LABEL label4 :
-WRITE result
+WRITE n
 RETURN #0
 

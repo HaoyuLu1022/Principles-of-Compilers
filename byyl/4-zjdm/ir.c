@@ -255,6 +255,8 @@ void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是�
 }
 
 char* translate_Exp(struct node *head, FILE *f) {
+	// if(head->child)
+	// 	printf("%s\n", head->child->name);
 	if(head->child->bro == NULL) {
 		if(!strcmp(head->child->name, "ID")) {
 			// fprintf(f, "%s ", head->child->id);
@@ -464,11 +466,16 @@ char* translate_Exp(struct node *head, FILE *f) {
 					fprintf(f, "WRITE %s", head->child->bro->bro->child->child->id);	//ext2还需要改
 				}
 				else if(!strcmp(head->child->bro->bro->child->child->name, "INT")) {
-					//fprintf(f, "%d\n", head->child->bro->bro->child->child->intValue);
-					fprintf(f, "WRITE t%d", findNum(head->child->bro->bro->child->child->intValue, f));
+					if(head->child->bro->bro->child->child->intValue == 0) {
+						fprintf(f, "WRITE #0");
+					}
+					else {
+						fprintf(f, "WRITE t%d", findNum(head->child->bro->bro->child->child->intValue, f));
+					}
+					
 				}
 				else if(!strcmp(head->child->bro->bro->child->child->name, "MINUS")) {
-					fprintf(f, "WRITE t%d", findNum(-head->child->bro->bro->child->child->bro->intValue, f));
+					fprintf(f, "WRITE t%d", findNum(-head->child->bro->bro->child->child->bro->child->intValue, f));
 				}
 				else {
 					// printf("%s\n", head->child->bro->bro->child->name);
