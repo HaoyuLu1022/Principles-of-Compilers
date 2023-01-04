@@ -143,3 +143,31 @@ python2 irsim.py
 
 ### Quick Start
 
+## 实验5 目标代码生成
+
+### 环境准备
+
+```sh
+sudo apt install spim
+```
+
+>   可以安装GUI版本的QtSpim：http://pages.cs.wisc.edu/~larus/spim.html
+
+### 文件组织
+
+有一些变化：
+
+-   新增asm.h, asm.c，是生成目标代码的文件
+
+-   include关系发生变化：
+
+    -   syntax.y不再引用ir.h，而是asm.h
+    -   asm.h中引用ir.h（以使用SyntaxTree.h中的函数）
+
+    其他没变
+
+### 任务
+
+-   指令选择
+-   寄存器分配
+-   函数调用
