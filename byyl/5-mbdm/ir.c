@@ -131,8 +131,8 @@ void translate_Def(struct node *head, FILE *f) {
 
 		struct node* newDecList = head->child->bro;
 		do {
-			fprintf(f, "DEC %sobj %d\n", newDecList->child->child->child->id, space);
-			fprintf(f, "%s := &%sobj\n", newDecList->child->child->child->id, newDecList->child->child->child->id);
+			fprintf(f, "DEC %sObj %d\n", newDecList->child->child->child->id, space);
+			fprintf(f, "%s := &%sObj\n", newDecList->child->child->child->id, newDecList->child->child->child->id);
 			if(newDecList->child->bro) {
 				newDecList = newDecList->child->bro->bro;
 			}
@@ -169,8 +169,22 @@ void translate_Def(struct node *head, FILE *f) {
 					else if(!strcmp(newnode->child->child->bro->bro->child->name, "FLOAT")) {
 						fprintf(f, "%s := #%f\n", newnode->child->child->child->id, newnode->child->child->bro->bro->child->floatValue);
 					}
-					else {
+					else if(!strcmp(newnode->child->child->bro->bro->child->name, "ID")) {
 						fprintf(f, "%s := %s\n", newnode->child->child->child->id, newnode->child->child->bro->bro->child->id);
+					}
+					else{			// Dec : VarDec ASSIGNOP Exp
+						char* tmp1 = translate_Exp(newnode->child->child->bro->bro, f);
+						//fprintf(f, "t%d := %s", tmp1);
+						fprintf(f, "%s := %s\n", newnode->child->child->child->id, tmp1);
+									/*char* tmp1 = translate_Exp(head->child, f);
+									// fprintf(f, "* ");
+									char* tmp2 = translate_Exp(head->child->bro->bro, f);
+									fprintf(f, "t%d := %s * %s\n", tcnt, tmp1, tmp2);
+									tmp = (char*)malloc(sizeof(tcnt) + 3);
+									sprintf(tmp, "t%d", tcnt);
+									strcpy(head->id, tmp);
+									tcnt++;
+									tag*/
 					}
 				}
 			}
@@ -184,7 +198,7 @@ void translate_Def(struct node *head, FILE *f) {
 	}
 }
 
-void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是否需要再加一个跳转, 若有else则为1
+void translate_Stmt(struct node *head, FILE *f) {
 	// printf("Stmt\n");
 	int back1, back2, back3;
 	if(!strcmp(head->child->name, "CompSt"))
@@ -193,7 +207,7 @@ void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是�
 		//printf("tag1\n");
 		translate_Exp(head->child, f);
 		//printf("tag2\n");
-		fprintf(f, "\n");
+		fprintf(f, "\n");					//一定要注意Exp本身不维护自身的换行，所有的换行都由上一级负责，不然就很乱
 	}
 	else if(!strcmp(head->child->name, "RETURN")) {
 		// fprintf(f, "RETURN ");
@@ -243,14 +257,14 @@ void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是�
 		fprintf(f, " GOTO label%d\n", r);
 		back2 = r;
 		r++;
-		fprintf(f, " GOTO label%d\n", r);
+		fprintf(f, "GOTO label%d\n", r);
 		back3 = r;
 		r++;
 
 		fprintf(f, "LABEL label%d : \n", back2);
 		sprintf(head->child->bro->bro->bro->bro->id, "label%d", back2);
 		translate_Stmt(head->child->bro->bro->bro->bro, f);
-		fprintf(f, " GOTO label%d\n", back1);
+		fprintf(f, "GOTO label%d\n", back1);
 		fprintf(f, "LABEL label%d : \n", back3);
 		sprintf(head->child->bro->bro->id, "label%d", back3);
 	}
@@ -438,7 +452,7 @@ char* translate_Exp(struct node *head, FILE *f) {
 						fprintf(f, "*");
 						flagArr = 0;
 					}
-					fprintf(f, "%s := %s\n", tmp1, tmp2);
+					fprintf(f, "%s := %s", tmp1, tmp2);
 					tmp = (char*)malloc(sizeof(tmp1));
 					sprintf(tmp, "%s", tmp1);
 				}
@@ -453,7 +467,7 @@ char* translate_Exp(struct node *head, FILE *f) {
 					fprintf(f, "*");
 					flagArr = 0;
 				}
-				fprintf(f, "%s := %s\n", tmp1, tmp2);
+				fprintf(f, "%s := %s", tmp1, tmp2);
 				tmp = (char*)malloc(sizeof(tmp1));
 				sprintf(tmp, "%s", tmp1);
 			}

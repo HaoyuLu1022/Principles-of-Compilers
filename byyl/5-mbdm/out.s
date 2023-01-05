@@ -30,6 +30,7 @@ jal read
 lw $ra, 0($sp)
 addi $sp, $sp, 4
 move $t3, $v0
+//少一行
 label1:
 blt $t2, $t3, label2
 j label3
@@ -43,6 +44,9 @@ lw, $ra, 0($sp)
 addi, $sp, $sp, 4
 move $t0, $t1
 move $t1, $t4
+//差三行
+//
+//
 label3:
 move $v0, $0
 jr $ra
