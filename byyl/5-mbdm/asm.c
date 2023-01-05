@@ -1,4 +1,5 @@
 #include "asm.h"
+int rr = 1; // 指示label编号
 
 void genAsm(struct node* head, FILE* fp) {
     fprintf(fp, ".data\n");
@@ -64,6 +65,8 @@ void genCompSt(struct node *head, FILE *f) {
 }
 
 void genMid(struct node *head, FILE *f) {
+    // printf("%s\n", head->child->name);
+    
     if(!head->child)
         return;
     else if(!strcmp(head->child->name, "Def")) {
@@ -71,6 +74,7 @@ void genMid(struct node *head, FILE *f) {
         genMid(head->child->bro, f);
     }
     else if(!strcmp(head->child->name, "Stmt")) {
+        // printf("%s\n", head->child->child->name);
         genStmt(head->child, f);
         genMid(head->child->bro, f);
     }
@@ -81,8 +85,56 @@ void genStmtList(struct node *head, FILE *f);
 // 语句的翻译模式
 void genStmt(struct node *head, FILE *f) {
     // printf("%s\n", head->child->name);
+    int back1, back2, back3;
     if(!strcmp(head->child->name, "Exp")) {
         genExp(head->child, f);
+    }
+    if(!strcmp(head->child->name, "CompSt")) {
+        genCompSt(head->child, f);
+    }
+    if(!strcmp(head->child->name, "RETURN")) {
+        if(head->child->bro->child->type == INT_TYPE) {
+            fprintf(f, "move $v0, $%d\n", head->child->bro->child->intValue);
+            fprintf(f, "jr $ra\n");
+        }
+        if(head->child->bro->child->type == FLOAT_TYPE) {
+            fprintf(f, "move $v0, $%f\n", head->child->bro->child->floatValue);
+            fprintf(f, "jr $ra\n");
+        }
+    }
+    if(!strcmp(head->child->name, "WHILE")) {
+        // WHILE LP Exp RP Stmt
+        fprintf(f, "%s:\n", head->id);
+        if(head->child->bro->bro->child->bro) {
+            if(!strcmp(head->child->bro->bro->child->bro->id, "<")) {
+                int mark1 = 0, mark2 = 0;
+                for(int i = 0; i < Regcnt; i++) {
+                    if(!strcmp(VarReg[i], head->child->bro->bro->child->child->id)) {
+                        mark1 = i;
+                        break;
+                    }
+                }
+                for(int i = 0; i < Regcnt; i++) {
+                    if(!strcmp(VarReg[i], head->child->bro->bro->child->bro->bro->child->id)) {
+                        mark2 = i;
+                        break;
+                    }
+                }
+                fprintf(f, "blt $t%d, $t%d, %s\n", mark1, mark2, head->child->bro->bro->bro->bro->id);
+                fprintf(f, "j %s\n", head->child->bro->bro->id);
+                fprintf(f, "%s:\n", head->child->bro->bro->bro->bro->id);
+                // printf("%s\n", head->child->bro->bro->bro->bro->child->child->bro->child->name);
+                genStmt(head->child->bro->bro->bro->bro, f); // 还有问题
+                fprintf(f, "%s:\n", head->child->bro->bro->id);
+                if(head->bro) {
+                    // printf("%s\n", head->bro->child->name);
+                    if(!strcmp(head->bro->name, "Mid")) {
+                        genMid(head->child, f);
+                    }
+                }
+            }
+
+        }
     }
 }
 
@@ -131,19 +183,52 @@ void genDecList(struct node *head, FILE *f) {
 }
 
 void genVarDec(struct node *head, FILE *f) {
-    fprintf(f, "li $t%d, ", --Regcnt); // 维护Regcnt
+    int mark = 0;
+    for(int i = 0; i < Regcnt; i++) {
+        if(!strcmp(VarReg[i], head->child->id)) {
+            mark = i;
+            break;
+        }
+    }
+    fprintf(f, "li $t%d, ", mark);
+    // fprintf(f, "li $t%d, ", --Regcnt); // 维护Regcnt
     // 如何建立寄存器名与变量名的对应关系
 }
 
 void genDec(struct node *head, FILE *f) {
     if(head->child->bro) {
-        genVarDec(head->child, f);
-        // genExp(head->child->bro->bro, f); // 可能涉及打印先后次序问题，暂不调用
-        if(!strcmp(head->child->bro->bro->child->name, "INT")) {
-            fprintf(f, "%d\n", head->child->bro->bro->child->intValue);
+        if(!strcmp(head->child->bro->bro->child->name, "INT") || !strcmp(head->child->bro->bro->child->name, "FLOAT")) {
+            genVarDec(head->child, f);
+            // genExp(head->child->bro->bro, f); // 可能涉及打印先后次序问题，暂不调用
+            if(!strcmp(head->child->bro->bro->child->name, "INT")) {
+                fprintf(f, "%d\n", head->child->bro->bro->child->intValue);
+            }
+            if(!strcmp(head->child->bro->bro->child->name, "FLOAT")) {
+                fprintf(f, "%f\n", head->child->bro->bro->child->floatValue);
+            }
         }
-        if(!strcmp(head->child->bro->bro->child->name, "FLOAT")) {
-            fprintf(f, "%f\n", head->child->bro->bro->child->floatValue);
+        else if(!strcmp(head->child->bro->bro->child->bro->name, "PLUS")) {
+            struct node* newnode = head->child->bro->bro->child; // newnode指向PLUS前面的Exp
+            int mark1 = 0, mark2 = 0, mark3 = 0;
+            for(int i = 0; i < Regcnt; i++) {
+                if(!strcmp(VarReg[i], head->child->child->id)) {
+                    mark1 = i;
+                    break;
+                }
+            }
+            for(int i = 0; i < Regcnt; i++) {
+                if(!strcmp(VarReg[i], newnode->child->id)) {
+                    mark2 = i;
+                    break;
+                }
+            }
+            for(int i = 0; i < Regcnt; i++) {
+                if(!strcmp(VarReg[i], newnode->bro->bro->child->id)) {
+                    mark3 = i;
+                    break;
+                }
+            }
+            fprintf(f, "add $t%d, $t%d, $t%d\n", mark1, mark2, mark3);
         }
     }
     
@@ -151,17 +236,38 @@ void genDec(struct node *head, FILE *f) {
 
 // 基本表达式的翻译模式
 char* genExp(struct node *head, FILE *f) {
+    if(!strcmp(head->child->name, "Exp")) {
+        genExp(head->child, f);
+    }
     if(head->child->bro) {
         if(!strcmp(head->child->bro->name, "ASSIGNOP")) { // Exp ASSIGNOP Exp
             // printf("%s\n", head->child->bro->bro->child->name);
-            if(head->child->bro->bro->child->bro->bro) {
-                if(!strcmp(head->child->bro->bro->child->bro->bro->name, "RP")) {
+            if(!strcmp(head->child->bro->bro->child->name, "ID") && !head->child->bro->bro->child->bro) {
+                int mark1 = 0, mark2 = 0;
+                for(int i = 0; i < Regcnt; i++) {
+                    if(!strcmp(VarReg[i], head->child->child->id)) {
+                        mark1 = i;
+                        break;
+                    }
+                }
+                for(int i = 0; i < Regcnt; i++) {
+                    if(!strcmp(VarReg[i], head->child->bro->bro->child->id)) {
+                        mark2 = i;
+                        break;
+                    }
+                }
+                // printf("%d %d\n", mark1, mark2);
+                fprintf(f, "move $t%d, $t%d\n", mark1, mark2);
+            }
+            else if(head->child->bro->bro->child->bro) {
+                // printf("%s\n", head->child->bro->bro->child->bro->name);
+                if(!strcmp(head->child->bro->bro->child->bro->bro->name, "RP")) {printf("yes\n");
                     // ID LP RP
                     fprintf(f, "add $sp, $sp, -4\n");
                     fprintf(f, "sw, $ra, 0($sp)\n");
                     fprintf(f, "jal %s\n", head->child->bro->bro->child->id);
                     fprintf(f, "lw $ra, 0($sp)\n");
-                    fprintf(f, "addi, $sp, $sp, 4\n");
+                    fprintf(f, "addi $sp, $sp, 4\n");
                     // fprintf(f, "move $t%d, $v0\n", --Regcnt);
                     int mark = 0;
                     for(int i = 0; i < Regcnt; i++) {
@@ -173,12 +279,31 @@ char* genExp(struct node *head, FILE *f) {
                     fprintf(f, "move $t%d, $v0\n", mark);
                     // 打表式翻译
                 }
-                else if(!strcmp(head->child->bro->bro->child->bro->bro->bro->name, "RP")) {
-                    // ID LP Args RP，没遇到暂时不写
+            }
+            else if(head->child->bro->bro->child->bro->bro->bro) {
+                // ID LP Args RP，没遇到暂时不写
+                if(!strcmp(head->child->bro->bro->child->bro->bro->bro->name, "RP")) {
+                // ID LP Args RP，没遇到暂时不写
                 }
             }
+            else if(!strcmp(head->child->bro->bro->child->name, "Exp")) {
+                if(!strcmp(head->child->bro->bro->child->bro->name, "PLUS")) {
+                    if(!strcmp(head->child->bro->bro->child->id, head->child->child->id)) {
+                        // 特殊情况，如i = i + 1，先不考虑寄存器分配
+                        int mark = 0;
+                        for(int i = 0; i < Regcnt; i++) {
+                            if(!strcmp(VarReg[i], head->child->child->id)) {
+                                mark = i;
+                                break;
+                            }
+                        }
+                        fprintf(f, "addi, $t%d, $%d\n", mark, head->child->bro->bro->child->bro->bro->child->intValue);
+                    }
+                }
+                
+            }
             else {
-                // printf("yes\n");
+                printf("no\n");
             }
         }
         if(!strcmp(head->child->bro->bro->name, "Args")) { // ID LP ARGS RP
@@ -192,7 +317,7 @@ char* genExp(struct node *head, FILE *f) {
             }
             fprintf(f, "move $a0, $t%d\n", mark);
             fprintf(f, "addi, $sp, $sp, -4\n");
-            fprintf(f, "sw $ra, 0($sa)\n");
+            fprintf(f, "sw $ra, 0($sp)\n");
             fprintf(f, "jal %s\n", head->child->id);
             fprintf(f, "lw, $ra, 0($sp)\n");
             fprintf(f, "addi, $sp, $sp, 4\n");

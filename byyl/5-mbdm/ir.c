@@ -248,9 +248,11 @@ void translate_Stmt(struct node *head, FILE *f) {		//flag用来标记结尾是�
 		r++;
 
 		fprintf(f, "LABEL label%d : \n", back2);
+		sprintf(head->child->bro->bro->bro->bro->id, "label%d", back2);
 		translate_Stmt(head->child->bro->bro->bro->bro, f);
 		fprintf(f, " GOTO label%d\n", back1);
 		fprintf(f, "LABEL label%d : \n", back3);
+		sprintf(head->child->bro->bro->id, "label%d", back3);
 	}
 }
 

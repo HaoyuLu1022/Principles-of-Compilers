@@ -826,8 +826,9 @@ DecList : Dec {
 Dec : VarDec {
         $$ = insNode($1, "Dec", @1.first_line, NON_TERMINAL);
         Regcnt++;
-        if(!strcmp(head->child->name, "ID")) {
-            strcpy(VarReg[Regcnt-1], head->child->id);
+        if(!strcmp(head->child->child->name, "ID")) {
+            strcpy(VarReg[Regcnt-1], head->child->child->id);
+            // printf("%s\n", VarReg[Regcnt-1]);
         }
     }
     | VarDec ASSIGNOP Exp {
@@ -835,8 +836,9 @@ Dec : VarDec {
         $1->bro = $2;
         $2->bro = $3;
         Regcnt++;
-        if(!strcmp(head->child->name, "ID")) {
-            strcpy(VarReg[Regcnt-1], head->child->id);
+        if(!strcmp(head->child->child->name, "ID")) {
+            strcpy(VarReg[Regcnt-1], head->child->child->id);
+            // printf("%s\n", VarReg[Regcnt-1]);
         }
     }
     ;
@@ -1176,7 +1178,7 @@ Exp : Exp ASSIGNOP Exp {
         $1->bro = $2;
         $2->bro = $3;
 
-        Regcnt++;
+        // Regcnt++;
         char num1[20] = {0};
         MyType t1 = MyType_default;
         MyType* t2;
