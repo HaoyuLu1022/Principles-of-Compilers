@@ -43,6 +43,8 @@ lw, $ra, 0($sp)
 addi, $sp, $sp, 4
 move $t0, $t1
 move $t1, $t4
+addi, $t2, $t2, 1
+j label1
 label3:
 move $v0, $0
 jr $ra

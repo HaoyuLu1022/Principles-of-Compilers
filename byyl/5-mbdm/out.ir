@@ -5,18 +5,16 @@ i := #0
 READ n
 LABEL label1 : 
 IF i < n GOTO label2
- GOTO label3
+GOTO label3
 LABEL label2 : 
-c := 
+t0 := a + b
+c := t0
 WRITE b
 a := b
-
 b := c
-
-t0 := i + #1
-i := t0
-
- GOTO label1
+t1 := i + #1
+i := t1
+GOTO label1
 LABEL label3 : 
 RETURN #0
 
