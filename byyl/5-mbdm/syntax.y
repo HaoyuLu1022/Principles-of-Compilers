@@ -43,6 +43,8 @@
 	int errors = 0;
     int yydebug = 1;
     int flgStruct = 0, flgArr = 0, func_cnt = 0;
+    int Regcnt = 0;
+    char VarReg[10][10];
     char Compst_return_type[20] = "null";
     char func_list[20][20];
     struct rb_root mytree = RB_ROOT;
@@ -823,11 +825,19 @@ DecList : Dec {
 
 Dec : VarDec {
         $$ = insNode($1, "Dec", @1.first_line, NON_TERMINAL);
+        Regcnt++;
+        if(!strcmp(head->child->name, "ID")) {
+            strcpy(VarReg[Regcnt-1], head->child->id);
+        }
     }
     | VarDec ASSIGNOP Exp {
         $$ = insNode($1, "Dec", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
+        Regcnt++;
+        if(!strcmp(head->child->name, "ID")) {
+            strcpy(VarReg[Regcnt-1], head->child->id);
+        }
     }
     ;
 
@@ -1165,7 +1175,8 @@ Exp : Exp ASSIGNOP Exp {
         $$ = insNode($1, "Exp", @1.first_line, NON_TERMINAL);
         $1->bro = $2;
         $2->bro = $3;
-    
+
+        Regcnt++;
         char num1[20] = {0};
         MyType t1 = MyType_default;
         MyType* t2;
