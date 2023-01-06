@@ -37,6 +37,13 @@ main:
 	bgt $t1, $t3, label4
 	j label5
 label4:
+	move $a0, $t1
+	addi, $sp, $sp, -4
+	sw $ra, 0($sp)
+	jal fact
+	lw, $ra, 0($sp)
+	addi, $sp, $sp, 4
+	move $t2, $v0
 	j label6
 label5:
 	li $t2, 1

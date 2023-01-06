@@ -110,7 +110,7 @@ void genStmt(struct node *head, FILE *f) {
     // printf("%s\n", head->child->name);
     int back1, back2, back3;
     if(!strcmp(head->child->name, "Exp")) {
-    	printf("tag1\n");
+    	//printf("tag1\n");
         genExp(head->child, f);
     }
     if(!strcmp(head->child->name, "CompSt")) {
@@ -160,7 +160,7 @@ void genStmt(struct node *head, FILE *f) {
     	//fprintf(f, "after\n");
     	fprintf(f, "\tj %s\n", head->id);			// to be reviesed
     	fprintf(f, "%s:\n", head->child->bro->bro->bro->bro->bro->bro->id);
-    	printf("before\n");
+    	//printf("before\n");
     	genStmt(head->child->bro->bro->bro->bro->bro->bro, f);
     	fprintf(f, "%s:\n", head->id);				// to be reviesed
     	
@@ -336,14 +336,17 @@ char* genExp(struct node *head, FILE *f) {
     else if(head->child->bro->bro->bro == NULL)*/
     if(head->child->bro){
         if(!strcmp(head->child->bro->name, "ASSIGNOP")) {
+        	printf("tag3\n");
             // Exp ASSIGNOP Exp
             // printf("%s\n", head->child->bro->bro->child->name);
             if(!strcmp(head->child->bro->bro->child->name, "INT")) {
-            	printf("tag2\n");
+            	//printf("tag2\n");
+            	printf("choice1\n");
             	int mark = findMark(head->child->child->id);
             	fprintf(f, "\tli $t%d, %d\n", mark, head->child->bro->bro->child->intValue);
             }
             else if(!strcmp(head->child->bro->bro->child->name, "ID") && !head->child->bro->bro->child->bro) {
+            	printf("choice2\n");
                 int mark1 = 0, mark2 = 0;
                 for(int i = 0; i < Regcnt; i++) {
                     if(!strcmp(VarReg[i], head->child->child->id)) {
@@ -360,7 +363,20 @@ char* genExp(struct node *head, FILE *f) {
                 // printf("%d %d\n", mark1, mark2);
                 fprintf(f, "\tmove $t%d, $t%d\n", mark1, mark2);
             }
+            else if(head->child->bro->bro->child->bro->bro->bro) {
+            	printf("choice4\n");
+                if(!strcmp(head->child->bro->bro->child->bro->bro->bro->name, "RP")) {	// ID LP Args RP
+                	fprintf(f, "\tmove $a0, $t%d\n", findMark(head->child->bro->bro->child->bro->bro->child->child->id));
+				    fprintf(f, "\taddi, $sp, $sp, -4\n");
+				    fprintf(f, "\tsw $ra, 0($sp)\n");
+				    fprintf(f, "\tjal %s\n", head->child->bro->bro->child->id);
+				    fprintf(f, "\tlw, $ra, 0($sp)\n");
+				    fprintf(f, "\taddi, $sp, $sp, 4\n");
+				    fprintf(f, "\tmove $t%d, $v0\n", findMark(head->child->child->id));
+                }
+            }
             else if(head->child->bro->bro->child->bro) {
+            	printf("choice3\n");
                 if(!strcmp(head->child->bro->bro->child->bro->bro->name, "RP")) {
                     // ID LP RP
                     fprintf(f, "\taddi $sp, $sp, -4\n");
@@ -415,12 +431,6 @@ char* genExp(struct node *head, FILE *f) {
                     	fprintf(f, "\tadd $t%d, $t%d, $t%d\n", findMark(head->child->child->id), findMark(head->child->bro->bro->child->child->id), 
                     	findMark(head->child->bro->bro->child->bro->bro->child->id));
                     }
-                }
-            }
-            else if(head->child->bro->bro->child->bro->bro->bro) {
-                // ID LP Args RP，没遇到暂时不写
-                if(!strcmp(head->child->bro->bro->child->bro->bro->bro->name, "RP")) {
-                // ID LP Args RP，没遇到暂时不写
                 }
             }
             else {
