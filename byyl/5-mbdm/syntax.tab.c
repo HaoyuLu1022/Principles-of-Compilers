@@ -4099,7 +4099,11 @@ int main(int argc, char** argv) {
 	fclose(f);
 	fclose(f1);
 	fclose(f2);
+<<<<<<< HEAD
 	fclose(f3);
+=======
+    fclose(f3);
+>>>>>>> upstream/master
 	return 0;
 }
 

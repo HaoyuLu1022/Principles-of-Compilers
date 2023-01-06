@@ -44,9 +44,14 @@ lw, $ra, 0($sp)
 addi, $sp, $sp, 4
 move $t0, $t1
 move $t1, $t4
+<<<<<<< HEAD
 //差三行
 //
 //
+=======
+addi, $t2, $t2, 1
+j label1
+>>>>>>> upstream/master
 label3:
 move $v0, $0
 jr $ra

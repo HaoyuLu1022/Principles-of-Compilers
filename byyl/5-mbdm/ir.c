@@ -176,15 +176,15 @@ void translate_Def(struct node *head, FILE *f) {
 						char* tmp1 = translate_Exp(newnode->child->child->bro->bro, f);
 						//fprintf(f, "t%d := %s", tmp1);
 						fprintf(f, "%s := %s\n", newnode->child->child->child->id, tmp1);
-									/*char* tmp1 = translate_Exp(head->child, f);
-									// fprintf(f, "* ");
-									char* tmp2 = translate_Exp(head->child->bro->bro, f);
-									fprintf(f, "t%d := %s * %s\n", tcnt, tmp1, tmp2);
-									tmp = (char*)malloc(sizeof(tcnt) + 3);
-									sprintf(tmp, "t%d", tcnt);
-									strcpy(head->id, tmp);
-									tcnt++;
-									tag*/
+						/*char* tmp1 = translate_Exp(head->child, f);
+						// fprintf(f, "* ");
+						char* tmp2 = translate_Exp(head->child->bro->bro, f);
+						fprintf(f, "t%d := %s * %s\n", tcnt, tmp1, tmp2);
+						tmp = (char*)malloc(sizeof(tcnt) + 3);
+						sprintf(tmp, "t%d", tcnt);
+						strcpy(head->id, tmp);
+						tcnt++;
+						tag*/
 					}
 				}
 			}
@@ -207,7 +207,8 @@ void translate_Stmt(struct node *head, FILE *f) {
 		//printf("tag1\n");
 		translate_Exp(head->child, f);
 		//printf("tag2\n");
-		fprintf(f, "\n");					//一定要注意Exp本身不维护自身的换行，所有的换行都由上一级负责，不然就很乱
+		fprintf(f, "\n");
+		//一定要注意Exp本身不维护自身的换行，所有的换行都由上一级负责，不然就很乱
 	}
 	else if(!strcmp(head->child->name, "RETURN")) {
 		// fprintf(f, "RETURN ");
