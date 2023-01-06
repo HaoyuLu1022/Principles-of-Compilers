@@ -363,7 +363,7 @@ char* genExp(struct node *head, FILE *f) {
                 // printf("%d %d\n", mark1, mark2);
                 fprintf(f, "\tmove $t%d, $t%d\n", mark1, mark2);
             }
-            else if(head->child->bro->bro->child->bro->bro->bro) {
+            else if(head->child->bro->bro->child->bro->bro->bro) {	// 一定要注意先写长的再写短的
             	printf("choice4\n");
                 if(!strcmp(head->child->bro->bro->child->bro->bro->bro->name, "RP")) {	// ID LP Args RP
                 	fprintf(f, "\tmove $a0, $t%d\n", findMark(head->child->bro->bro->child->bro->bro->child->child->id));
