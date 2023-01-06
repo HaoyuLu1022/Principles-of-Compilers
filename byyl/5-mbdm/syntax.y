@@ -43,8 +43,9 @@
 	int errors = 0;
     int yydebug = 1;
     int flgStruct = 0, flgArr = 0, func_cnt = 0;
-    int Regcnt = 0;
-    char VarReg[10][10];
+    int Regcnt = 1;		// $t0默认存0
+    char VarReg[20][20];
+    int ImmReg[20];
     char Compst_return_type[20] = "null";
     char func_list[20][20];
     struct rb_root mytree = RB_ROOT;
@@ -2060,7 +2061,6 @@ int main(int argc, char** argv) {
 		
 		f2 = fopen("out.ir", "w");
 		translate_Program(head, f2);
-        
         f3 = fopen(argv[2], "w");
         genAsm(head, f3);
 	}
