@@ -1,9 +1,12 @@
 #include <stdio.h>
 #include "ir.h"
 
-extern int Regcnt; // 寄存器计数
-extern char VarReg[10][10]; // 存放变量对应的寄存器号
+extern int Regcnt; 			// 寄存器计数
+extern char VarReg[20][20]; // 存放变量对应的寄存器号
+extern int ImmReg[20];		// 存放立即数对应的寄存器号，但是和VarReg共用Regcnt
 
+int findMark(char* id);
+int findNum2(int n, FILE* fp);
 void genAsm(struct node* head, FILE* fp);
 // 整体程序的翻译模式
 void genProgram(struct node* head, FILE* fp);

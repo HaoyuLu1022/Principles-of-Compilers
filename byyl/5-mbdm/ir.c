@@ -217,8 +217,7 @@ void translate_Stmt(struct node *head, FILE *f) {
 		// fprintf(f, "\n");
 	}
 	else if(!strcmp(head->child->name, "IF")) {
-		sprintf(head->id, "label%d", r);
-
+		/*
 		fprintf(f, "IF ");
 		translate_Exp(head->child->bro->bro, f);
 		fprintf(f, " GOTO label%d\n", r);
@@ -228,11 +227,13 @@ void translate_Stmt(struct node *head, FILE *f) {
 			int tmp = flagif;
 			flagif = 0;
 			translate_Stmt(head->child->bro->bro->bro->bro->bro->bro, f);
+			sprintf(head->child->bro->bro->bro->bro->bro->bro->id, "label%d", BACK);
 			fprintf(f, "GOTO label%d\n", BACK);
 			flagif = tmp;
 		}
 		else if(head->child->bro->bro->bro->bro->bro != NULL) {
 			translate_Stmt(head->child->bro->bro->bro->bro->bro->bro, f);
+			sprintf(head->child->bro->bro->bro->bro->bro->bro->id, "label%d", r);
 			fprintf(f, "GOTO label%d\n", r);
 			BACK = r; r += 1;
 		}
@@ -242,9 +243,34 @@ void translate_Stmt(struct node *head, FILE *f) {
 		}
 		fprintf(f, "LABEL label%d :\n", back1);
 		translate_Stmt(head->child->bro->bro->bro->bro, f);
+		sprintf(head->child->bro->bro->bro->bro->id, "label%d", back1);
 		if(flagif)
-		fprintf(f, "LABEL label%d :\n", BACK);
-		
+		fprintf(f, "LABEL label%d :\n", BACK);*/
+		// 小段老师的改进写法里只用到了两个label，而目标代码样例中涉及到三个label，故而恢复了我之前的写法 --jcy
+		fprintf(f, "IF ");
+		translate_Exp(head->child->bro->bro, f);
+		fprintf(f, " GOTO label%d\n", r);
+		back1 = r; r += 1;
+		fprintf(f, "GOTO label%d\n", r);
+		back2 = r; r += 1;
+		fprintf(f, "LABEL label%d :\n", back1);
+		// printf("before\n");
+		translate_Stmt(head->child->bro->bro->bro->bro, f);
+		sprintf(head->child->bro->bro->bro->bro->id, "label%d", back1);
+		// printf("after\n");
+		if(head->child->bro->bro->bro->bro->bro != NULL){
+			fprintf(f, "GOTO label%d\n", r);
+			back3 = r; r += 1;
+			//translate_Stmt(head->child->bro->bro->bro->bro->bro->bro, f);
+		}
+		fprintf(f, "LABEL label%d :\n", back2);
+		if(head->child->bro->bro->bro->bro->bro != NULL){
+			//printf("name: %s\n", head->child->bro->bro->bro->bro->bro->bro->name);
+			translate_Stmt(head->child->bro->bro->bro->bro->bro->bro, f);
+			sprintf(head->child->bro->bro->bro->bro->bro->bro->id, "label%d", back2);
+		}
+		fprintf(f, "LABEL label%d :\n", back3);
+		sprintf(head->id, "label%d", back3);
 	}
 	else if(!strcmp(head->child->name, "WHILE")) {
 		// 对应产生式: Stmt : WHILE LP Exp RP Stmt

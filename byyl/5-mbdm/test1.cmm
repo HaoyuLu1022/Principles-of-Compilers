@@ -1,6 +1,6 @@
 int main()
 {
-    int a = 0, b = 1, i = 0, n;// int c;
+    int a = 0, b = 1, i = 0, n;
     n = read();
     while (i < n)
     {

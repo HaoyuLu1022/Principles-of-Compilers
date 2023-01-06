@@ -10,7 +10,6 @@ read:
 	li $v0, 5
 	syscall
 	jr $ra
-
 write:
 	li $v0, 1
 	syscall
@@ -19,40 +18,35 @@ write:
 	syscall
 	move $v0, $0
 	jr $ra
+fact:
+	li $t3, 1
+	beq $t3, $t3, label1
+	j label2
+label1:
+	j label3
+label2:
+label3:
 
 main:
-li $t0, 0
-li $t1, 1
-li $t2, 0
-add $sp, $sp, -4
-sw, $ra, 0($sp)
-jal read
-lw $ra, 0($sp)
-addi $sp, $sp, 4
-move $t3, $v0
-//少一行
-label1:
-blt $t2, $t3, label2
-j label3
-label2:
-add $t4, $t0, $t1
-move $a0, $t1
-addi, $sp, $sp, -4
-sw $ra, 0($sp)
-jal write
-lw, $ra, 0($sp)
-addi, $sp, $sp, 4
-move $t0, $t1
-move $t1, $t4
-<<<<<<< HEAD
-//差三行
-//
-//
-=======
-addi, $t2, $t2, 1
-j label1
->>>>>>> upstream/master
-label3:
-move $v0, $0
-jr $ra
+	addi $sp, $sp, -4
+	sw $ra, 0($sp)
+	jal read
+	lw $ra, 0($sp)
+	addi $sp, $sp, 4
+	move $t1, $v0
+	bgt $t1, $t3, label4
+	j label5
+label4:
+	j label6
+label5:
+	li $t2, 1
+label6:
+	move $a0, $t2
+	addi, $sp, $sp, -4
+	sw $ra, 0($sp)
+	jal write
+	lw, $ra, 0($sp)
+	addi, $sp, $sp, 4
+	move $v0, $0
+	jr $ra
 
