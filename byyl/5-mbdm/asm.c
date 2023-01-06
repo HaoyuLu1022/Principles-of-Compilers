@@ -9,6 +9,7 @@ int findMark(char* id) {
             break;
         }
     }
+    return mark;
 }
 
 int findNum2(int n, FILE* f) {
@@ -16,15 +17,56 @@ int findNum2(int n, FILE* f) {
 	for(int i = Regcnt; i < 20; i ++ ) {
 		if(ImmReg[i] == n) return i;
 		else if(ImmReg[i] == 0) {
-			fprintf(f, "\tli $t%d, %d\n", i, n);
+			fprintf(f, "\tli, $t%d, %d\n", i, n);
 			ImmReg[i] = n;
 			return i;
 		}
 	}
 }
 
+struct Queue {
+    char name[10];
+    struct Queue* nxt;
+};
+
+struct Queue* hed; // 队首存main
+
+void pushQueue(struct Queue* Qhed, char* name){ // printf("push!!\n");
+    if(!strcmp(name, "read") || !strcmp(name, "write")) return;
+    struct Queue* tmp;
+    tmp = (struct Queue*)malloc(sizeof(struct Queue*)); // printf("1\n");
+    strcpy(tmp->name, name);tmp->nxt = NULL; 
+    struct Queue* q = (struct Queue*)malloc(sizeof(struct Queue*));
+    q = Qhed;
+    while(q->nxt){
+        if(!strcmp(q->name, name)) return;
+        q = q->nxt;
+    }
+    q->nxt = tmp; // printf("pushover!!\n");
+}
+
+void bfsgenExtDefList(struct node* head, FILE* fp) {
+    // printf("start\n");
+    struct Queue* q = (struct Queue*)malloc(sizeof(struct Queue*));
+    q = hed; // printf("%s\n", q.name);
+    struct node p = *head;
+    while(q){printf("这会儿忙着搞%s\n", q->name);
+    // printf("%s\n", p.child->child->bro->child->name);
+        p = *head;
+        while(p.child && strcmp(q->name, p.child->child->bro->child->id)){ // printf("%s\n", p.child->id);
+            p = *(p.child->bro);
+        }
+        // printf("%s\n", p.child->child->bro->child->id);
+        genExtDef(p.child, fp);
+        // if(q->nxt)
+        q = q->nxt;
+        // else break;
+    }
+}
 
 void genAsm(struct node* head, FILE* fp) {
+    // for(int i = 0; VarReg[i] && i < 10; i ++) printf("%s\n", VarReg[i]);
+    
     fprintf(fp, ".data\n");
     fprintf(fp, "_prompt: .asciiz \"Enter an integer:\"\n");
     fprintf(fp, "_ret: .asciiz \"\\n\"\n");
@@ -45,15 +87,24 @@ void genAsm(struct node* head, FILE* fp) {
     fprintf(fp, "\tsyscall\n");
     fprintf(fp, "\tmove $v0, $0\n");
     fprintf(fp, "\tjr $ra\n");
-
-    genExtDefList(head->child, fp);
+    
+    hed = (struct Queue*)malloc(sizeof(struct Queue*));
+    strcpy(hed->name, "main"); 
+    hed->nxt = NULL; 
+    bfsgenExtDefList(head->child, fp);
+    // printf("1\n");
+    // genExtDefList(head->child, fp); 
+    free(hed);
 }
+
+
 
 void genExtDefList(struct node* head, FILE* fp) {
     if(!head->child) return;
     genExtDef(head->child, fp);
     genExtDefList(head->child->bro, fp);
 }
+
 
 void genExtDef(struct node* head, FILE* fp) {
     genSpecifier(head->child, fp);
@@ -142,6 +193,7 @@ void genStmt(struct node *head, FILE *f) {
     				//if(tmp_idx >)fprintf(f, "\tli $t%d, %d\n", tmp_idx, head->child->bro->bro->child->bro->bro->child->intValue);
     				int mark1 = findMark(head->child->bro->bro->child->child->id);
     				int mark2 = findNum2(head->child->bro->bro->child->bro->bro->child->intValue, f);
+                    // fprintf(f, "\tli $t%d %d\n", mark2, head->child->bro->bro->child->bro->bro->child->intValue);
     				fprintf(f, "\tbgt $t%d, $t%d, %s\n", mark1, mark2, head->child->bro->bro->bro->bro->id);
     			}
     		}
@@ -364,9 +416,12 @@ char* genExp(struct node *head, FILE *f) {
                 fprintf(f, "\tmove $t%d, $t%d\n", mark1, mark2);
             }
             else if(head->child->bro->bro->child->bro->bro->bro) {	// 一定要注意先写长的再写短的
-            	printf("choice4\n");
+            	// printf("choice4\n");
+                // printf("!!!%s\n", name);
+                
                 if(!strcmp(head->child->bro->bro->child->bro->bro->bro->name, "RP")) {	// ID LP Args RP
-                	fprintf(f, "\tmove $a0, $t%d\n", findMark(head->child->bro->bro->child->bro->bro->child->child->id));
+                	pushQueue(hed, head->child->bro->bro->child->id);
+                    fprintf(f, "\tmove $a0, $t%d\n", findMark(head->child->bro->bro->child->bro->bro->child->child->id));
 				    fprintf(f, "\taddi, $sp, $sp, -4\n");
 				    fprintf(f, "\tsw $ra, 0($sp)\n");
 				    fprintf(f, "\tjal %s\n", head->child->bro->bro->child->id);
@@ -379,6 +434,7 @@ char* genExp(struct node *head, FILE *f) {
             	printf("choice3\n");
                 if(!strcmp(head->child->bro->bro->child->bro->bro->name, "RP")) {
                     // ID LP RP
+                    pushQueue(hed, head->child->bro->bro->child->id);
                     fprintf(f, "\taddi $sp, $sp, -4\n");
                     fprintf(f, "\tsw $ra, 0($sp)\n");
                     fprintf(f, "\tjal %s\n", head->child->bro->bro->child->id);
