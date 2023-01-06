@@ -18,42 +18,32 @@ write:
 	syscall
 	move $v0, $0
 	jr $ra
-fact:
-	li $t3, 1
-	beq $t3, $t3, label1
-	j label2
-label1:
-	j label3
-label2:
-label3:
-
 main:
+	li $t1, 0
+	li $t2, 1
+	li $t3, 0
 	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 	jal read
 	lw $ra, 0($sp)
 	addi $sp, $sp, 4
-	move $t1, $v0
-	bgt $t1, $t3, label4
-	j label5
-label4:
-	move $a0, $t1
-	addi, $sp, $sp, -4
-	sw $ra, 0($sp)
-	jal fact
-	lw, $ra, 0($sp)
-	addi, $sp, $sp, 4
-	move $t2, $v0
-	j label6
-label5:
-	li $t2, 1
-label6:
+	move $t4, $v0
+label1:
+	blt $t3, $t4, label2
+	j label3
+label2:
+	add $t5, $t1, $t2
 	move $a0, $t2
 	addi, $sp, $sp, -4
 	sw $ra, 0($sp)
 	jal write
 	lw, $ra, 0($sp)
 	addi, $sp, $sp, 4
+	move $t1, $t2
+	move $t2, $t5
+	addi $t3, $t3, 1
+	j label1
+label3:
 	move $v0, $0
 	jr $ra
 
