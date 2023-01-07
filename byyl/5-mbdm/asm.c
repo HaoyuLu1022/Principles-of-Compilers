@@ -1,5 +1,7 @@
 #include "asm.h"
 int rr = 1; // 指示label编号
+char regName[5] = "a0", arg[5], stackRet[5] = "v0";
+char funcName[10]; // 存储当前正在翻译的函数名
 
 int findMark(char* id) {
 	int mark = 0;
@@ -31,11 +33,12 @@ struct Queue {
 
 struct Queue* hed; // 队首存main
 
-void pushQueue(struct Queue* Qhed, char* name){ // printf("push!!\n");
+void pushQueue(struct Queue* Qhed, char* name) { // printf("push!!\n");
     if(!strcmp(name, "read") || !strcmp(name, "write")) return;
     struct Queue* tmp;
     tmp = (struct Queue*)malloc(sizeof(struct Queue*)); // printf("1\n");
-    strcpy(tmp->name, name);tmp->nxt = NULL; 
+    strcpy(tmp->name, name);
+    tmp->nxt = NULL; 
     struct Queue* q = (struct Queue*)malloc(sizeof(struct Queue*));
     q = Qhed;
     while(q->nxt){
@@ -50,10 +53,15 @@ void bfsgenExtDefList(struct node* head, FILE* fp) {
     struct Queue* q = (struct Queue*)malloc(sizeof(struct Queue*));
     q = hed; // printf("%s\n", q.name);
     struct node p = *head;
-    while(q){printf("这会儿忙着搞%s\n", q->name);
+    while(q){printf("now generate \"%s\"\n", q->name);
     // printf("%s\n", p.child->child->bro->child->name);
+        strcpy(arg, "");
+        strcpy(funcName, q->name);
+        // strcpy(stackRet, "");
+        // strcpy(regName, "");
+
         p = *head;
-        while(p.child && strcmp(q->name, p.child->child->bro->child->id)){ // printf("%s\n", p.child->id);
+        while(p.child && strcmp(q->name, p.child->child->bro->child->id)) { // printf("%s\n", p.child->id);
             p = *(p.child->bro);
         }
         // printf("%s\n", p.child->child->bro->child->id);
@@ -130,6 +138,12 @@ void genFunDec(struct node *head, FILE *f) {
 
 void genVarList(struct node *head, FILE *f) {
     // 好像不用生成，跟栈有关
+    if(head->child) {
+        // printf("%s\n", head->child->name);
+        strcpy(arg, head->child->child->bro->child->id); // 将参数名复制
+        // strcpy(regName, "a0");
+        //暂时只支持单个参数
+    }
 }
 
 void genParamDec(struct node *head, FILE *f);
@@ -148,7 +162,6 @@ void genMid(struct node *head, FILE *f) {
         genMid(head->child->bro, f);
     }
     else if(!strcmp(head->child->name, "Stmt")) {
-        // printf("%s\n", head->child->child->name);
         genStmt(head->child, f);
         genMid(head->child->bro, f);
     }
@@ -158,7 +171,6 @@ void genMid(struct node *head, FILE *f) {
 void genStmtList(struct node *head, FILE *f);
 // 语句的翻译模式
 void genStmt(struct node *head, FILE *f) {
-    // printf("%s\n", head->child->name);
     int back1, back2, back3;
     if(!strcmp(head->child->name, "Exp")) {
     	//printf("tag1\n");
@@ -167,7 +179,8 @@ void genStmt(struct node *head, FILE *f) {
     if(!strcmp(head->child->name, "CompSt")) {
         genCompSt(head->child, f);
     }
-    if(!strcmp(head->child->name, "RETURN")) {
+    if(!strcmp(head->child->name, "RETURN")) { 
+        // RETURN Exp
         if(head->child->bro->child->type == INT_TYPE) {
             fprintf(f, "\tmove $v0, $%d\n", head->child->bro->child->intValue);
             fprintf(f, "\tjr $ra\n");
@@ -176,7 +189,14 @@ void genStmt(struct node *head, FILE *f) {
             fprintf(f, "\tmove $v0, $%f\n", head->child->bro->child->floatValue);
             fprintf(f, "\tjr $ra\n");
         }
-        
+        else if(!strcmp(head->child->bro->child->name, "ID")) {
+            fprintf(f, "\tmove $v0, $a0\n");
+            fprintf(f, "\tjr $ra\n");
+        }
+        else if(head->child->bro->child->bro) { // return一个运算式
+            genExp(head->child->bro, f);
+            fprintf(f, "\tjr $ra\n");
+        }
     }
     if(!strcmp(head->child->name, "IF")) {
     	// 仅考虑IF LP Exp RP Stmt ELSE Stmt, 未考虑不存在ELSE的情况
@@ -208,13 +228,15 @@ void genStmt(struct node *head, FILE *f) {
     	//fprintf(f, "after\n");
     	fprintf(f, "\tj %s\n", head->child->bro->bro->bro->bro->bro->bro->id);
     	fprintf(f, "%s:\n", head->child->bro->bro->bro->bro->id);
+        // printf("%s\n", head->child->bro->bro->bro->bro->child->name);
     	genStmt(head->child->bro->bro->bro->bro, f);
-    	//fprintf(f, "after\n");
-    	fprintf(f, "\tj %s\n", head->id);			// to be reviesed
+    	// fprintf(f, "after\n");
+    	fprintf(f, "\tj %s\n", head->id);			// to be revised
     	fprintf(f, "%s:\n", head->child->bro->bro->bro->bro->bro->bro->id);
     	//printf("before\n");
+        // printf("%s\n", head->child->bro->bro->bro->bro->bro->bro->child->name);
     	genStmt(head->child->bro->bro->bro->bro->bro->bro, f);
-    	fprintf(f, "%s:\n", head->id);				// to be reviesed
+    	fprintf(f, "%s:\n", head->id);				// to be revised
     	
     	/*fprintf(f, "IF ");
 		translate_Exp(head->child->bro->bro, f);
@@ -386,19 +408,24 @@ char* genExp(struct node *head, FILE *f) {
     
     }
     else if(head->child->bro->bro->bro == NULL)*/
-    if(head->child->bro){
+    if(!strcmp(head->child->name, "LP")) {
+        genExp(head->child->bro, f);
+    }
+
+    if(head->child->bro) {
         if(!strcmp(head->child->bro->name, "ASSIGNOP")) {
-        	printf("tag3\n");
+        	// printf("tag3\n");
             // Exp ASSIGNOP Exp
-            // printf("%s\n", head->child->bro->bro->child->name);
+            printf("left: %s\n", head->child->child->id);
             if(!strcmp(head->child->bro->bro->child->name, "INT")) {
             	//printf("tag2\n");
-            	printf("choice1\n");
+            	// printf("choice1\n");
             	int mark = findMark(head->child->child->id);
             	fprintf(f, "\tli $t%d, %d\n", mark, head->child->bro->bro->child->intValue);
             }
             else if(!strcmp(head->child->bro->bro->child->name, "ID") && !head->child->bro->bro->child->bro) {
-            	printf("choice2\n");
+                // Exp(ID) = Exp(ID)
+            	// printf("choice2\n");
                 int mark1 = 0, mark2 = 0;
                 for(int i = 0; i < Regcnt; i++) {
                     if(!strcmp(VarReg[i], head->child->child->id)) {
@@ -416,22 +443,13 @@ char* genExp(struct node *head, FILE *f) {
                 fprintf(f, "\tmove $t%d, $t%d\n", mark1, mark2);
             }
             else if(head->child->bro->bro->child->bro->bro->bro) {	// 一定要注意先写长的再写短的
-            	// printf("choice4\n");
-                // printf("!!!%s\n", name);
-                
-                if(!strcmp(head->child->bro->bro->child->bro->bro->bro->name, "RP")) {	// ID LP Args RP
-                	pushQueue(hed, head->child->bro->bro->child->id);
-                    fprintf(f, "\tmove $a0, $t%d\n", findMark(head->child->bro->bro->child->bro->bro->child->child->id));
-				    fprintf(f, "\taddi, $sp, $sp, -4\n");
-				    fprintf(f, "\tsw $ra, 0($sp)\n");
-				    fprintf(f, "\tjal %s\n", head->child->bro->bro->child->id);
-				    fprintf(f, "\tlw, $ra, 0($sp)\n");
-				    fprintf(f, "\taddi, $sp, $sp, 4\n");
-				    fprintf(f, "\tmove $t%d, $v0\n", findMark(head->child->child->id));
-                }
+            	// ID LP Args RP
+                pushQueue(hed, head->child->bro->bro->child->id);
+                genExp(head->child->bro->bro, f);
+                fprintf(f, "\tmove $t%d, $v0\n", findMark(head->child->child->id)); // 赋值
             }
             else if(head->child->bro->bro->child->bro) {
-            	printf("choice3\n");
+            	// printf("choice3\n");
                 if(!strcmp(head->child->bro->bro->child->bro->bro->name, "RP")) {
                     // ID LP RP
                     pushQueue(hed, head->child->bro->bro->child->id);
@@ -493,7 +511,42 @@ char* genExp(struct node *head, FILE *f) {
                 printf("no\n");
             }
         }
-        if(!strcmp(head->child->bro->bro->name, "Args")) { // Exp : ID LP ARGS RP
+        else if(!strcmp(head->child->bro->name, "STAR")) {
+            char tmp1[5], tmp2[5];
+            if(!strcmp(head->child->child->id, arg)) { // 是函数传入的参数
+                strcpy(tmp1, regName);
+            }
+            strcpy(tmp2, genExp(head->child->bro->bro, f));
+            fprintf(f, "\tmul $%s, $%s, $%s\n", tmp2, tmp2, tmp1);
+            return tmp2;
+        }
+        else if(!strcmp(head->child->bro->name, "MINUS")) {
+            char tmp1[5], tmp2[5];
+            if(!strcmp(head->child->child->id, arg)) { // 是函数传入的参数
+                strcpy(tmp1, regName);
+            }
+            if(!strcmp(head->child->bro->bro->child->name, "INT")) {
+                fprintf(f, "\tsub $%s, $%s, %d\n", tmp1, tmp1, head->child->bro->bro->child->intValue);
+                return tmp1;
+            }
+            else {
+                strcpy(tmp2, genExp(head->child->bro->bro, f));
+                fprintf(f, "\tsub $%s, $%s, $%s\n", tmp2, tmp2, tmp1);
+                return tmp2;
+            }
+            
+        }
+        else if(!strcmp(head->child->bro->name, "PLUS")) {
+            genExp(head->child, f);
+            genExp(head->child->bro->bro, f);
+            fprintf(f, "\tadd $, $, $\n");
+        }
+        else if(!strcmp(head->child->bro->name, "DIV")) {
+            genExp(head->child, f);
+            genExp(head->child->bro->bro, f);
+            fprintf(f, "\tdiv $, $, $\n");
+        }
+        else if(!strcmp(head->child->bro->bro->name, "Args")) { // Exp : ID LP ARGS RP
             int mark = 0; // 默认值可能有问题
             for(int i = 0; i < Regcnt; i++) {
                 if(!strcmp(VarReg[i], head->child->bro->bro->child->child->id)) {
@@ -502,13 +555,22 @@ char* genExp(struct node *head, FILE *f) {
                     break;
                 }
             }
-            fprintf(f, "\tmove $a0, $t%d\n", mark);
+            if(strcmp(head->child->id, funcName)) {
+                fprintf(f, "\tmove $a0, $t%d\n", mark);
+            }
             fprintf(f, "\taddi, $sp, $sp, -4\n");
             fprintf(f, "\tsw $ra, 0($sp)\n");
+            genArgs(head->child->bro->bro, f);
             fprintf(f, "\tjal %s\n", head->child->id);
             fprintf(f, "\tlw, $ra, 0($sp)\n");
             fprintf(f, "\taddi, $sp, $sp, 4\n");
             // 打表式翻译
+
+            strcpy(regName, "a0"); // 传入的参数寄存器
+            strcpy(arg, head->child->bro->bro->child->child->id); // 参数名，暂只考虑单个
+            strcpy(stackRet, "v0"); // 函数的返回值寄存器
+
+            return stackRet;
         }
     }
 }
@@ -518,4 +580,17 @@ char* genExp(struct node *head, FILE *f) {
 //void genCond(struct node *head, FILE *f, Operand lable_true, Operand lable_false);
 
 // 函数参数的翻译模式
-void genArgs(struct node *head, FILE *f);
+void genArgs(struct node *head, FILE *f) {
+    // Exp COMMA Args
+    struct node* newArg = head; // newArg始终指向Args
+    do {
+        genExp(newArg->child, f);
+        if(newArg->child->bro) {
+            newArg = newArg->child->bro->bro;
+        }
+        else {
+            break;
+        }
+    } while(newArg->bro);
+    
+}
