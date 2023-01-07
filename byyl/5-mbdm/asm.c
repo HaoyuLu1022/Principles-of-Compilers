@@ -2,6 +2,7 @@
 int rr = 1; // 指示label编号
 char regName[5] = "a0", arg[5], stackRet[5] = "v0";
 char funcName[10]; // 存储当前正在翻译的函数名
+struct node* currentFunc;
 
 int findMark(char* id) {
 	int mark = 0;
@@ -57,6 +58,7 @@ void pushQueue(struct Queue* Qhed, char* name) { // printf("push!!\n");
 void bfsgenExtDefList(struct node* head, FILE* fp) {
     // printf("start\n");
     struct Queue* q = (struct Queue*)malloc(sizeof(struct Queue*));
+    currentFunc = (struct node*)malloc(sizeof(struct node));
     q = hed; // printf("%s\n", q.name);
     struct node p = *head;
     while(q){printf("now generate \"%s\"\n", q->name);
@@ -71,6 +73,8 @@ void bfsgenExtDefList(struct node* head, FILE* fp) {
             p = *(p.child->bro);
         }
         // printf("%s\n", p.child->child->bro->child->id);
+        currentFunc = p.child->child->bro;
+        printf("%s\n", currentFunc->name);
         genExtDef(p.child, fp);
         // if(q->nxt)
         q = q->nxt;
@@ -209,10 +213,8 @@ void genStmt(struct node *head, FILE *f) {
     	//fprintf(f, "before\n");
     	if(head->child->bro->bro->child->bro) {
     		//fprintf(f, "tag1\n");
-    		//printf("%s\n", head->child->bro->bro->child->bro->id);
     		if(!strcmp(head->child->bro->bro->child->bro->id, ">")) {
     			//fprintf(f, "tag2\n");
-    			//printf("%s\n", head->child->bro->bro->child->bro->bro->child->name);
     			if(!strcmp(head->child->bro->bro->child->bro->bro->child->name, "INT")) {
     				//fprintf(f, "tag3\n");
     				//int tmp_idx = findNum2(head->child->bro->bro->child->bro->bro->child->intValue);
@@ -224,11 +226,20 @@ void genStmt(struct node *head, FILE *f) {
     			}
     		}
     		else if(!strcmp(head->child->bro->bro->child->bro->id, "==")) {
-    			if(!strcmp(head->child->bro->bro->child->bro->bro->child->name, "INT")) {
-    				int mark1 = findMark(head->child->bro->bro->child->child->id);
-    				int mark2 = findNum2(head->child->bro->bro->child->bro->bro->child->intValue, f);
-    				fprintf(f, "\tbeq $t%d, $t%d, %s\n", mark1, mark2, head->child->bro->bro->bro->bro->id);
-    			}
+                if(strcmp(currentFunc->child->bro->bro->name, "VarList")) {
+                    if(!strcmp(head->child->bro->bro->child->bro->bro->child->name, "INT")) {
+                        int mark1 = findMark(head->child->bro->bro->child->child->id);
+                        int mark2 = findNum2(head->child->bro->bro->child->bro->bro->child->intValue, f);
+                        fprintf(f, "\tbeq $t%d, $t%d, %s\n", mark1, mark2, head->child->bro->bro->bro->bro->id);
+                    }
+                }
+    			else {
+                    if(!strcmp(head->child->bro->bro->child->bro->bro->child->name, "INT")) {
+                        // int mark1 = findMark(head->child->bro->bro->child->child->id);
+                        int mark2 = findNum2(head->child->bro->bro->child->bro->bro->child->intValue, f);
+                        fprintf(f, "\tbeq $a0, $t%d, %s\n", mark2, head->child->bro->bro->bro->bro->id);
+                    }
+                }
     		} 
     	}
     	//fprintf(f, "after\n");
@@ -422,7 +433,7 @@ char* genExp(struct node *head, FILE *f) {
         if(!strcmp(head->child->bro->name, "ASSIGNOP")) {
         	// printf("tag3\n");
             // Exp ASSIGNOP Exp
-            printf("left: %s\n", head->child->child->id);
+            // printf("left: %s\n", head->child->child->id);
             if(!strcmp(head->child->bro->bro->child->name, "INT")) {
             	//printf("tag2\n");
             	// printf("choice1\n");
@@ -564,12 +575,24 @@ char* genExp(struct node *head, FILE *f) {
             if(strcmp(head->child->id, funcName)) {
                 fprintf(f, "\tmove $a0, $t%d\n", mark);
             }
-            fprintf(f, "\taddi, $sp, $sp, -4\n");
-            fprintf(f, "\tsw $ra, 0($sp)\n");
-            genArgs(head->child->bro->bro, f);
-            fprintf(f, "\tjal %s\n", head->child->id);
-            fprintf(f, "\tlw $ra, 0($sp)\n");
-            fprintf(f, "\taddi $sp, $sp, 4\n");
+            if(!strcmp(currentFunc->child->bro->bro->name, "VarList")) {
+                fprintf(f, "\taddi $sp, $sp, -8\n");
+                fprintf(f, "\tsw $a0, 0($sp)\n");
+                fprintf(f, "\tsw $ra, 4($sp)\n");
+                genArgs(head->child->bro->bro, f);
+                fprintf(f, "\tjal %s\n", head->child->id);
+                fprintf(f, "\tlw $a0, 0($sp)\n");
+                fprintf(f, "\tlw $ra, 4($sp)\n");
+                fprintf(f, "\taddi $sp, $sp, 8\n");
+            }
+            else {
+                fprintf(f, "\taddi $sp, $sp, -4\n");
+                fprintf(f, "\tsw $ra, 0($sp)\n");
+                genArgs(head->child->bro->bro, f);
+                fprintf(f, "\tjal %s\n", head->child->id);
+                fprintf(f, "\tlw $ra, 0($sp)\n");
+                fprintf(f, "\taddi $sp, $sp, 4\n");
+            }
             // 打表式翻译
 
             strcpy(regName, "a0"); // 传入的参数寄存器

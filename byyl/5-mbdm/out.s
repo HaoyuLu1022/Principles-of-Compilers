@@ -30,7 +30,7 @@ main:
 	j label5
 label4:
 	move $a0, $t1
-	addi, $sp, $sp, -4
+	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 	jal fact
 	lw $ra, 0($sp)
@@ -41,7 +41,7 @@ label5:
 	li $t2, 1
 label6:
 	move $a0, $t2
-	addi, $sp, $sp, -4
+	addi $sp, $sp, -4
 	sw $ra, 0($sp)
 	jal write
 	lw $ra, 0($sp)
@@ -51,19 +51,21 @@ label6:
 
 fact:
 	li $t3, 1
-	beq $t0, $t3, label1
+	beq $a0, $t3, label1
 	j label2
 label1:
 	move $v0, $a0
 	jr $ra
 	j label3
 label2:
-	addi, $sp, $sp, -4
-	sw $ra, 0($sp)
+	addi $sp, $sp, -8
+	sw $a0, 0($sp)
+	sw $ra, 4($sp)
 	sub $a0, $a0, 1
 	jal fact
-	lw $ra, 0($sp)
-	addi $sp, $sp, 4
+	lw $a0, 0($sp)
+	lw $ra, 4($sp)
+	addi $sp, $sp, 8
 	mul $v0, $v0, $a0
 	jr $ra
 label3:
