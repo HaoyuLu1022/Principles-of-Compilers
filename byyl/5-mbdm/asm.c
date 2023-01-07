@@ -13,11 +13,17 @@ int findMark(char* id) {
 }
 
 int findNum2(int n, FILE* f) {
-	if(n == 0) return 0;
+	if(n == 0){
+		fprintf(f, "\tli $t0, 0\n");
+		return 0;
+	} 
 	for(int i = Regcnt; i < 20; i ++ ) {
-		if(ImmReg[i] == n) return i;
+		if(ImmReg[i] == n) {
+			fprintf(f, "\tli $t%d, %d\n", i, n);
+			return i;
+		}
 		else if(ImmReg[i] == 0) {
-			fprintf(f, "\tli, $t%d, %d\n", i, n);
+			fprintf(f, "\tli $t%d, %d\n", i, n);
 			ImmReg[i] = n;
 			return i;
 		}
@@ -422,11 +428,11 @@ char* genExp(struct node *head, FILE *f) {
                 if(!strcmp(head->child->bro->bro->child->bro->bro->bro->name, "RP")) {	// ID LP Args RP
                 	pushQueue(hed, head->child->bro->bro->child->id);
                     fprintf(f, "\tmove $a0, $t%d\n", findMark(head->child->bro->bro->child->bro->bro->child->child->id));
-				    fprintf(f, "\taddi, $sp, $sp, -4\n");
+				    fprintf(f, "\taddi $sp, $sp, -4\n");
 				    fprintf(f, "\tsw $ra, 0($sp)\n");
 				    fprintf(f, "\tjal %s\n", head->child->bro->bro->child->id);
-				    fprintf(f, "\tlw, $ra, 0($sp)\n");
-				    fprintf(f, "\taddi, $sp, $sp, 4\n");
+				    fprintf(f, "\tlw $ra, 0($sp)\n");
+				    fprintf(f, "\taddi $sp, $sp, 4\n");
 				    fprintf(f, "\tmove $t%d, $v0\n", findMark(head->child->child->id));
                 }
             }
@@ -503,11 +509,11 @@ char* genExp(struct node *head, FILE *f) {
                 }
             }
             fprintf(f, "\tmove $a0, $t%d\n", mark);
-            fprintf(f, "\taddi, $sp, $sp, -4\n");
+            fprintf(f, "\taddi $sp, $sp, -4\n");
             fprintf(f, "\tsw $ra, 0($sp)\n");
             fprintf(f, "\tjal %s\n", head->child->id);
-            fprintf(f, "\tlw, $ra, 0($sp)\n");
-            fprintf(f, "\taddi, $sp, $sp, 4\n");
+            fprintf(f, "\tlw $ra, 0($sp)\n");
+            fprintf(f, "\taddi $sp, $sp, 4\n");
             // 打表式翻译
         }
     }
