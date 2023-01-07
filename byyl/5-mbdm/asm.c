@@ -15,11 +15,17 @@ int findMark(char* id) {
 }
 
 int findNum2(int n, FILE* f) {
-	if(n == 0) return 0;
+	if(n == 0){
+		fprintf(f, "\tli $t0, 0\n");
+		return 0;
+	} 
 	for(int i = Regcnt; i < 20; i ++ ) {
-		if(ImmReg[i] == n) return i;
+		if(ImmReg[i] == n) {
+			fprintf(f, "\tli $t%d, %d\n", i, n);
+			return i;
+		}
 		else if(ImmReg[i] == 0) {
-			fprintf(f, "\tli, $t%d, %d\n", i, n);
+			fprintf(f, "\tli $t%d, %d\n", i, n);
 			ImmReg[i] = n;
 			return i;
 		}
@@ -562,8 +568,8 @@ char* genExp(struct node *head, FILE *f) {
             fprintf(f, "\tsw $ra, 0($sp)\n");
             genArgs(head->child->bro->bro, f);
             fprintf(f, "\tjal %s\n", head->child->id);
-            fprintf(f, "\tlw, $ra, 0($sp)\n");
-            fprintf(f, "\taddi, $sp, $sp, 4\n");
+            fprintf(f, "\tlw $ra, 0($sp)\n");
+            fprintf(f, "\taddi $sp, $sp, 4\n");
             // 打表式翻译
 
             strcpy(regName, "a0"); // 传入的参数寄存器
