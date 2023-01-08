@@ -1,0 +1,157 @@
+Program (1)
+	ExtDefList (1)
+		ExtDef (1)
+			Specifier (1)
+				TYPE : int
+			FunDec (1)
+				ID : fact
+				LP : (
+				VarList (1)
+					ParamDec (1)
+						Specifier (1)
+							TYPE : int
+						VarDec (1)
+							ID : n
+				RP : )
+			CompSt (2)
+				LC : {
+				Empty : Empty
+				StmtList (3)
+					Stmt (3)
+						IF : if
+						LP : (
+						Exp (3)
+							Exp (3)
+								ID : n
+							RELOP : ==
+							Exp (3)
+								INT : 1
+						RP : )
+						Stmt (3)
+							CompSt (3)
+								LC : {
+								Empty : Empty
+								StmtList (4)
+									Stmt (4)
+										RETURN : return
+										Exp (4)
+											ID : n
+										SEMI : ;
+									Empty : Empty
+								RC : }
+						ELSE : else
+						Stmt (7)
+							RETURN : return
+							Exp (7)
+								LP : (
+								Exp (7)
+									Exp (7)
+										ID : n
+									STAR : *
+									Exp (7)
+										ID : fact
+										LP : (
+										Args (7)
+											Exp (7)
+												Exp (7)
+													ID : n
+												MINUS : -
+												Exp (7)
+													INT : 1
+										RP : )
+								RP : )
+							SEMI : ;
+					Empty : Empty
+				RC : }
+		ExtDefList (10)
+			ExtDef (10)
+				Specifier (10)
+					TYPE : int
+				FunDec (10)
+					ID : main
+					LP : (
+					RP : )
+				CompSt (11)
+					LC : {
+					Empty : Empty
+					DefList (12)
+						Def (12)
+							Specifier (12)
+								TYPE : int
+							DecList (12)
+								Dec (12)
+									VarDec (12)
+										ID : m
+								COMMA : ,
+								DecList (12)
+									Dec (12)
+										VarDec (12)
+											ID : result
+							SEMI : ;
+						Empty : Empty
+						StmtList (13)
+							Stmt (13)
+								Exp (13)
+									Exp (13)
+										ID : m
+									ASSIGNOP : =
+									Exp (13)
+										ID : read
+										LP : (
+										RP : )
+								SEMI : ;
+							Empty : Empty
+							StmtList (14)
+								Stmt (14)
+									IF : if
+									LP : (
+									Exp (14)
+										Exp (14)
+											ID : m
+										RELOP : >
+										Exp (14)
+											INT : 1
+									RP : )
+									Stmt (15)
+										Exp (15)
+											Exp (15)
+												ID : result
+											ASSIGNOP : =
+											Exp (15)
+												ID : fact
+												LP : (
+												Args (15)
+													Exp (15)
+														ID : m
+												RP : )
+										SEMI : ;
+									ELSE : else
+									Stmt (17)
+										Exp (17)
+											Exp (17)
+												ID : result
+											ASSIGNOP : =
+											Exp (17)
+												INT : 1
+										SEMI : ;
+								Empty : Empty
+								StmtList (18)
+									Stmt (18)
+										Exp (18)
+											ID : write
+											LP : (
+											Args (18)
+												Exp (18)
+													ID : result
+											RP : )
+										SEMI : ;
+									Empty : Empty
+									StmtList (19)
+										Stmt (19)
+											RETURN : return
+											Exp (19)
+												INT : 0
+											SEMI : ;
+										Empty : Empty
+					RC : }
+			ExtDefList (21)
