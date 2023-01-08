@@ -393,7 +393,7 @@ char* genExp(struct node *head, FILE *f) {
         genExp(head->child->bro, f);
     }
 
-    /*if(!strcmp(head->child->name, "INT")) {
+    if(!strcmp(head->child->name, "INT")) {
         sprintf(expReg, "%d", head->child->intValue);
         return expReg;
     }
@@ -401,10 +401,15 @@ char* genExp(struct node *head, FILE *f) {
         sprintf(expReg, "%f", head->child->floatValue);
         return expReg;
     }
-    else if(!strcmp(head->child->name, "ID")) {
-        sprintf(expReg, "%s", head->child->id);
-        return expReg;
-    }*/
+    else if(!strcmp(head->child->name, "ID") && !head->child->bro) {
+        if(!strcmp(head->child->id, arg)) { // 是传参列表中的
+            return regName;
+        }
+        else { // 非传入参数，查找变量表
+            sprintf(expReg, "t%d", findMark(head->child->id));
+            return expReg;
+        }
+    }
 
     if(head->child->bro) {
         if(!strcmp(head->child->bro->name, "ASSIGNOP")) {
@@ -457,92 +462,63 @@ char* genExp(struct node *head, FILE *f) {
         }
         else if(!strcmp(head->child->bro->name, "STAR")) {
             char tmp1[5], tmp2[5];
-            if(!strcmp(head->child->child->id, arg)) { // 是函数传入的参数
-                strcpy(tmp1, regName);
-            }
-            else { // 非传入参数，查找变量表
-                sprintf(tmp1, "t%d", findMark(head->child->child->id));
-            }
+            strcpy(tmp1, genExp(head->child, f));
 
-            if(!strcmp(head->child->bro->bro->child->name, "INT")) { // 减去立即数
+            if(!strcmp(head->child->bro->bro->child->name, "INT")) { // 乘以立即数
                 fprintf(f, "\tmul $%s, $%s, %d\n", tmp1, tmp1, head->child->bro->bro->child->intValue);
-                
                 strcpy(expReg, tmp1);
                 return expReg;
             }
-            else { // 减去变量
+            else { // 乘以变量
                 strcpy(tmp2, genExp(head->child->bro->bro, f));
                 fprintf(f, "\tmul $%s, $%s, $%s\n", tmp2, tmp2, tmp1);
-
                 strcpy(expReg, tmp2);
                 return expReg;
             }
         }
         else if(!strcmp(head->child->bro->name, "MINUS")) {
             char tmp1[5], tmp2[5];
-            if(!strcmp(head->child->child->id, arg)) { // 是函数传入的参数
-                strcpy(tmp1, regName);
-            }
-            else { // 非传入参数，查找变量表
-                sprintf(tmp1, "t%d", findMark(head->child->child->id));
-            }
-
-            if(!strcmp(head->child->bro->bro->child->name, "INT")) { // 乘以立即数
+            strcpy(tmp1, genExp(head->child, f));
+            if(!strcmp(head->child->bro->bro->child->name, "INT")) { // 减去立即数
                 fprintf(f, "\tsub $%s, $%s, %d\n", tmp1, tmp1, head->child->bro->bro->child->intValue);
-                
                 strcpy(expReg, tmp1);
                 return expReg;
             }
-            else { // 乘以变量
+            else { // 减去变量
                 strcpy(tmp2, genExp(head->child->bro->bro, f));
                 fprintf(f, "\tsub $%s, $%s, $%s\n", tmp2, tmp2, tmp1);
-
                 strcpy(expReg, tmp2);
                 return expReg;
             }
         }
-        else if(!strcmp(head->child->bro->name, "PLUS")) {printf("yes\n");
+        else if(!strcmp(head->child->bro->name, "PLUS")) {
             char tmp1[5], tmp2[5];
-            if(!strcmp(head->child->child->id, arg)) { // 是函数传入的参数
-                strcpy(tmp1, regName);
-            }
-            else { // 非传入参数，查找变量表
-                sprintf(tmp1, "t%d", findMark(head->child->child->id));
-            }
+            strcpy(tmp1, genExp(head->child, f));
 
             if(!strcmp(head->child->bro->bro->child->name, "INT")) { // 加上立即数
                 fprintf(f, "\tadd $%s, $%s, %d\n", tmp1, tmp1, head->child->bro->bro->child->intValue);
-                
                 strcpy(expReg, tmp1);
                 return expReg;
             }
             else { // 加上变量
                 strcpy(tmp2, genExp(head->child->bro->bro, f));
                 fprintf(f, "\tadd $%s, $%s, $%s\n", tmp2, tmp2, tmp1);
-
                 strcpy(expReg, tmp2);
                 return expReg;
             }
         }
         else if(!strcmp(head->child->bro->name, "DIV")) {
             char tmp1[5], tmp2[5];
-            if(!strcmp(head->child->child->id, arg)) { // 是函数传入的参数
-                strcpy(tmp1, regName);
-            }
-            else { // 非传入参数，查找变量表
-                sprintf(tmp1, "t%d", findMark(head->child->child->id));
-            }
+            strcpy(tmp1, genExp(head->child, f));
 
             if(!strcmp(head->child->bro->bro->child->name, "INT")) { // 除以立即数
-                fprintf(f, "\tdiv $%s, $%s, %d\n", tmp1, tmp1, head->child->bro->bro->child->intValue);
-                
+                fprintf(f, "\tdiv $%s, $%s, %d\n", tmp1, tmp1, head->child->bro->bro->child->intValue);     
                 strcpy(expReg, tmp1);
                 return expReg;
             }
             else { // 除以变量
                 strcpy(tmp2, genExp(head->child->bro->bro, f));
                 fprintf(f, "\tdiv $%s, $%s, $%s\n", tmp2, tmp2, tmp1);
-
                 strcpy(expReg, tmp2);
                 return expReg;
             }
