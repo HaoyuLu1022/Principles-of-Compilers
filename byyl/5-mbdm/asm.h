@@ -40,4 +40,4 @@ char* genExp(struct node *head, FILE *f);
 //void genCond(struct node *head, FILE *f, Operand lable_true, Operand lable_false);
 
 // 函数参数的翻译模式
-void genArgs(struct node *head, FILE *f);
+int genArgs(struct node *head, FILE *f);
